@@ -1,3 +1,4 @@
+package gui;
 
 
 import java.awt.Color;
@@ -312,7 +313,7 @@ public class MapMaker extends JPanel {
 		CSVReader reader;
 		java.util.List<String[]> myEntries = null;
 		try {
-			reader = new CSVReader(new FileReader(this.getClass().getResource("map.csv").getPath()), ',');
+			reader = new CSVReader(new FileReader(this.getClass().getResource("resources/map.csv").getPath()), ',');
 			myEntries = (java.util.List<String[]>) reader.readAll();
 		} catch (Exception e) {
 			e.printStackTrace();
