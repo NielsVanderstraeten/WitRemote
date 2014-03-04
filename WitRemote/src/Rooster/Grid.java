@@ -258,11 +258,11 @@ public class Grid {
 		double distance1 = vector1.getDistance(vector2);
 		double distance2 = vector1.getDistance(vector3);
 		double distance3 = vector2.getDistance(vector3);
-		return equalsApprox(distance1,distance2) && equalsApprox(distance1,distance3);
+		return fuzzyEquals(distance1,distance2) && fuzzyEquals(distance1,distance3);
 	}
 	
 	// gelijk bij benadering
-	private boolean equalsApprox(double a, double b) {
+	private boolean fuzzyEquals(double a, double b) {
 		return (a*(1+approx/100) > b && a*(1-approx/100) < b);
 	}
 }
