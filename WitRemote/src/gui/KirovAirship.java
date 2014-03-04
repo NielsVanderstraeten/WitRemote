@@ -27,6 +27,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 public class KirovAirship extends JFrame {
@@ -202,8 +203,8 @@ public class KirovAirship extends JFrame {
 		int colums = 9; int rows = 9;
 		String[] code = testcode(rows, colums);
 		
-		mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8);
-		//mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8, 9, 9, code);
+		//mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8);
+		mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8, 9, 9, code);
 		mapMaker.setBounds(4, 4, mapMaker.getWidth(), mapPane.getHeight());
 		mapPane.add(mapMaker);
 		mapMaker.addMouseListener(new ZeppelinMouse());
@@ -375,29 +376,29 @@ public class KirovAirship extends JFrame {
 		public void mousePressed(MouseEvent e){
 			double x = e.getX();
 			double y = e.getY();
-			setGoal((int) x, (int) y);
+			if(SwingUtilities.isLeftMouseButton(e) )
+				setGoal((int) x, (int) y);
+			else if(SwingUtilities.isRightMouseButton(e) )
+				updateGui((int) x, (int) y, opponentX, opponentY);
+			else if(SwingUtilities.isMiddleMouseButton(e) ){
+				updateGui(ownX, ownY, (int) x, (int) y);
+			}
 		}
 
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
-			
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void mouseExited(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
-			// TODO Auto-generated method stub
 		}
 	}
 }
