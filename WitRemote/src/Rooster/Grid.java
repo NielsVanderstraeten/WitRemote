@@ -11,16 +11,23 @@ public class Grid {
 	private int height;
 	private int width;
 	private PositionCalculator myCalculator;
+	private double pictureDistance;
+	//toegelaten afwijking in percenten bij afstandsverglijking
+	private final double approx = 5;
 	
 	public Grid(int width, int height) {
-		myPoints = new ArrayList<String>(120);
+		//myPoints = new ArrayList<String>(120);
 		this.width = width;
 		this.height = height;
 		myCalculator = new PositionCalculator(width, height);
 		
 	}
 	
-	public Vector getPosition(HashMap<String,ArrayList<Integer>> figures) {
+	public void setMap(ArrayList<String> list) {
+		this.myPoints = list;
+	}
+	
+	public Vector getPosition(HashMap<String,Vector> figures) {
 		ArrayList<Integer> points = getPoints(figures);
 		int a = points.get(0);
 		int b = points.get(1);
@@ -34,9 +41,10 @@ public class Grid {
 		
 	}
 	
-	public ArrayList<Integer> getPoints(HashMap<String,ArrayList<Integer>> figures) {
-		if (figures.size() == 3) {
-			HashSet<String> keys = new HashSet<String>(figures.keySet());
+	public ArrayList<Integer> getPoints(HashMap<String,Vector> figures) {
+		if (figures.size() >= 3) {
+			HashMap<String,Vector> rightFigures = this.getRightTriangle(figures);
+			HashSet<String> keys = new HashSet<String>(rightFigures.keySet());
 			ArrayList<String> listkeys = new ArrayList<String>(keys);
 			ArrayList<Integer> points0 = new ArrayList<Integer>();
 			ArrayList<Integer> points1 = new ArrayList<Integer>();
@@ -218,5 +226,43 @@ public class Grid {
 		}
 		
 		return returnList;
+	}
+	
+	//Methode om een gelijkzijdige driehoek uit de ontvangen hashmap van de fotoanalyse te verkrijgen
+	private HashMap<String, Vector> getRightTriangle(HashMap<String,Vector> figures) {
+		HashSet<String> keys = new HashSet<String>(figures.keySet());
+		ArrayList<String> listkeys = new ArrayList<String>(keys);
+		HashMap<String,Vector> returnMap = new HashMap<String,Vector>();
+		for (int i=0;i<listkeys.size()-2;i++) {
+			for (int j = (i+1); j<listkeys.size()-1;j++) {
+				for(int k = (j+1); k<listkeys.size();k++) {
+					String key1 = listkeys.get(i);
+					String key2 = listkeys.get(j);
+					String key3 = listkeys.get(k);
+					if (isTriangle(figures.get(key1), figures.get(key2), figures.get(key3))) {
+						returnMap.put(key1,figures.get(key1));
+						returnMap.put(key2,figures.get(key2));
+						returnMap.put(key3,figures.get(key3));
+						return returnMap;
+					}
+				}
+			}
+		}
+		
+		System.out.println("geen driehoek gevonden");
+		return null;
+	}
+	
+	//boolean ofdat 3 ontvangen vectoren in een gelijkzijdige driehoek liggen
+	private boolean isTriangle(Vector vector1, Vector vector2, Vector vector3) {
+		double distance1 = vector1.getDistance(vector2);
+		double distance2 = vector1.getDistance(vector3);
+		double distance3 = vector2.getDistance(vector3);
+		return equalsApprox(distance1,distance2) && equalsApprox(distance1,distance3);
+	}
+	
+	// gelijk bij benadering
+	private boolean equalsApprox(double a, double b) {
+		return (a*(1+approx/100) > b && a*(1-approx/100) < b);
 	}
 }

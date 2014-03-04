@@ -47,7 +47,8 @@ public class PositionCalculator {
 		}
 	}
 	
-	public double getY(int point) {
+	// Y-as naar boven gericht!!!
+	public double getY2(int point) {
 		int line = point/width +1;
 		double totalHeight = ((height-1)*distance*Math.sqrt(3)/2);
 		if (line%2 == 0) {
@@ -55,6 +56,17 @@ public class PositionCalculator {
 		}
 		else {
 			return totalHeight - (line-1)*distance*Math.sqrt(3)/2;
+		}
+	}
+	
+	// Y-as naar beneden gericht!!!
+	public double getY(int point) {
+		int line = point/width +1;
+		if (line%2 == 0) {
+			return (line-1)*distance*Math.sqrt(3)/2;
+		}
+		else {
+			return (line-1)*distance*Math.sqrt(3)/2;
 		}
 	}
 	
