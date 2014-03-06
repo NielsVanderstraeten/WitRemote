@@ -1,16 +1,25 @@
 package gui;
 
+import java.util.LinkedList;
+
 import javax.swing.JFrame;
 
-public class Simulator {
+import commands.*;
+import goals.*;
 
+public class Simulator implements Runnable{
+
+	private LinkedList<Command> queue;
+	private LinkedList<Goal> goals;
 	public Simulator(String host){
+		queue = new LinkedList<Command>();
+		goals = new LinkedList<Goal>();
 		createGUI();
 	}
 	private KirovAirship gui;
 	
 	private void createGUI(){
-		gui = new KirovAirship(1280, 780, 1000, 1000);;
+		gui = new KirovAirship(1280, 780, 4000, 4000, queue, goals);;
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Fancy");
 		gui.setSize(gui.getWidth(), gui.getHeight());
@@ -55,7 +64,9 @@ public class Simulator {
 			oppX = oppX + 5/distanceOpp*(goalX - oppX);
 			oppY = oppY + 5/distanceOpp*(goalY - oppY);
 		}
-		gui.updateGui((int) ownX, (int) ownY, (int) oppX, (int) oppY);
+		gui.updateOwnPosition((int) ownX, (int) ownY);
+		gui.updateOpponentPosition((int) oppX, (int) oppY);
+		gui.updateGui();
 	}
 	
 	private boolean fuzzyEquals(double first, double second){

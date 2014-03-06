@@ -1,20 +1,19 @@
 package gui;
 
+import goals.*;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -30,18 +29,22 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import commands.Command;
+import commands.SetGoalPosition;
+
 public class KirovAirship extends JFrame {
 
+	private static final long serialVersionUID = 1L;
 	private JLayeredPane totalPane;
 	//Height en width van het scherm
 	private final int height, width;
 	//Coordinaten worden bijgehouden in millimeter.
-	private int ownX, ownY, opponentX, opponentY;
+	private int ownX, ownY, opponentX, opponentY, zeppHeight;
 	private final int heightMeters, widthMeters;
-	public final static int REAL_WIDTH_MM = 4000;
-	public final static int REAL_HEIGHT_MM = 4000;
+	public LinkedList<Command> queue;
+	private LinkedList<Goal> goals;
 	
-	public KirovAirship(int width, int height, int heightMeters, int widthMeters){
+	public KirovAirship(int width, int height, int heightMeters, int widthMeters, LinkedList<Command> queue, LinkedList<Goal> goals){
 		if(height > 0)
 			this.height = height;
 		else throw new IllegalArgumentException("Height smaller than zero.");
@@ -55,6 +58,8 @@ public class KirovAirship extends JFrame {
 			this.widthMeters = widthMeters;
 		else throw new IllegalArgumentException("Width(real) smaller than zero.");
 		
+		this.queue = queue;
+		this.goals = goals;
 		totalPane = new JLayeredPane();
 		totalPane.setOpaque(true);
 		totalPane.setBackground(new Color(193,193,193));
@@ -69,6 +74,13 @@ public class KirovAirship extends JFrame {
 		setUpMap();
 	}
 	
+	public KirovAirship(LinkedList<Command> queue, LinkedList<Goal> goals){
+		this(1280, 780, 4000, 4000, queue, goals);
+	}
+	
+	public KirovAirship(){
+		this(new LinkedList<Command>(), new LinkedList<Goal>());
+	}
 	public int getHeight(){
 		return height;
 	}
@@ -109,7 +121,7 @@ public class KirovAirship extends JFrame {
 	}
 	
 	public static void main(String[] args){
-		KirovAirship gui = new KirovAirship(1280, 780, 1000, 1000);
+		KirovAirship gui = new KirovAirship();
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Kirov Airship Reporting.");
 		gui.setSize(gui.getWidth(), gui.getHeight());
@@ -203,16 +215,16 @@ public class KirovAirship extends JFrame {
 		int colums = 9; int rows = 9;
 		String[] code = testcode(rows, colums);
 		
-		//mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8);
-		mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8, 9, 9, code);
+		mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8);
+		//mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8, 9, 9, code);
 		mapMaker.setBounds(4, 4, mapMaker.getWidth(), mapPane.getHeight());
 		mapPane.add(mapMaker);
 		mapMaker.addMouseListener(new ZeppelinMouse());
 		
 		//TODO wegdoen
-		ownX = (int) (mapMaker.getWidth()*0.1); 	ownY = (int) (mapMaker.getHeight()*0.1);
-		opponentX = (int) (0.9*mapMaker.getWidth()); opponentY = (int) (0.9*mapMaker.getHeight());
-		updateGui(ownX, ownY, opponentX, opponentY);
+		updateOwnPosition((int) (mapMaker.getWidth()*0.1), 	(int) (mapMaker.getHeight()*0.1));
+		updateOpponentPosition((int) (0.9*mapMaker.getWidth()), (int) (0.9*mapMaker.getHeight()));
+		updateGui();
 	}
 	private JLayeredPane informationPane;
 	private JLabel targetHeightLabel, currentHeightLabel, ownXPosLabel, ownYPosLabel, opponentXPosLabel, opponentYPosLabel;
@@ -295,25 +307,29 @@ public class KirovAirship extends JFrame {
 		repaint();
 	}
 	
-	public void updateGui(int ownX, int ownY, int oppX, int oppY){
-		this.ownX = ownX; this.ownY = ownY;
-		this.opponentX = oppX; this.opponentY = oppY;
-		int realOwnX = ownX * REAL_WIDTH_MM/mapMaker.getWidth();
-		int realOwnY = ownY* REAL_HEIGHT_MM/mapMaker.getHeight();
-		int realOppX = oppX * REAL_WIDTH_MM/mapMaker.getWidth();
-		int realOppY = oppY * REAL_HEIGHT_MM/mapMaker.getHeight();
-		ownXPosLabel.setText(realOwnX+" mm"); ownYPosLabel.setText(realOwnY+" mm");
-		opponentXPosLabel.setText(realOppX+" mm"); opponentYPosLabel.setText(realOppY+" mm");
+	public void updateGui(){
 		moveZeppelins();
 	}
 	
+	public void updateOwnPosition(int x, int y){
+		ownX = x; ownY = y;
+		int realOwnX = x * widthMeters/mapMaker.getWidth();
+		int realOwnY = y* heightMeters/mapMaker.getHeight();
+		ownXPosLabel.setText(realOwnX+" mm"); ownYPosLabel.setText(realOwnY+" mm");
+	}
 	
+	public void updateOpponentPosition(int x, int y){
+		opponentX = x; opponentY = y;
+		int realOppX = x * widthMeters/mapMaker.getWidth();
+		int realOppY = y * heightMeters/mapMaker.getHeight();
+		opponentXPosLabel.setText(realOppX+" mm"); opponentYPosLabel.setText(realOppY+" mm");
+	}
 
 	int goalX, goalY;
 	public void setGoal(int goalX, int goalY){
-		this.goalX = goalX; this.goalY = goalY;
-		goalX = goalX * REAL_WIDTH_MM/mapMaker.getWidth();
-		goalY = goalY * REAL_HEIGHT_MM/mapMaker.getHeight();
+		this.goalX = goalX;
+		this.goalY = goalY;
+		queue.add(new SetGoalPosition(goalX, goalY));
 		missionText.setText("We have to go to: " + goalX + "mm, " + goalY +"mm");
 	}
 	
@@ -339,6 +355,20 @@ public class KirovAirship extends JFrame {
 
 	public int getOpponentY() {
 		return opponentY;
+	}
+	
+	public void updateLastCommand(String command){
+		outputConsole.append(command + "\n");
+		outputConsole.setCaretPosition(outputConsole.getDocument().getLength());
+	}
+	
+	public void updateZeppHeight(int newheight){
+		zeppHeight = newheight;
+		currentHeightLabel.setText(newheight + "mm");
+	}
+	
+	public int getZeppHeight(){
+		return zeppHeight;
 	}
 	
 	//TODO Testcode: wegdoen uiteindelijk
@@ -376,13 +406,16 @@ public class KirovAirship extends JFrame {
 		public void mousePressed(MouseEvent e){
 			double x = e.getX();
 			double y = e.getY();
-			if(SwingUtilities.isLeftMouseButton(e) )
+			if(SwingUtilities.isLeftMouseButton(e) ){
 				setGoal((int) x, (int) y);
-			else if(SwingUtilities.isRightMouseButton(e) )
-				updateGui((int) x, (int) y, opponentX, opponentY);
-			else if(SwingUtilities.isMiddleMouseButton(e) ){
-				updateGui(ownX, ownY, (int) x, (int) y);
+				goals.offer(new GoalPosition((int) x,(int) y));
 			}
+			else if(SwingUtilities.isRightMouseButton(e) )
+				updateOwnPosition((int) x, (int) y);
+			else if(SwingUtilities.isMiddleMouseButton(e) ){
+				updateOpponentPosition((int) x, (int) y);
+			}
+			updateGui();
 		}
 
 		@Override

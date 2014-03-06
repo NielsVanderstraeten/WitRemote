@@ -4,18 +4,12 @@ package gui;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.List;
 import java.awt.Polygon;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -313,7 +307,7 @@ public class MapMaker extends JPanel {
 		CSVReader reader;
 		java.util.List<String[]> myEntries = null;
 		try {
-			reader = new CSVReader(new FileReader(this.getClass().getResource("resources/map.csv").getPath()), ',');
+			reader = new CSVReader(new FileReader("src/gui/resources/map.csv"), ',');
 			myEntries = (java.util.List<String[]>) reader.readAll();
 		} catch (Exception e) {
 			e.printStackTrace();
