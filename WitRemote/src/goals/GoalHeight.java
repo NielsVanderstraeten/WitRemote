@@ -10,4 +10,8 @@ public class GoalHeight extends Goal {
 	public int getTargetHeight(){
 		return height;
 	}
+	
+	public void print(){
+		System.out.println("Height: " + height);
+	}
 }

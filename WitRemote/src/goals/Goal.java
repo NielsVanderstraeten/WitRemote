@@ -1,5 +1,6 @@
 package goals;
 
-public class Goal {
+public abstract class Goal {
 
+	public abstract void print();
 }

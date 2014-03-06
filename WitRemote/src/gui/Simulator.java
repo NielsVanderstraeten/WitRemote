@@ -11,6 +11,7 @@ public class Simulator implements Runnable{
 
 	private LinkedList<Command> queue;
 	private LinkedList<Goal> goals;
+	private Goal nextGoal;
 	public Simulator(String host){
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
@@ -50,9 +51,8 @@ public class Simulator implements Runnable{
 	double oppX, oppY;
 	
 	private void getDestination(){
-		goalX = gui.getGoalX(); goalY = gui.getGoalY();
 		ownX = gui.getOwnX(); ownY = gui.getOwnY();
-		oppX = gui.getOpponentX(); oppY = gui.getOpponentY();
+		oppX = gui.getOpponentX(); oppY = gui.getOpponentY();			
 	}
 	
 	private void goToDestination(){

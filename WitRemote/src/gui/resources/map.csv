@@ -1,9 +1,9 @@
-XX, XX, XX, XX, BC, XX, XX, XX, XX 
- XX, XX, YR, GC, WC, XX, XX, XX, XX 
-XX, XX, WS, RR, BC, YC, RR, XX, XX 
- YR, BR, YS, WC, WC, YS, YS, XX, XX 
-BS, GC, YR, RS, WC, WR, WC, BS, RC 
- WR, RS, RS, RR, GC, YS, RR, XX, XX 
-XX, XX, RC, WS, GR, GR, BS, XX, XX 
- XX, XX, WR, RC, YR, XX, XX, XX, XX 
-XX, XX, XX, XX, WR, XX, XX, XX, XX 
+GS, BR, RC, WH, YR, YH, YC, RC, WH
+GC, BS, YH, GS, RH, YS, BC, RH, BC
+GH, RR, WH, BR, YH, WS, BS, RR, WS
+GS, GH, RR, YR, WS, GR, GH, GC, RH
+BH, BH, WR, BS, YC, GS, BH, RS, GR
+BR, RS, WR, RS, GC, RS, BS, WS, GC
+RC, YS, RR, RS, YS, YC, RC, WR, GC
+RS, YH, GH, WC, RR, BC, YH, BH, RC
+GH, YS, YS, WC, BC, RH, WS, GC, RC

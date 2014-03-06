@@ -21,17 +21,21 @@ public class ControlManager implements Runnable{
 		ControlManager cm ;
 		Thread t = null;
 		if(args.length == 0){
-			ControlManager.setUpFirstConnection();
 			cm = new ControlManager();
+			cm.setUpFirstConnection();
 			t = new Thread(cm);
 		}
 		else if(args[0].equals("-simulate")){
 			simulator = new Simulator("localhost");
 			t = new Thread(simulator);
 		}
+		else if(args[0].equals("-lazymode")){
+			cm = new ControlManager();
+			t = new Thread(cm);
+		}
 		else if(args.length >= 2){
-			ControlManager.setUpFirstConnection();
 			cm = new ControlManager(args[0], Integer.parseInt(args[1]));
+			cm.setUpFirstConnection();
 			t = new Thread(cm);
 		}
 		else 
@@ -39,7 +43,7 @@ public class ControlManager implements Runnable{
 		t.start();
 	}
 	
-	public static void setUpFirstConnection(){
+	public void setUpFirstConnection(){
 		try{
 			JSch jsch=new JSch();
 			Session session=jsch.getSession("pi", "192.168.43.233", 22);
@@ -71,6 +75,8 @@ public class ControlManager implements Runnable{
 		queue = new LinkedList<Command>();
 		client = new Client(serverName, port, "src/resources");
 		goals = new LinkedList<Goal>();
+		//-500 zodat er direct wordt gevraagd naar hoogte.
+		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
 	}
@@ -89,7 +95,9 @@ public class ControlManager implements Runnable{
 	}
 	
 	public void setUpGoals(){
-		goals.add(new GoalHeight(1000));
+		//Standaard hoogte van 1m invoeren als targethoogte.
+		nextGoal = new GoalHeight(1000);
+		gui.updateZeppHeight(1500);
 		//TODO HIER MOETEN DE GOALS KOMEN.
 		//WE KUNNEN MISSCHIEN AUTOMATISEREN, MAAR DAS LASTIG :D
 	}
@@ -100,12 +108,13 @@ public class ControlManager implements Runnable{
 	}
 	public void run(){
 		//Wachttijd nodig om connectie te initialiseren
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		nextGoal = goals.getFirst();
+//		try {
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+		if(!goals.isEmpty())
+			nextGoal = goals.getFirst();
 		
 		while(!terminate){
 			Command c = null;
@@ -131,11 +140,14 @@ public class ControlManager implements Runnable{
 					gui.updateZeppHeight(Integer.parseInt(recv));
 					gui.updateLastCommand(c.getConsole());
 				}
+				else if(c instanceof SetPosition){
+					client.executeCommand(c);
+					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY());
+				}
 				else{
 					client.executeCommand(c);
 					gui.updateLastCommand(c.getConsole());
 				}
-				queue.offer(new GetHeight());
 			}
 			
 			if(analysePicture){
@@ -150,7 +162,11 @@ public class ControlManager implements Runnable{
 				if (queue.isEmpty())
 					stillEmpty = true;
 				
+				nextGoal.print();
 				queue.offer(new GetHeight());
+				Command nextCommand = queue.getFirst();
+				if(!(nextCommand instanceof GetHeight) && !(nextCommand instanceof TakePicture))
+					System.out.println(nextCommand.getConsole());
 				
 				//Enkel nieuwe foto nemen indien queue nog steeds leeg was, en de laatst genomen foto reeds verwerkt is
 				if (stillEmpty && ! isThreadStillAlive(analyserThread))
@@ -158,8 +174,7 @@ public class ControlManager implements Runnable{
 			}
 			
 			if(checkGoalReached()){
-				goals.removeFirst();
-				nextGoal = goals.getFirst();
+				addNextGoal();
 			}
 		}
 	}
@@ -168,6 +183,7 @@ public class ControlManager implements Runnable{
 		return (! ((t == null) || t.isAlive()) );
 	}	
 
+	//NextGoal is al uit de list verwijderd
 	private Goal nextGoal;
 	private boolean checkGoalReached(){
 		if(nextGoal instanceof GoalHeight){
@@ -183,10 +199,29 @@ public class ControlManager implements Runnable{
 		return false;
 	}
 	
+	private void addNextGoal(){
+		if(!goals.isEmpty()){
+			nextGoal = goals.poll();
+			if(nextGoal instanceof GoalHeight){
+				int targetheight = ((GoalHeight) nextGoal).getTargetHeight();
+				gui.setTargetHeight(targetheight);
+				queue.offerFirst(new SetGoalHeight(targetheight));
+			}
+			else if(nextGoal instanceof GoalPosition){
+				int goalX = ((GoalPosition) nextGoal).getX();
+				int goalY = ((GoalPosition) nextGoal).getY();
+				gui.setGoalPosition(goalX, goalY);
+				queue.offerFirst(new SetGoalPosition(goalX, goalY));
+			}
+			else
+				throw new IllegalStateException("Niet bestaande goal @ addNextGoal @ ControlManager");
+		}
+	}
+	
 	private boolean closeEnough(double current, double target){
 		//We werken in mm ok?
 		double absoluteMarge = 100;
-		if(current - target < absoluteMarge)
+		if(Math.abs(current - target) < absoluteMarge)
 			return true;
 		return false;
 	}

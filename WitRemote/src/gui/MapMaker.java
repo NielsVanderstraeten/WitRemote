@@ -22,7 +22,7 @@ public class MapMaker extends JPanel {
 	private final double standardScale = 41.06666666666667;
 	private final double standardTotalScale = 71;
 	private double scaleX, scaleY;
-	private final double zeppScale = 1.1;	
+	private final double zeppScale = 1.2;	
 	
 	public MapMaker(int width, int height, int colums, int rows, String[] code){
 		

@@ -17,4 +17,8 @@ public class GoalPosition extends Goal {
 	public int getY(){
 		return (int) position.getY();
 	}
+	
+	public void print(){
+		System.out.println("X :" + position.getX() +", Y : " + position.getY());
+	}
 }
