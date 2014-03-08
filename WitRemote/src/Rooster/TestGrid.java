@@ -72,10 +72,27 @@ public class TestGrid {
 		for (int i=0;i<z-2;i++) {
 			for (int j = (i+1); j<z-1;j++) {
 				for(int k = (j+1); k<z;k++) {
-					System.out.println(i + "," + j + "," + k);
+					//System.out.println(i + "," + j + "," + k);
 				}
 			}
 		}
+	}
+	
+	@Test
+	public void TestGetAngle() {
+		Vector vector1 = new Vector (0,0);
+		Vector vector = new Vector(1,1);
+		double deltaX = (vector.getX() - vector1.getX());
+		double deltaY = (vector.getY() - vector1.getY());
+		double slope = deltaX/deltaY;
+		double deviation;
+		if (deltaX > 0) {
+			deviation = Math.PI/2 - Math.atan(slope);
+		}
+		else {
+			deviation = -(Math.PI/2 + Math.atan(slope));
+		}
+		System.out.println(deviation);
 	}
 
 }

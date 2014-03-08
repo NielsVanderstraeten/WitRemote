@@ -22,6 +22,7 @@ public class Vector {
 	public double getDistance(Vector vector) {
 		return Math.sqrt(Math.pow(this.getX()-vector.getX(), 2) + Math.pow(this.getY()-vector.getY(), 2));
 	}
+	
 	// afwijking ten opzichte van horizontale as naar rechts in radialen!
 	public double getAnglePicture(Vector vector) {
 		double deltaX = (vector.getX() - this.getX());
