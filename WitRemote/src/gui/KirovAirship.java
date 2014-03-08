@@ -1,20 +1,21 @@
 package gui;
 
+import goals.*;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.LinkedList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -27,20 +28,23 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+
+import commands.*;
 
 public class KirovAirship extends JFrame {
 
+	private static final long serialVersionUID = 1L;
 	private JLayeredPane totalPane;
 	//Height en width van het scherm
 	private final int height, width;
 	//Coordinaten worden bijgehouden in millimeter.
-	private int ownX, ownY, opponentX, opponentY;
 	private final int heightMeters, widthMeters;
-	public final static int REAL_WIDTH_MM = 4000;
-	public final static int REAL_HEIGHT_MM = 4000;
+	public LinkedList<Command> queue;
+	private LinkedList<Goal> goals;
 	
-	public KirovAirship(int width, int height, int heightMeters, int widthMeters){
+	public KirovAirship(int width, int height, int heightMeters, int widthMeters, LinkedList<Command> queue, LinkedList<Goal> goals){
 		if(height > 0)
 			this.height = height;
 		else throw new IllegalArgumentException("Height smaller than zero.");
@@ -54,11 +58,15 @@ public class KirovAirship extends JFrame {
 			this.widthMeters = widthMeters;
 		else throw new IllegalArgumentException("Width(real) smaller than zero.");
 		
+		this.queue = queue;
+		this.goals = goals;
+		this.parser = new TextParser(this.queue, this.goals);
 		totalPane = new JLayeredPane();
 		totalPane.setOpaque(true);
 		totalPane.setBackground(new Color(193,193,193));
 		totalPane.setBounds(0, 0, width - 16, height - 18);
 		getContentPane().add(totalPane);
+		addKeyListener(new EventKey());
 		
 		setUpConsole();
 		setUpMission();
@@ -68,6 +76,13 @@ public class KirovAirship extends JFrame {
 		setUpMap();
 	}
 	
+	public KirovAirship(LinkedList<Command> queue, LinkedList<Goal> goals){
+		this(1280, 780, 4000, 4000, queue, goals);
+	}
+	
+	public KirovAirship(){
+		this(new LinkedList<Command>(), new LinkedList<Goal>());
+	}
 	public int getHeight(){
 		return height;
 	}
@@ -94,6 +109,8 @@ public class KirovAirship extends JFrame {
 		return new ImageIcon(resizedImg);
 	}
 	
+	
+	private TextParser parser;
 	/**
 	 * De methode die de text in de console pakt en doorstuurt naar de parser.
 	 * Deze methode scrollt ook naar beneden en reset de input.
@@ -101,14 +118,15 @@ public class KirovAirship extends JFrame {
 	 */
 	private void textEntered(String text){
 		if(text != null && text != ""){
-			outputConsole.append(text + "\n");
+			String printer = parser.parse(text);
+			outputConsole.append(printer + "\n");
 			inputConsole.setText("");
 			outputConsole.setCaretPosition(outputConsole.getDocument().getLength());
 		}
 	}
 	
 	public static void main(String[] args){
-		KirovAirship gui = new KirovAirship(1280, 780, 1000, 1000);
+		KirovAirship gui = new KirovAirship();
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Kirov Airship Reporting.");
 		gui.setSize(gui.getWidth(), gui.getHeight());
@@ -146,6 +164,7 @@ public class KirovAirship extends JFrame {
 		
 		inputConsole = new JTextField();
 		inputConsole.setBounds(0, consolePane.getHeight()-20, consolePane.getWidth()-104, 20);
+		inputConsole.addKeyListener(new EventKey());
 		consolePane.add(inputConsole);
 		
 		consoleButton = new JButton("Enter");
@@ -209,9 +228,9 @@ public class KirovAirship extends JFrame {
 		mapMaker.addMouseListener(new ZeppelinMouse());
 		
 		//TODO wegdoen
-		ownX = (int) (mapMaker.getWidth()*0.1); 	ownY = (int) (mapMaker.getHeight()*0.1);
-		opponentX = (int) (0.9*mapMaker.getWidth()); opponentY = (int) (0.9*mapMaker.getHeight());
-		updateGui(ownX, ownY, opponentX, opponentY);
+		updateOwnPosition((int) (mapMaker.getWidth()*0.1), 	(int) (mapMaker.getHeight()*0.1));
+		updateOpponentPosition((int) (0.9*mapMaker.getWidth()), (int) (0.9*mapMaker.getHeight()));
+		updateGui();
 	}
 	private JLayeredPane informationPane;
 	private JLabel targetHeightLabel, currentHeightLabel, ownXPosLabel, ownYPosLabel, opponentXPosLabel, opponentYPosLabel;
@@ -294,34 +313,24 @@ public class KirovAirship extends JFrame {
 		repaint();
 	}
 	
-	public void updateGui(int ownX, int ownY, int oppX, int oppY){
-		this.ownX = ownX; this.ownY = ownY;
-		this.opponentX = oppX; this.opponentY = oppY;
-		int realOwnX = ownX * REAL_WIDTH_MM/mapMaker.getWidth();
-		int realOwnY = ownY* REAL_HEIGHT_MM/mapMaker.getHeight();
-		int realOppX = oppX * REAL_WIDTH_MM/mapMaker.getWidth();
-		int realOppY = oppY * REAL_HEIGHT_MM/mapMaker.getHeight();
-		ownXPosLabel.setText(realOwnX+" mm"); ownYPosLabel.setText(realOwnY+" mm");
-		opponentXPosLabel.setText(realOppX+" mm"); opponentYPosLabel.setText(realOppY+" mm");
+	public void updateGui(){
 		moveZeppelins();
 	}
 	
-	
-
-	int goalX, goalY;
-	public void setGoal(int goalX, int goalY){
-		this.goalX = goalX; this.goalY = goalY;
-		goalX = goalX * REAL_WIDTH_MM/mapMaker.getWidth();
-		goalY = goalY * REAL_HEIGHT_MM/mapMaker.getHeight();
-		missionText.setText("We have to go to: " + goalX + "mm, " + goalY +"mm");
+	int ownX, ownY;
+	public void updateOwnPosition(int x, int y){
+		ownX = x; ownY = y;
+		int realOwnX = x * widthMeters/mapMaker.getWidth();
+		int realOwnY = y* heightMeters/mapMaker.getHeight();
+		ownXPosLabel.setText(realOwnX+" mm"); ownYPosLabel.setText(realOwnY+" mm");
 	}
 	
-	public int getGoalX(){
-		return goalX;
-	}
-	
-	public int getGoalY(){
-		return goalY;
+	int opponentX, opponentY;
+	public void updateOpponentPosition(int x, int y){
+		opponentX = x; opponentY = y;
+		int realOppX = x * widthMeters/mapMaker.getWidth();
+		int realOppY = y * heightMeters/mapMaker.getHeight();
+		opponentXPosLabel.setText(realOppX+" mm"); opponentYPosLabel.setText(realOppY+" mm");
 	}
 	
 	public int getOwnX() {
@@ -340,64 +349,127 @@ public class KirovAirship extends JFrame {
 		return opponentY;
 	}
 	
+	public void updateLastCommand(String command){
+		outputConsole.append(command + "\n");
+		outputConsole.setCaretPosition(outputConsole.getDocument().getLength());
+	}
+	
+	public void updateZeppHeight(int newheight){
+		zeppHeight = newheight;
+		currentHeightLabel.setText(newheight + "mm");
+	}
+	
+	int zeppHeight;
+	public int getZeppHeight(){
+		return zeppHeight;
+	}
+	
+	public void setTargetHeight(int height){
+		targetHeightLabel.setText(height + "mm");
+		missionText.setText("Change height to: "+ height+"mm.");
+	}
+	
+	public void setGoalPosition(int x, int y){
+		missionText.setText("We have to go to: " + x + "mm, " + y +"mm");
+	}
 	//TODO Testcode: wegdoen uiteindelijk
 	private String[] testcode(int rows, int colums){
 		String[] code = new String[rows*colums];
 		int random;
-		for(int i = 0; i < rows*colums; i++){
-			random = (int )(Math.random() * 5 + 1);
-			if(random == 1)
-				code[i] = "G";
-			if(random == 2)
-				code[i] = "R";
-			if(random == 3)
-				code[i] = "Y";
-			if(random == 4)
-				code[i] = "B";
-			if(random == 5)
-				code[i] = "W";
-			
-			random = (int )(Math.random() * 4 + 1);
-			if(random == 1)
-				code[i] += "R";
-			if(random == 2)
-				code[i] += "C";
-			if(random == 3)
-				code[i] += "S";
-			if(random == 4)
-				code[i] += "H";
+		for(int i = 0; i < rows; i++){
+			for(int j = 0; j<colums; j++){
+				random = (int )(Math.random() * 5 + 1);
+				if(random == 1)
+					code[i*colums + j] = "G";
+				else if(random == 2)
+					code[i*colums + j] = "R";
+				else if(random == 3)
+					code[i*colums + j] = "Y";
+				else if(random == 4)
+					code[i*colums + j] = "B";
+				else if(random == 5)
+					code[i*colums + j] = "W";
+				
+				random = (int )(Math.random() * 4 + 1);
+				if(random == 1)
+					code[i*colums + j] += "R";
+				else if(random == 2)
+					code[i*colums + j] += "C";
+				else if(random == 3)
+					code[i*colums + j] += "S";
+				else if(random == 4)
+					code[i*colums + j] += "H";
+				
+				if(j != colums - 1)
+					code[i*colums + j] += ", ";
+				else
+					code[i*colums + j] += "\n";
+			}
 		}
+		//Dit is om een nieuw grid af te printen zodat je deze in de map.csv kan zetten.
+//		String test = "";
+//		for(int i = 0; i < code.length; i++)
+//			test += code[i];
+//		System.out.println(test);
+		
 		return code;
 	}
 	
+	//TODO dit weghalen, of toch alleen doel bijhouden.
 	private class ZeppelinMouse implements MouseListener{
 		@Override
 		public void mousePressed(MouseEvent e){
-			double x = e.getX();
-			double y = e.getY();
-			setGoal((int) x, (int) y);
+			int x = (int) e.getX();
+			int y = (int) e.getY();
+			if(SwingUtilities.isLeftMouseButton(e) ){
+				goals.offer(new GoalPosition(x, y));
+			}
+			else if(SwingUtilities.isRightMouseButton(e) ){
+				queue.add(new SetPosition(x,y));
+			}
+			else if(SwingUtilities.isMiddleMouseButton(e) ){
+				updateOpponentPosition(x, y);
+			}
+			updateGui();
 		}
 
 		@Override
 		public void mouseClicked(MouseEvent arg0) {
-			
 		}
 
 		@Override
 		public void mouseEntered(MouseEvent arg0) {
-			// TODO Auto-generated method stub
-			
 		}
 
 		@Override
 		public void mouseExited(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+		}
+	}
+
+	private class EventKey implements KeyListener{
+
+		@Override
+		public void keyPressed(KeyEvent arg0) {
+			if(arg0.getKeyCode() == KeyEvent.VK_ENTER){
+				textEntered(inputConsole.getText());
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent arg0) {
 			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public void mouseReleased(MouseEvent arg0) {
+		public void keyTyped(KeyEvent arg0) {
 			// TODO Auto-generated method stub
+			
 		}
+		
 	}
 }
