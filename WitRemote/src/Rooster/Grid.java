@@ -39,20 +39,6 @@ public class Grid {
 			Vector triCenter = myCalculator.calculateTriple(a, b, c);
 			double gridAngle = myCalculator.getVector(a).getAngle(triCenter);
 			System.out.println("gridAngle = " + gridAngle);
-//			System.out.println(myMap.get(a));
-//			System.out.println(myMap.get(b));
-//			System.out.println(myMap.get(c));
-//			System.out.println("hoek tussen centrum en a= " + gridAngle);
-//			HashSet<String> keys = new HashSet<String>(rightFigures.keySet());
-//			ArrayList<String> listkeys = new ArrayList<String>(keys);
-//			System.out.println("keys: ");
-//			for (String str: listkeys) {
-//				System.out.println(str);
-//			}
-//			System.out.println("vectors: ");
-//			for (String str: listkeys) {
-//				System.out.println(rightFigures.get(str).toString());
-//			}
 			Vector picCenter = myCalculator.calculateTriple(rightFigures.get(myMap.get(a)), rightFigures.get(myMap.get(b)), rightFigures.get(myMap.get(c)));
 			double pictureAngle = rightFigures.get(myMap.get(a)).getAngle(picCenter);
 			System.out.println("pictureAngle = " + pictureAngle);
