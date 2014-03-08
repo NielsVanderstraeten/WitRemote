@@ -3,28 +3,47 @@ package Rooster;
 
 public class PositionCalculator {
 	
-	private int x;
-	private int y;
+//	private int x;
+//	private int y;
 	private int width;
 	private int height;
 	private final int distance = 400; // in mm
 	
 	public PositionCalculator(int width, int height) {
-		x = 0;
-		y = 0;
+//		x = 0;
+//		y = 0;
 		this.width = width;
 		this.height = height;
 	}
 	
+	//returns a vector that is the center of three given vectors
 	public Vector calculateTriple(Vector vectorA, Vector vectorB, Vector vectorC) {
 		double xcoord = (vectorA.getX() + vectorB.getX() + vectorC.getX())/3;
 		double ycoord = (vectorA.getY() + vectorB.getY() + vectorC.getY())/3;
 		
 		return new Vector(xcoord, ycoord);
 	}
+	
+	//returns a vector that is the center of three given points (position in the arraylist that describes the grid)
 	public Vector calculateTriple(int a, int b, int c) {
 		double xcoord = (getX(a) + getX(b) + getX(c))/3;
 		double ycoord = (getY(a) + getY(b) + getY(c))/3;
+		
+		return new Vector(xcoord, ycoord);
+	}
+	
+	//returns the vector that is the center of two given vectors
+	public Vector calculateDouble(Vector vectorA, Vector vectorB) {
+		double xcoord = (vectorA.getX() + vectorB.getX())/2;
+		double ycoord = (vectorA.getY() + vectorB.getY())/2;
+		
+		return new Vector(xcoord, ycoord);
+	}
+	
+	//returns a vector that is the center of tow given points (position in the arraylist that describes the grid)
+	public Vector calculateDouble(int a, int b) {
+		double xcoord = (getX(a) + getX(b))/3;
+		double ycoord = (getY(a) + getY(b))/3;
 		
 		return new Vector(xcoord, ycoord);
 	}

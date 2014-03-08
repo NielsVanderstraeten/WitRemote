@@ -7,7 +7,7 @@ import java.util.HashSet;
 
 public class Grid {
 	
-	private ArrayList<String> myPoints;
+	private ArrayList<String> myMap;
 	private int height;
 	private int width;
 	private PositionCalculator myCalculator;
@@ -24,7 +24,41 @@ public class Grid {
 	}
 	
 	public void setMap(ArrayList<String> list) {
-		this.myPoints = list;
+		this.myMap = list;
+	}
+	
+
+	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
+	public double getRotation(HashMap<String,Vector> figures) {
+		HashMap<String,Vector> rightFigures = this.getRightTriangle(figures);
+		ArrayList<Integer> points = getPoints(figures);
+		int a = points.get(0);
+		int b = points.get(1);
+		if (points.size() == 3) {
+			int c = points.get(2);
+			Vector triCenter = myCalculator.calculateTriple(a, b, c);
+			double gridAngle = myCalculator.getVector(a).getAngle(triCenter);
+			System.out.println("gridAngle = " + gridAngle);
+//			System.out.println(myMap.get(a));
+//			System.out.println(myMap.get(b));
+//			System.out.println(myMap.get(c));
+//			System.out.println("hoek tussen centrum en a= " + gridAngle);
+//			HashSet<String> keys = new HashSet<String>(rightFigures.keySet());
+//			ArrayList<String> listkeys = new ArrayList<String>(keys);
+//			System.out.println("keys: ");
+//			for (String str: listkeys) {
+//				System.out.println(str);
+//			}
+//			System.out.println("vectors: ");
+//			for (String str: listkeys) {
+//				System.out.println(rightFigures.get(str).toString());
+//			}
+			Vector picCenter = myCalculator.calculateTriple(rightFigures.get(myMap.get(a)), rightFigures.get(myMap.get(b)), rightFigures.get(myMap.get(c)));
+			double pictureAngle = rightFigures.get(myMap.get(a)).getAngle(picCenter);
+			System.out.println("pictureAngle = " + pictureAngle);
+			return (gridAngle - pictureAngle + 270)%360;
+		}
+		return 0;
 	}
 	
 	public Vector getPosition(HashMap<String,Vector> figures) {
@@ -35,7 +69,11 @@ public class Grid {
 			int c = points.get(2);
 			return myCalculator.calculateTriple(a, b, c);
 		}
+		else if (points.size() == 2) {
+			return myCalculator.calculateDouble(a, b);
+		}
 		else {
+			//nieuwe foto maken -> nog programmeren
 			return null;
 		}
 		
@@ -49,14 +87,14 @@ public class Grid {
 			ArrayList<Integer> points0 = new ArrayList<Integer>();
 			ArrayList<Integer> points1 = new ArrayList<Integer>();
 			ArrayList<Integer> points2 = new ArrayList<Integer>();
-			for (int i = 0; i < myPoints.size(); i++) {
-				if (listkeys.get(0) == myPoints.get(i)) {
+			for (int i = 0; i < myMap.size(); i++) {
+				if (listkeys.get(0) == myMap.get(i)) {
 					points0.add(i);
 				}
-				else if (listkeys.get(1) == myPoints.get(i)) {
+				else if (listkeys.get(1) == myMap.get(i)) {
 					points1.add(i);
 				}
-				else if (listkeys.get(2) == myPoints.get(i)) {
+				else if (listkeys.get(2) == myMap.get(i)) {
 					points2.add(i);
 				}
 			}			
@@ -103,17 +141,6 @@ public class Grid {
 		if (figures.size() == 1) {
 			
 		}
-		return null;
-	}
-	
-	public int getRotation(ArrayList<String> points) {
-		
-		
-		return 0;
-	}
-	
-	private ArrayList<Integer> getTriangles() {
-		
 		return null;
 	}
 	

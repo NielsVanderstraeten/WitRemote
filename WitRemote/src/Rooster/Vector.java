@@ -23,19 +23,30 @@ public class Vector {
 		return Math.sqrt(Math.pow(this.getX()-vector.getX(), 2) + Math.pow(this.getY()-vector.getY(), 2));
 	}
 	
-	// afwijking ten opzichte van horizontale as naar rechts in radialen!
-	public double getAnglePicture(Vector vector) {
-		double deltaX = (vector.getX() - this.getX());
-		double deltaY = (vector.getY() - this.getY());
-		double slope = deltaX/deltaY;
+	// afwijking ten opzichte van horizontale as naar rechts en verticale as naar onder in GRADEN!
+	public double getAngle(Vector vector) {
+		double deltaX = (this.getX() - vector.getX());
+		double deltaY = (this.getY() - vector.getY());
+		double slope = deltaY/deltaX;
 		double deviation;
-		if (deltaX > 0) {
-			deviation = Math.PI/2 - Math.atan(slope);
+		
+		if (deltaX == 0) {
+			if (deltaY >= 0) {
+				deviation = Math.PI/2;
+			} else {
+				deviation = 3*Math.PI/2;
+			}
+		}
+		else if (deltaX > 0) {
+			//deviation = Math.PI/2 - Math.atan(slope);
+			deviation = Math.atan(slope);
 		}
 		else {
-			deviation = -(Math.PI/2 + Math.atan(slope));
+			//deviation = -(Math.PI/2 + Math.atan(slope));
+			deviation = Math.atan(slope) + Math.PI;
 		}
-		return deviation;
+		deviation = deviation/Math.PI*180 + 360;
+		return (deviation%360);
 	}
 	
 	public boolean positiveX(Vector vector) {
@@ -46,5 +57,9 @@ public class Vector {
 			positive = true;
 		}
 		return positive;
+	}
+	
+	public String toString() {
+		return (getX() + ", " + getY());
 	}
 }
