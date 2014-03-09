@@ -1,7 +1,5 @@
 package Rooster;
 
-import Vector;
-
 
 
 public class Shape {
