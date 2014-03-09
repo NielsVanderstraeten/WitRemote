@@ -5,5 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="src/gui/resources/opencv-248.jar"/>
 	<classpathentry kind="lib" path="src/gui/resources/jsch-0.1.50.jar"/>
+	<classpathentry kind="lib" path="src/gui/resources/opencsv-2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
