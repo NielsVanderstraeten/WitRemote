@@ -64,7 +64,7 @@ public class Simulator implements Runnable{
 			oppX = oppX + 5/distanceOpp*(goalX - oppX);
 			oppY = oppY + 5/distanceOpp*(goalY - oppY);
 		}
-		gui.updateOwnPosition((int) ownX, (int) ownY);
+		gui.updateOwnPosition((int) ownX, (int) ownY, 0);
 		gui.updateOpponentPosition((int) oppX, (int) oppY);
 		gui.updateGui();
 	}
