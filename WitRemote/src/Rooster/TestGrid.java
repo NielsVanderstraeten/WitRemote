@@ -24,12 +24,12 @@ public class TestGrid {
 		myPoints.add("BC");
 		myPoints.add("BD");
 		myPoints.add("CA");
-		myPoints.add("CB");
+		myPoints.add("VV");
 		myPoints.add("CC");
 		myPoints.add("CD");
 		
 		myPoints.add("DA");
-		myPoints.add("DB");
+		myPoints.add("VW");
 		myPoints.add("DC");
 		myPoints.add("DD");
 		myPoints.add("EA");
@@ -43,28 +43,34 @@ public class TestGrid {
 		
 		myGrid.setMap(myPoints);
 		
-		Vector vector1 = new Vector(20,10);
-		Vector vector2 = new Vector(80,10);
-		Vector vector3 = new Vector(50, 62);
+		
+//		Vector vector1 = new Vector(20,10);
+//		Vector vector2 = new Vector(80,10);
+//		Vector vector3 = new Vector(50, 62);
 //		Vector vector4 = new Vector(1200,688);
 //		Vector vector5 = new Vector(0,688);
 //		ArrayList<Integer> list1 = new ArrayList<Integer>();
 //		ArrayList<Integer> list2 = new ArrayList<Integer>();
 //		ArrayList<Integer> list3 = new ArrayList<Integer>();
-		HashMap<String,Vector> myMap = new HashMap<String,Vector>();
-		myMap.put("CB", vector2);
-		myMap.put("CC", vector3);
-		myMap.put("DB", vector1);
+//		HashMap<String,Vector> myMap = new HashMap<String,Vector>();
+//		myMap.put("CB", vector2);
+//		myMap.put("CC", vector3);
+//		myMap.put("DB", vector1);
 //		myMap.put("CD", vector4);
 //		myMap.put("CA", vector5);
-		ArrayList<Integer> result = myGrid.getPoints(myMap);
+		ArrayList<Shape> myList = new ArrayList<Shape>();
+		myList.add(new Shape(20,10,"VW"));
+		myList.add(new Shape(80,10,"VV"));
+		myList.add(new Shape(50,62,"CC"));
+		ArrayList<Integer> result = myGrid.getPoints(myList);
+		
 		System.out.println("de gevonden punten op het rooster zijn:");
 		for (int i = 0; i< result.size(); i++) {
 			System.out.println(result.get(i));
 		}
-		Vector myVector = myGrid.getPosition(myMap);
+		Vector myVector = myGrid.getPosition(myList);
 		System.out.println(myVector.getX() + ", " +  myVector.getY());
-		double myAngle = myGrid.getRotation(myMap);
+		double myAngle = myGrid.getRotation(myList);
 		System.out.println("de rotatie = " + myAngle);
 	}
 	

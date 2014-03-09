@@ -2,8 +2,6 @@ package Rooster;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class Grid {
 	
@@ -12,7 +10,8 @@ public class Grid {
 	private int width;
 	private PositionCalculator myCalculator;
 	private double pictureDistance;
-	private double lastZepPosition;
+	private Vector lastZepPosition;
+	private double lastRotation;
 	//toegelaten afwijking in percenten bij afstandsverglijking
 	private final double approx = 10;
 	//laatste afstand van 2 naast elkaar liggende punten
@@ -31,70 +30,85 @@ public class Grid {
 	
 
 	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
-	public double getRotation(HashMap<String,Vector> figures) {
-		HashMap<String,Vector> rightFigures = this.getRightTriangle(figures);
-		ArrayList<Integer> points = getPoints(figures);
-		int a = points.get(0);
-		int b = points.get(1);
-		if (points.size() == 3) {
-			int c = points.get(2);
-			Vector triCenter = myCalculator.calculateTriple(a, b, c);
-			double gridAngle = myCalculator.getVector(a).getAngle(triCenter);
-			System.out.println("gridAngle = " + gridAngle);
-			Vector picCenter = myCalculator.calculateTriple(rightFigures.get(myMap.get(a)), rightFigures.get(myMap.get(b)), rightFigures.get(myMap.get(c)));
-			double pictureAngle = rightFigures.get(myMap.get(a)).getAngle(picCenter);
-			System.out.println("pictureAngle = " + pictureAngle);
-			return (gridAngle - pictureAngle + 270)%360;
+	public double getRotation(ArrayList<Shape> figures) {
+		if (figuresContainTriangle(figures)) {
+			ArrayList<Shape> rightFigures = this.getRightTriangle(figures);
+			ArrayList<Integer> points = getPoints(figures);
+			int a = points.get(0);
+			int b = points.get(1);
+			if (points.size() == 3) {
+				int c = points.get(2);
+				Shape compare = null;
+				for (int i = 0; i<3; i++) {
+					boolean test = false;
+					for (int j = 0; j<3; j++) {
+						if (i !=j) {
+							test = (rightFigures.get(i).getCode() == rightFigures.get(j).getCode());
+						}
+					}
+					if (!test) {
+						compare = rightFigures.get(i);
+					}
+				}
+				Vector triCenter = myCalculator.calculateTriple(a, b, c);
+				double gridAngle = myCalculator.getVector(compare.getGridPosition()).getAngle(triCenter);
+//				System.out.println("gridAngle = " + gridAngle);
+				Vector picCenter = myCalculator.calculateTriple(rightFigures.get(0).getPosition(), rightFigures.get(1).getPosition(), rightFigures.get(2).getPosition());
+				double pictureAngle = compare.getPosition().getAngle(picCenter);
+//				System.out.println("pictureAngle = " + pictureAngle);
+				lastRotation = (gridAngle - pictureAngle + 270)%360;
+			}
 		}
-		return 0;
+		
+		return lastRotation;
 	}
 	
-	public Vector getPosition(HashMap<String,Vector> figures) {
+	public Vector getPosition(ArrayList<Shape> figures) {
 		ArrayList<Integer> points = getPoints(figures);
 		int a = points.get(0);
 		int b = points.get(1);
 		if (points.size() == 3) {
 			int c = points.get(2);
-			return myCalculator.calculateTriple(a, b, c);
+			lastZepPosition = myCalculator.calculateTriple(a, b, c);
 		}
 		else if (points.size() == 2) {
-			return myCalculator.calculateDouble(a, b);
+			lastZepPosition = myCalculator.calculateDouble(a, b);
 		}
 		else {
 			//nieuwe foto maken -> nog programmeren
-			return null;
 		}
-		
+		return lastZepPosition;		
 	}
 	
-	private boolean figuresContainTriangle(HashMap<String,Vector> figures) {
+	private boolean figuresContainTriangle(ArrayList<Shape> figures) {
 		return !(this.getRightTriangle(figures) == null);
 	}
 	
-	private boolean figuresContainNeighbours(HashMap<String,Vector> figures) {
+	private boolean figuresContainNeighbours(ArrayList<Shape> figures) {
 		return !(this.getRightNeighbours(figures) == null);
 	} 
 	
-	public ArrayList<Integer> getPoints(HashMap<String,Vector> figures) {
+	public ArrayList<Integer> getPoints(ArrayList<Shape> figures) {
 		if (figures.size() >= 3) {
 			if (figuresContainTriangle(figures)) {
-				HashMap<String,Vector> rightFigures = this.getRightTriangle(figures);
-				HashSet<String> keys = new HashSet<String>(rightFigures.keySet());
-				ArrayList<String> listkeys = new ArrayList<String>(keys);
+				ArrayList<Shape> rightFigures = this.getRightTriangle(figures);
 				ArrayList<Integer> points0 = new ArrayList<Integer>();
 				ArrayList<Integer> points1 = new ArrayList<Integer>();
 				ArrayList<Integer> points2 = new ArrayList<Integer>();
 				for (int i = 0; i < myMap.size(); i++) {
-					if (listkeys.get(0) == myMap.get(i)) {
+					if (rightFigures.get(0).getCode() == myMap.get(i)) {
 						points0.add(i);
+						System.out.println("added to points0: " + i);
 					}
-					else if (listkeys.get(1) == myMap.get(i)) {
+					if (rightFigures.get(1).getCode() == myMap.get(i)) {
 						points1.add(i);
+						System.out.println("added to points1: " + i);
 					}
-					else if (listkeys.get(2) == myMap.get(i)) {
+					if (rightFigures.get(2).getCode() == myMap.get(i)) {
 						points2.add(i);
+						System.out.println("added to points2: " + i);
 					}
-				}			
+				}
 				for (int i = 0; i < points0.size(); i++) {
 					for (int j = 0; j < points1.size(); j++) {
 						ArrayList<Integer> compareList = getHexagon(points0.get(i));
@@ -120,8 +134,14 @@ public class Grid {
 								if (found2) {
 									ArrayList<Integer> returnList = new ArrayList<Integer>();
 									returnList.add(points0.get(i));
+									rightFigures.get(0).setGridPosition(points0.get(i));
+									System.out.println("gridPosition setted: " + points0.get(i));
 									returnList.add(points1.get(j));
+									rightFigures.get(1).setGridPosition(points1.get(j));
+									System.out.println("gridPosition setted: " + points1.get(j));
 									returnList.add(points2.get(k));
+									rightFigures.get(2).setGridPosition(points2.get(k));
+									System.out.println("gridPosition setted: " + points2.get(k));
 									return returnList;
 								}
 							}
@@ -129,22 +149,20 @@ public class Grid {
 					}				
 				}
 			}
+			else if (figuresContainNeighbours(figures)) {
+				
+			}
 			
-			return null;
 		}
 		if (figures.size() == 2) {
-			HashSet<String> keys = new HashSet<String>(figures.keySet());
-			ArrayList<String> listkeys = new ArrayList<String>(keys);
-			Vector vector0 = figures.get(listkeys.get(0));
-			Vector vector1 = figures.get(listkeys.get(1));
-			vector0.getDistance(vector1);
+			
 			
 		}
 		
 		if (figures.size() == 1) {
 			
 		}
-		return null;
+		return new ArrayList<Integer>();
 	}
 	
 	// return the hexagon around a given point (if the complete hexagon exists, otherwise only the existing surrounding points)
@@ -259,21 +277,27 @@ public class Grid {
 	}
 	
 	//Methode om een gelijkzijdige driehoek uit de ontvangen hashmap van de fotoanalyse te verkrijgen
-	private HashMap<String, Vector> getRightTriangle(HashMap<String,Vector> figures) {
-		HashSet<String> keys = new HashSet<String>(figures.keySet());
-		ArrayList<String> listkeys = new ArrayList<String>(keys);
-		HashMap<String,Vector> returnMap = new HashMap<String,Vector>();
-		for (int i=0;i<listkeys.size()-2;i++) {
-			for (int j = (i+1); j<listkeys.size()-1;j++) {
-				for(int k = (j+1); k<listkeys.size();k++) {
-					String key1 = listkeys.get(i);
-					String key2 = listkeys.get(j);
-					String key3 = listkeys.get(k);
-					if (isTriangle(figures.get(key1), figures.get(key2), figures.get(key3))) {
-						returnMap.put(key1,figures.get(key1));
-						returnMap.put(key2,figures.get(key2));
-						returnMap.put(key3,figures.get(key3));
-						return returnMap;
+	private ArrayList<Shape> getRightTriangle(ArrayList<Shape> figures) {
+//		HashSet<String> keys = new HashSet<String>(figures.keySet());
+		
+		ArrayList<String> codes = new ArrayList<String>();
+		for (Shape shape: figures) {
+			codes.add(shape.getCode());
+			System.out.println(shape.getCode());
+		}
+		ArrayList<Shape> returnList = new ArrayList<Shape>();
+		for (int i=0;i<codes.size()-2;i++) {
+			for (int j = (i+1); j<codes.size()-1;j++) {
+				for(int k = (j+1); k<codes.size();k++) {
+					if ( isTriangle(figures.get(i).getPosition(), figures.get(j).getPosition(), figures.get(k).getPosition()) ) {
+						returnList.add(figures.get(i));
+						returnList.add(figures.get(j));
+						returnList.add(figures.get(k));
+						System.out.println("in returnList: " );
+						for (Shape shape: returnList) {
+							System.out.println(shape.getCode());
+						}
+						return returnList;
 					}
 				}
 			}
@@ -284,8 +308,8 @@ public class Grid {
 	}
 	
 	//methode dat uit een gegeven hashmap twee buren haalt.
-	public HashMap<String,Vector> getRightNeighbours(HashMap<String, Vector> figures) {
-		return null;
+	public ArrayList<Shape> getRightNeighbours(ArrayList<Shape> figures) {
+		return new ArrayList<Shape>();
 	}
 	
 	//boolean ofdat 3 ontvangen vectoren in een gelijkzijdige driehoek liggen

@@ -1,7 +1,5 @@
 package Rooster;
 
-import Vector;
-
 
 
 public class Shape {
@@ -33,5 +31,9 @@ public class Shape {
 	
 	public void setGridPosition(int position) {
 		gridPosition = position;
+	}
+	
+	public int getGridPosition() {
+		return gridPosition;
 	}
 }
