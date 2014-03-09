@@ -7,6 +7,7 @@ import Vector;
 public class Shape {
 	private Vector position;
 	private String code;
+	private int gridPosition;
 	
 	public Shape(double centerXCoord, double centerYCoord, String code) {
 		this.position = new Vector(centerXCoord, centerYCoord);
@@ -28,5 +29,9 @@ public class Shape {
 	
 	public String getCode() {
 		return code;
+	}
+	
+	public void setGridPosition(int position) {
+		gridPosition = position;
 	}
 }
