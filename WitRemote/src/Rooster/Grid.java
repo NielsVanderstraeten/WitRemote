@@ -12,8 +12,10 @@ public class Grid {
 	private int width;
 	private PositionCalculator myCalculator;
 	private double pictureDistance;
+	private double lastZepPosition;
 	//toegelaten afwijking in percenten bij afstandsverglijking
-	private final double approx = 5;
+	private final double approx = 10;
+	//laatste afstand van 2 naast elkaar liggende punten
 	
 	public Grid(int width, int height) {
 		//myPoints = new ArrayList<String>(120);
@@ -65,62 +67,77 @@ public class Grid {
 		
 	}
 	
+	private boolean figuresContainTriangle(HashMap<String,Vector> figures) {
+		return !(this.getRightTriangle(figures) == null);
+	}
+	
+	private boolean figuresContainNeighbours(HashMap<String,Vector> figures) {
+		return !(this.getRightNeighbours(figures) == null);
+	} 
+	
 	public ArrayList<Integer> getPoints(HashMap<String,Vector> figures) {
 		if (figures.size() >= 3) {
-			HashMap<String,Vector> rightFigures = this.getRightTriangle(figures);
-			HashSet<String> keys = new HashSet<String>(rightFigures.keySet());
-			ArrayList<String> listkeys = new ArrayList<String>(keys);
-			ArrayList<Integer> points0 = new ArrayList<Integer>();
-			ArrayList<Integer> points1 = new ArrayList<Integer>();
-			ArrayList<Integer> points2 = new ArrayList<Integer>();
-			for (int i = 0; i < myMap.size(); i++) {
-				if (listkeys.get(0) == myMap.get(i)) {
-					points0.add(i);
-				}
-				else if (listkeys.get(1) == myMap.get(i)) {
-					points1.add(i);
-				}
-				else if (listkeys.get(2) == myMap.get(i)) {
-					points2.add(i);
-				}
-			}			
-			for (int i = 0; i < points0.size(); i++) {
-				for (int j = 0; j < points1.size(); j++) {
-					ArrayList<Integer> compareList = getHexagon(points0.get(i));
-					boolean found = false;
-					int j2 = 0;
-					while (j2 < compareList.size() && !found) {
-						if (compareList.get(j2) == points1.get(j)) {
-							found = true;
-						}
-						j2++;
+			if (figuresContainTriangle(figures)) {
+				HashMap<String,Vector> rightFigures = this.getRightTriangle(figures);
+				HashSet<String> keys = new HashSet<String>(rightFigures.keySet());
+				ArrayList<String> listkeys = new ArrayList<String>(keys);
+				ArrayList<Integer> points0 = new ArrayList<Integer>();
+				ArrayList<Integer> points1 = new ArrayList<Integer>();
+				ArrayList<Integer> points2 = new ArrayList<Integer>();
+				for (int i = 0; i < myMap.size(); i++) {
+					if (listkeys.get(0) == myMap.get(i)) {
+						points0.add(i);
 					}
-					if (found) {
-						for (int k = 0; k < points2.size(); k++) {
-							ArrayList<Integer> compareList2 = getTriangle(points0.get(i), points1.get(j));
-							boolean found2 = false;
-							int k2 = 0;
-							while (k2 < compareList2.size() && !found2) {
-								if (compareList2.get(k2) == points2.get(k)) {
-									found2 = true;
+					else if (listkeys.get(1) == myMap.get(i)) {
+						points1.add(i);
+					}
+					else if (listkeys.get(2) == myMap.get(i)) {
+						points2.add(i);
+					}
+				}			
+				for (int i = 0; i < points0.size(); i++) {
+					for (int j = 0; j < points1.size(); j++) {
+						ArrayList<Integer> compareList = getHexagon(points0.get(i));
+						boolean found = false;
+						int j2 = 0;
+						while (j2 < compareList.size() && !found) {
+							if (compareList.get(j2) == points1.get(j)) {
+								found = true;
+							}
+							j2++;
+						}
+						if (found) {
+							for (int k = 0; k < points2.size(); k++) {
+								ArrayList<Integer> compareList2 = getTriangle(points0.get(i), points1.get(j));
+								boolean found2 = false;
+								int k2 = 0;
+								while (k2 < compareList2.size() && !found2) {
+									if (compareList2.get(k2) == points2.get(k)) {
+										found2 = true;
+									}
+									k2++;
 								}
-								k2++;
-							}
-							if (found2) {
-								ArrayList<Integer> returnList = new ArrayList<Integer>();
-								returnList.add(points0.get(i));
-								returnList.add(points1.get(j));
-								returnList.add(points2.get(k));
-								return returnList;
+								if (found2) {
+									ArrayList<Integer> returnList = new ArrayList<Integer>();
+									returnList.add(points0.get(i));
+									returnList.add(points1.get(j));
+									returnList.add(points2.get(k));
+									return returnList;
+								}
 							}
 						}
-					}
+					}				
 				}
-				
 			}
+			
 			return null;
 		}
 		if (figures.size() == 2) {
+			HashSet<String> keys = new HashSet<String>(figures.keySet());
+			ArrayList<String> listkeys = new ArrayList<String>(keys);
+			Vector vector0 = figures.get(listkeys.get(0));
+			Vector vector1 = figures.get(listkeys.get(1));
+			vector0.getDistance(vector1);
 			
 		}
 		
@@ -130,7 +147,7 @@ public class Grid {
 		return null;
 	}
 	
-	// return the hexagon around a given point (if the complet hexagon exists, otherwise les points)
+	// return the hexagon around a given point (if the complete hexagon exists, otherwise only the existing surrounding points)
 	private ArrayList<Integer> getHexagon(int point) {
 		int line = point/width +1; /// width ipv height
 		int column = point - (line-1) * width + 1;
@@ -266,12 +283,23 @@ public class Grid {
 		return null;
 	}
 	
+	//methode dat uit een gegeven hashmap twee buren haalt.
+	public HashMap<String,Vector> getRightNeighbours(HashMap<String, Vector> figures) {
+		return null;
+	}
+	
 	//boolean ofdat 3 ontvangen vectoren in een gelijkzijdige driehoek liggen
 	private boolean isTriangle(Vector vector1, Vector vector2, Vector vector3) {
 		double distance1 = vector1.getDistance(vector2);
 		double distance2 = vector1.getDistance(vector3);
 		double distance3 = vector2.getDistance(vector3);
-		return fuzzyEquals(distance1,distance2) && fuzzyEquals(distance1,distance3);
+		if (fuzzyEquals(distance1,distance2) && fuzzyEquals(distance1,distance3)) {
+			pictureDistance = (distance1 + distance2 + distance3)/3;
+			return true;
+		} else {
+			return false;
+		}
+		
 	}
 	
 	// gelijk bij benadering
