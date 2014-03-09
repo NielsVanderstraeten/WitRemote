@@ -58,20 +58,23 @@ public class TextParser {
 	}
 	
 	public String setPosition(String[] command){
-		if(command.length != 3)
-			return "Please enter exactly 3 words. First the command then the x and y poisition on the grid in mm.\n"
-					+ "For example: setposition 1000 2000";
+		if(command.length != 4)
+			return "Please enter exactly 4 words. First the command then the x and y poisition on the grid in mm and finally the rotation of the zeppelin.\n"
+					+ "For example: setposition 1000 2000 3.14";
 		else{
 			int x, y;
+			double rotation;
 			try{
-				x = Integer.parseInt(command[1]); y = Integer.parseInt(command[2]); }
+				x = Integer.parseInt(command[1]); y = Integer.parseInt(command[2]);
+				rotation = Double.parseDouble(command[3]);
+				}
 			catch(NumberFormatException ne){
 				return "Please enter valid numbers as positions. Only positive integers are allowed.";
 			}
 			if(x < 0 || y < 0)
 				return "Please enter positive amounts.";
 			else{
-				queue.add(new SetPosition(x, y));
+				queue.add(new SetPosition(x, y, rotation));
 				return "Setting the position to: x= " + x + "mm, y= " +y + "mm.";
 			}
 		}

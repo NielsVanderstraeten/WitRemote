@@ -2,12 +2,14 @@ package commands;
 
 public class SetPosition extends Command{
 	
-	int x, y;
+	private int x, y;
+	private double rotation;
 	
-	public SetPosition(int x, int y){
-		super("setposition " + x + " " + y, "Reporting position to the zeppelin. Poisition is: x=" + x + "mm, y=" + y + "mm.");
+	public SetPosition(int x, int y, double rotation){
+		super("setposition " + x + " " + y +" " + rotation, "Reporting position to the zeppelin. Poisition is: x=" + x + "mm, y=" + y + "mm. Rotation is: " + rotation);
 		this.x = x;
 		this.y = y;
+		this.rotation = rotation;
 	}
 
 	public int getX() {
@@ -16,5 +18,9 @@ public class SetPosition extends Command{
 
 	public int getY() {
 		return y;
+	}
+	
+	public double getRotation(){
+		return rotation;
 	}
 }
