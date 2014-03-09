@@ -1,10 +1,14 @@
 package gui;
 
 
+import goals.GoalPosition;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
@@ -13,8 +17,11 @@ import java.io.FileReader;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import au.com.bytecode.opencsv.CSVReader;
+
+import commands.SetPosition;
 
 public class MapMaker extends JPanel {
 	private String[] code;
@@ -34,21 +41,15 @@ public class MapMaker extends JPanel {
 		createShapes();
 		scaleX = width/(2*colums)/standardScale; 
 		scaleY = height/(2*rows)/standardScale;
-		
-		ownZeppX = (int) (20*zeppScale); ownZeppY = (int) (30*zeppScale);
-		oppZeppX = (int) (20*zeppScale); oppZeppY = (int) (30*zeppScale);
 	}
 	
 	public MapMaker(int width, int height){
 		this.height = height;
 		this.width = width;
 		parseCSV();
+		createShapes();
 		scaleX = width/(2*colums)/standardScale; 
 		scaleY = height/(2*rows)/standardScale;
-		
-		createShapes();
-		ownZeppX = (int) (30*scaleX); ownZeppY = (int) (30*scaleY);
-		oppZeppX = (int) (30*scaleX) + 100; oppZeppY = (int) (30*scaleY) + 100;
 	}
 	
 	@Override
@@ -137,6 +138,10 @@ public class MapMaker extends JPanel {
 		g2.setColor(Color.magenta);
 		g2.draw(oppZepp);
 		g2.fill(oppZepp);
+		
+		g2.setColor(Color.black);
+		g2.draw(firstZepp);
+		g2.fill(firstZepp);
 	}
 	
 	private Area drawSquare(int x, int y){
@@ -233,9 +238,17 @@ public class MapMaker extends JPanel {
 		Ellipse2D zeppelinShape = new Ellipse2D.Double(0, 0, 40*zeppScale, 60*zeppScale);
 		ownZepp = new Area(zeppelinShape);
 		oppZepp = new Area(zeppelinShape);
+		ownZeppX =(int) (20*zeppScale); ownZeppY =(int) (30*zeppScale);
+		oppZeppX =(int) (20*zeppScale); oppZeppY =(int) (30*zeppScale);
+		
+		Polygon one = new Polygon();
+		one.addPoint((int) (6*zeppScale), (int) (21*zeppScale)); one.addPoint((int) (16*zeppScale), (int) (8*zeppScale)); 
+		one.addPoint((int) (27*zeppScale), (int) (8*zeppScale)); one.addPoint((int) (27*zeppScale), (int) (53*zeppScale));
+		one.addPoint((int) (16*zeppScale), (int) (53*zeppScale)); one.addPoint((int) (16*zeppScale), (int) (21*zeppScale));
+		firstZepp = new Area(one);
 	}
 	
-	private Area ownZepp, oppZepp;
+	private Area ownZepp, oppZepp, firstZepp;
 	private int ownZeppX, ownZeppY, oppZeppX, oppZeppY;
 	
 	public void moveOwnZeppelin(double ownX, double ownY){
@@ -247,6 +260,18 @@ public class MapMaker extends JPanel {
 		AffineTransform at = new AffineTransform();
 		at.translate(diffX, diffY);
 		ownZepp.transform(at);
+		firstZepp.transform(at);
+	}
+	
+	private double ownRotation = 0;
+	public void rotateOwnZeppelin(double rotation){
+		double diffRot = (rotation - ownRotation);
+		ownRotation = rotation;
+		
+		AffineTransform at = new AffineTransform();
+		at.rotate(diffRot, ownZeppX, ownZeppY);
+		ownZepp.transform(at);
+		firstZepp.transform(at);
 	}
 	
 	public void moveOppZeppelin(int oppX, int oppY){
@@ -264,6 +289,7 @@ public class MapMaker extends JPanel {
 		code[41] = "XX";
 		
 		MapMaker heart = new MapMaker(800, 800);
+		heart.addMouse();
 		//MapMaker heart = new MapMaker(800, 800, 9, 9, code);
 		JFrame f = new JFrame("Heart");
 		f.setBounds(4, 4, 816,  818);
@@ -324,6 +350,39 @@ public class MapMaker extends JPanel {
 					i++;
 				}
 			}
+		}
+	}
+	
+	public void addMouse(){
+		this.addMouseListener(new ZeppelinMouse());
+	}
+	
+	private class ZeppelinMouse implements MouseListener{
+		@Override
+		public void mousePressed(MouseEvent e){
+			int x = (int) e.getX();
+			int y = (int) e.getY();
+			if(SwingUtilities.isLeftMouseButton(e) ){
+				System.out.println("x: " + x + "\ny: " +  y);
+				moveOwnZeppelin(e.getX(), e.getY());
+				repaint();
+			}
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
 		}
 	}
 }

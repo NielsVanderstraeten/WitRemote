@@ -83,6 +83,7 @@ public class KirovAirship extends JFrame {
 	public KirovAirship(){
 		this(new LinkedList<Command>(), new LinkedList<Goal>());
 	}
+	
 	public int getHeight(){
 		return height;
 	}
@@ -228,8 +229,8 @@ public class KirovAirship extends JFrame {
 		mapMaker.addMouseListener(new ZeppelinMouse());
 		
 		//TODO wegdoen
-		updateOwnPosition((int) (mapMaker.getWidth()*0.1), 	(int) (mapMaker.getHeight()*0.1));
-		updateOpponentPosition((int) (0.9*mapMaker.getWidth()), (int) (0.9*mapMaker.getHeight()));
+		updateOwnPosition((int) (widthMeters*0.1), 	(int) (heightMeters*0.1), 0);
+		updateOpponentPosition((int) (widthMeters*0.9), (int) (heightMeters*0.9));
 		updateGui();
 	}
 	private JLayeredPane informationPane;
@@ -308,8 +309,9 @@ public class KirovAirship extends JFrame {
 	}
 	
 	private void moveZeppelins(){
-		mapMaker.moveOwnZeppelin(ownX, ownY);
-		mapMaker.moveOppZeppelin(opponentX, opponentY);
+		mapMaker.moveOwnZeppelin(ownX * mapMaker.getWidth() / widthMeters, ownY * mapMaker.getHeight() / heightMeters);
+		mapMaker.rotateOwnZeppelin(ownRotation);
+		mapMaker.moveOppZeppelin(opponentX * mapMaker.getWidth() / widthMeters, opponentY * mapMaker.getHeight() / heightMeters);
 		repaint();
 	}
 	
@@ -317,20 +319,20 @@ public class KirovAirship extends JFrame {
 		moveZeppelins();
 	}
 	
-	int ownX, ownY;
-	public void updateOwnPosition(int x, int y){
-		ownX = x; ownY = y;
-		int realOwnX = x * widthMeters/mapMaker.getWidth();
-		int realOwnY = y* heightMeters/mapMaker.getHeight();
-		ownXPosLabel.setText(realOwnX+" mm"); ownYPosLabel.setText(realOwnY+" mm");
+	private int ownX, ownY;
+	private double ownRotation = 0;
+	public void updateOwnPosition(int x, int y, double rotation){
+		ownX = x; 
+		ownY = y;
+		ownRotation = rotation;
+		ownXPosLabel.setText(x+" mm"); ownYPosLabel.setText(y+" mm");
 	}
 	
-	int opponentX, opponentY;
+	private int opponentX, opponentY;
 	public void updateOpponentPosition(int x, int y){
-		opponentX = x; opponentY = y;
-		int realOppX = x * widthMeters/mapMaker.getWidth();
-		int realOppY = y * heightMeters/mapMaker.getHeight();
-		opponentXPosLabel.setText(realOppX+" mm"); opponentYPosLabel.setText(realOppY+" mm");
+		opponentX = x; 
+		opponentY = y;
+		opponentXPosLabel.setText(x+" mm"); opponentYPosLabel.setText(y+" mm");
 	}
 	
 	public int getOwnX() {
@@ -341,6 +343,10 @@ public class KirovAirship extends JFrame {
 		return ownY;
 	}
 
+	public double getOwnRotation(){
+		return ownRotation;
+	}
+	
 	public int getOpponentX() {
 		return opponentX;
 	}
@@ -425,10 +431,10 @@ public class KirovAirship extends JFrame {
 				goals.offer(new GoalPosition(x, y));
 			}
 			else if(SwingUtilities.isRightMouseButton(e) ){
-				queue.add(new SetPosition(x,y));
+				updateOwnPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight(), ownRotation);
 			}
 			else if(SwingUtilities.isMiddleMouseButton(e) ){
-				updateOpponentPosition(x, y);
+				updateOpponentPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight());
 			}
 			updateGui();
 		}
@@ -456,6 +462,10 @@ public class KirovAirship extends JFrame {
 		public void keyPressed(KeyEvent arg0) {
 			if(arg0.getKeyCode() == KeyEvent.VK_ENTER){
 				textEntered(inputConsole.getText());
+			}
+			if(arg0.getKeyCode() == KeyEvent.VK_T){
+				ownRotation += Math.PI/6;
+				moveZeppelins();
 			}
 		}
 

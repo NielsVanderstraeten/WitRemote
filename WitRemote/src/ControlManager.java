@@ -142,7 +142,7 @@ public class ControlManager implements Runnable{
 				}
 				else if(c instanceof SetPosition){
 					client.executeCommand(c);
-					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY());
+					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), 0);
 				}
 				else{
 					client.executeCommand(c);
