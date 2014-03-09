@@ -16,6 +16,9 @@ import goals.*;
 
 public class ControlManager implements Runnable{
 
+	private int REAL_WIDTH = 2400;
+	private int REAL_HEIGHT = 2000;
+	
 	public static void main(String[] args){
 		Simulator simulator;
 		ControlManager cm ;
@@ -55,7 +58,7 @@ public class ControlManager implements Runnable{
 			
 			ChannelExec channel2= (ChannelExec)session.openChannel("exec");
 			
-			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -cp pi4j-0.0.5/lib/pi4j-core.jar:. pi/Pi 6066");
+			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -cp pi4j-0.0.5/lib/pi4j-core.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
 			InputStream in = channel2.getInputStream();
@@ -79,7 +82,7 @@ public class ControlManager implements Runnable{
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
-		queue.add(new SetDimension(2400,2000));
+		queue.add(new SetDimensions(2400,2000));
 	}
 	
 	public ControlManager(){
