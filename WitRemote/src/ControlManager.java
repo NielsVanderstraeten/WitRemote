@@ -55,7 +55,7 @@ public class ControlManager implements Runnable{
 			
 			ChannelExec channel2= (ChannelExec)session.openChannel("exec");
 			
-			channel2.setCommand("cd ZeppelinPi/ZeppelinPi/src; sudo java -cp pi4j-0.0.5/lib/pi4j-core.jar:. pi/Pi 6066");
+			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -cp pi4j-0.0.5/lib/pi4j-core.jar:. pi/Pi 6066");
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
 			InputStream in = channel2.getInputStream();
@@ -79,6 +79,7 @@ public class ControlManager implements Runnable{
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
+		queue.add(new SetDimension(2400,2000));
 	}
 	
 	public ControlManager(){
@@ -86,7 +87,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public void setUpGui(){
-		gui = new KirovAirship(1280, 780, 1000, 1000, queue, goals);
+		gui = new KirovAirship(1280, 780, 2400, 2000, queue, goals);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Zeppelin Group White");
 		gui.setSize(gui.getWidth(), gui.getHeight());
@@ -155,7 +156,7 @@ public class ControlManager implements Runnable{
 				//positionAnalyser = new Thread()
 			}
 			
-			if(System.currentTimeMillis() - lastCheck > 500){
+			if(System.currentTimeMillis() - lastCheck > 2000){
 				lastCheck = System.currentTimeMillis();
 				
 				boolean stillEmpty = false;
