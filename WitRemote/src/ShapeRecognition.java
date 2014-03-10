@@ -109,7 +109,7 @@ public class ShapeRecognition implements Runnable{
 		printAllInfo = true;
 		saveAllImages = false;
 		threshValue1 = 100; // voor otsu maakt het niks uit
-		threshValue2 = 95;  // 95 voor de Test klasse
+		threshValue2 = 90;  // 95 voor de Test klasse
 		threshMethode = 1; // 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	}
 	
