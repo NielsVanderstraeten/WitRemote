@@ -16,23 +16,23 @@ public class Grid {
 	private Vector lastZepPosition;
 	private double lastRotation;
 	//toegelaten afwijking in percenten bij afstandsverglijking
-	private final double approx = 10;
+	private final double approx = 8;
 	//laatste afstand van 2 naast elkaar liggende punten
 	
 	
-//	/*constructor for an object of Grid
-//	 * 
-//	 * width = aantal kolommen
-//	 * height = aantal rijen
-//	 * map = lijst van String objecten dat de Map voorsteld (vb: "BO", "WH", "YR",...)
-//	 */
-//	public Grid(int width, int height, String csvReference) {
-//		this.width = width;
-//		this.height = height;
-//		myCalculator = new PositionCalculator(width, height);
-//		lastZepPosition = new Vector(0,0);
-//		
-//	}
+	/*constructor for an object of Grid
+	 * 
+	 * width = aantal kolommen
+	 * height = aantal rijen
+	 * map = lijst van String objecten dat de Map voorsteld (vb: "BO", "WH", "YR",...)
+	 */
+	public Grid(int width, int height, String csvReference) {
+		this.width = width;
+		this.height = height;
+		myCalculator = new PositionCalculator(width, height);
+		lastZepPosition = new Vector(0,0);
+		
+	}
 	
 	public Grid(String plaatsVanCSV) {
 		parseCSV(plaatsVanCSV);
