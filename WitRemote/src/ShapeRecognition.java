@@ -1,8 +1,11 @@
+import gui.KirovAirship;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,8 +24,11 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
+import Rooster.Grid;
 import Rooster.Shape;
 import Rooster.Vector;
+import commands.Command;
+import commands.SetPosition;
 
 /**
  * VORMEN: 1) Harten 2) Cirkels 3) Rechthoeken 4) Sterren
@@ -82,22 +88,19 @@ public class ShapeRecognition implements Runnable{
 	private int threshMethode;
 	private String analyseImagePath = "C:/";
 	
-	/**
-	 * Voor op te vragen voor wouter zijn shit.
-	 * @param args
-	 */
-	private ArrayList<Shape> shapeList = new ArrayList<Shape>();
+//	public static void main(String args[]){
+//		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg", n);
+//		test35.run();
+//	}	
 	
-	public ArrayList<Shape> getShapeList(){
-		return shapeList;
-	}
+	private KirovAirship gui;
+	private Grid grid;
+	private LinkedList<Command> queue;
 	
-	public static void main(String args[]){
-		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg");
-		test35.run();
-	}	
-	
-	public ShapeRecognition(String path){
+	public ShapeRecognition(String path, KirovAirship gui, Grid grid, LinkedList<Command> queue){
+		this.gui = gui;
+		this.grid = grid;
+		this.queue = queue;
 		originalImagePath = path;
 		writeToPath = "C:/Users/Jeroen/Desktop/";
 		//TODO: testen wat de minimale waarde hiervan moet zijn of robuuster maken adhv hoogte van zeppelin... 
@@ -122,6 +125,7 @@ public class ShapeRecognition implements Runnable{
 
 		findShapesAndDrawPoints();
 		
+		gui.updatePhoto();
 		
 		if(printAllInfo == true){
 			System.out.println("Rectangles: " + rectangles);
@@ -140,7 +144,12 @@ public class ShapeRecognition implements Runnable{
 			System.out.println();
 		}
 		
-		shapeList = makeShapeList();
+		ArrayList<Shape> shapeList = makeShapeList();
+		
+		Vector position = grid.getPosition(shapeList);
+		double rotation = grid.getRotation(shapeList);
+		
+		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 		
 		emptyAllParameters();
 	}

@@ -1,3 +1,6 @@
+import goals.Goal;
+import goals.GoalHeight;
+import goals.GoalPosition;
 import gui.KirovAirship;
 import gui.Simulator;
 
@@ -6,12 +9,18 @@ import java.util.LinkedList;
 
 import javax.swing.JFrame;
 
+import Rooster.Grid;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-
-import commands.*;
-import goals.*;
+import commands.Command;
+import commands.GetHeight;
+import commands.SetDimensions;
+import commands.SetGoalHeight;
+import commands.SetGoalPosition;
+import commands.SetPosition;
+import commands.TakePicture;
 
 
 public class ControlManager implements Runnable{
@@ -74,6 +83,7 @@ public class ControlManager implements Runnable{
 	private long lastCheck;
 	private LinkedList<Goal> goals;
 	private String path = "D:/";
+	private Grid grid;
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();
@@ -84,6 +94,7 @@ public class ControlManager implements Runnable{
 		setUpGui();
 		setUpGoals();
 		queue.add(new SetDimensions(2400,2000));
+		grid = new Grid(2400,2000);
 	}
 	
 	public ControlManager(){
@@ -156,9 +167,10 @@ public class ControlManager implements Runnable{
 			}
 			
 			if(analysePicture){
-				analyserThread = new Thread(new ShapeRecognition(path + client.getNamePicture()));
+				analyserThread = new Thread(new ShapeRecognition(path + client.getNamePicture(), gui, grid, queue));
 				analyserThread.start();
 				analysePicture = false;
+				//TODO: update GUI
 				//TODO: nog getMethode om locatie van gevonden shapes te
 			}
 			
