@@ -1,8 +1,6 @@
 package gui;
 
 
-import goals.GoalPosition;
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -21,35 +19,39 @@ import javax.swing.SwingUtilities;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import commands.SetPosition;
-
 public class MapMaker extends JPanel {
 	private String[] code;
 	private int colums, rows, width, height;
-	private final double standardScale = 41.06666666666667;
-	private final double standardTotalScale = 71;
+	private static final double standardScale = 42.5;
+	private static final double standardTotalScale = 71;
 	private double scaleX, scaleY;
 	private final double zeppScale = 1.2;	
+	private int tempwidth, tempheight;
 	
 	public MapMaker(int width, int height, int colums, int rows, String[] code){
-		
 		this.colums = colums;
 		this.rows = rows;
 		this.height = height;
 		this.width = width;
 		this.code = code;
 		createShapes();
-		scaleX = width/(2*colums)/standardScale; 
-		scaleY = height/(2*rows)/standardScale;
+		setTemps();
 	}
 	
 	public MapMaker(int width, int height){
 		this.height = height;
 		this.width = width;
 		parseCSV();
+		setTemps();
 		createShapes();
-		scaleX = width/(2*colums)/standardScale; 
-		scaleY = height/(2*rows)/standardScale;
+	}
+	
+	private void setTemps(){
+		//WHY? CUZ IT WORKS!
+		tempwidth = (int) (width + (standardTotalScale - standardScale)/standardTotalScale*width/colums);
+		tempheight = (int) (height + (standardTotalScale - standardScale)/2.1/standardTotalScale*height/rows);
+		scaleX = 2*tempwidth/(2*colums+1)/standardTotalScale; 
+		scaleY = tempheight/rows/standardTotalScale;
 	}
 	
 	@Override
@@ -64,12 +66,9 @@ public class MapMaker extends JPanel {
 	
 	@Override
 	public void paintComponent (Graphics g){
-		int x = 20;
-		int y = 20;
+		int x = 0;
+		int y = 0;
 		// de temp vars die we mogen gebruiken is:
-		// height- 20 voor de bovenkant - 20 voor de onderkant - de standaard grootte van het beeld (standardScale)*de schaal - 5 extra voor speling
-		int tempwidth = (int) (width - 45 - standardScale*scaleX);
-		int tempheight = (int) (height - 50 - standardScale*scaleY);
 		
 		Color color;
 		Area toPaint = null;
@@ -80,8 +79,10 @@ public class MapMaker extends JPanel {
 			for(int i = 0; i < code.length; i++){
 				String info = code[i];
 				color = Color.pink;
-				if( y > height)
-					throw new IllegalArgumentException("Te veel symbolen om weer te geven in de figuur.\n@MapMaker - Paint: rows= " + rows + " ,colums= " + colums + "code.length= " + code.length);
+				if( y > height){
+					System.err.println("Te veel symbolen om weer te geven in de figuur.\n@MapMaker - Paint: rows= " + rows + " ,colums= " + colums + "code.length= " + code.length);
+					System.exit(1);
+				}
 				if(info != null && info.length()==2 && !info.equalsIgnoreCase("xx")){
 					String[] letters = info.split("(?!^)");
 					//Kleur toewijzen
@@ -118,15 +119,15 @@ public class MapMaker extends JPanel {
 				//We gebruiken tempwidth om juist de plaatsen te berekenen. Omdat we alle figuren plaatsen in hun linksbovenhoek en met een standaardwaarde werken
 				//moeten we colums - 1 gebruiken.
 				//Omdat we met een inspringing werken, gebruiken we 2*colums, zodat de andere kan inspringen in de helft.
-				x = x + 2*tempwidth/(2*colums-1);
+				x = x + 2*tempwidth/(2*colums+1);
 				//Wanneer de linksbovenhoek groter wordt dan de breedtte - de marge - de grootte van het beeldje, moeten we de volgende lijn beginnen.
-				if(x > width - 20 - standardScale*scaleX){
+				if(x > width - tempwidth/(2*colums+1)){
 					//Als we de vorige keer geen indent hebben gemaakt, moet dit nu wel.
 					if(indent)
-						x = 20 + (int) Math.floor(tempwidth/(2*colums-1));
+						x = (int) Math.floor(tempwidth/(2*colums+1));
 					else
-						x = 20;
-					y = y + tempheight/(rows-1);
+						x = 0;
+					y = y + tempheight/rows;
 					indent = !indent;
 				}
 			}
@@ -220,6 +221,10 @@ public class MapMaker extends JPanel {
 		heart = new Area(area2);
 		heart.add(area1);
 		heart.add(area3);
+		AffineTransform at = new AffineTransform();
+		at.translate(4,0);
+		at.scale(0.85,0.85);
+		heart.transform(at);
 		
 		Rectangle2D rectangle = new Rectangle2D.Double(0, 0, 41, 41);
 		square = new Area(rectangle);
@@ -285,16 +290,20 @@ public class MapMaker extends JPanel {
 	}
 	
 	public static void main(String[] args) {
-		String[] code = MapMaker.testcode(9, 9);
+		String[] code = MapMaker.testcode(7, 7);
 		code[41] = "XX";
 		
-		MapMaker heart = new MapMaker(800, 800);
+		//MapMaker heart = new MapMaker(800, 800);
+		MapMaker heart = new MapMaker(1200, 800, 7, 7, code);
 		heart.addMouse();
-		//MapMaker heart = new MapMaker(800, 800, 9, 9, code);
 		JFrame f = new JFrame("Heart");
 		f.setBounds(4, 4, 816,  818);
 		f.getContentPane().add( heart, "Center" );
-		
+
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setTitle("Zeppelin Group White");
+		f.setVisible(true);
+		f.requestFocus();
 		f.setSize(heart.getWidth()+16, heart.getHeight()+18);
 		f.setVisible(true);
 	}

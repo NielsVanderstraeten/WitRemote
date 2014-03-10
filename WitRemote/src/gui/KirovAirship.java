@@ -224,9 +224,9 @@ public class KirovAirship extends JFrame {
 		int colums = 9; int rows = 9;
 		String[] code = testcode(rows, colums);
 		
-		mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8);
+		mapMaker = new MapMaker(mapPane.getWidth() - 18, mapPane.getHeight() - 18);
 		//mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8, 9, 9, code);
-		mapMaker.setBounds(4, 4, mapMaker.getWidth(), mapPane.getHeight());
+		mapMaker.setBounds(9, 9, mapMaker.getWidth(), mapPane.getHeight());
 		mapPane.add(mapMaker);
 		mapMaker.addMouseListener(new ZeppelinMouse());
 		
@@ -252,7 +252,7 @@ public class KirovAirship extends JFrame {
 		JLabel emptyLabel = new JLabel("");
 		informationPane.add(emptyLabel);
 		
-		JLabel heightTextLabel = new JLabel("Height (cm)");
+		JLabel heightTextLabel = new JLabel("Height (mm)");
 		heightTextLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
 		informationPane.add(heightTextLabel);
 		
@@ -385,7 +385,7 @@ public class KirovAirship extends JFrame {
 	}
 	
 	public void updatePhoto(){
-		ImageIcon photo = getImageIcon("D:/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
+		ImageIcon photo = getImageIcon("C:/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setIcon(photo);
 	}
 	
