@@ -45,26 +45,26 @@ public class Grid {
 	}
 	
 	//Gebruikt OpenCSV: http://opencsv.sourceforge.net/
-		public void parseCSV(String csvRef) {
-			CSVReader reader;
-			java.util.List<String[]> myEntries = null;
-			try {
-				reader = new CSVReader(new FileReader("src/gui/resources/map.csv"), ',');
-				myEntries = (java.util.List<String[]>) reader.readAll();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			if(myEntries != null){
-				width = myEntries.size();
-				height = myEntries.get(0).length;
-				myMap = new ArrayList<String>();
-				for(String[] array: myEntries){
-					for(String something: array){
-						myMap.add(something);
-					}
+	public void parseCSV(String csvRef) {
+		CSVReader reader;
+		java.util.List<String[]> myEntries = null;
+		try {
+			reader = new CSVReader(new FileReader("src/gui/resources/map.csv"), ',');
+			myEntries = (java.util.List<String[]>) reader.readAll();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if(myEntries != null){
+			height = myEntries.size();
+			width = myEntries.get(0).length;
+			myMap = new ArrayList<String>();
+			for(String[] array: myEntries){
+				for(String something: array){
+					myMap.add(something);
 				}
 			}
 		}
+	}
 
 	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
 	public double getRotation(ArrayList<Shape> figures) {
