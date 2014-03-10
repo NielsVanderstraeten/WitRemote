@@ -51,13 +51,15 @@ public class TextParser {
 			returnString = help(commandWords);
 		else if(commandWords[0].equalsIgnoreCase(commands.get(6)))
 			returnString = text(commandWords);
+		else if(commandWords[0].equalsIgnoreCase("terminate"))
+			returnString = terminate();
 		else
 			returnString = "Command not found. Please try again.\nYou entered: " + command;
 
 		return returnString;
 	}
 	
-	public String setPosition(String[] command){
+	private String setPosition(String[] command){
 		if(command.length != 4)
 			return "Please enter exactly 4 words. First the command then the x and y poisition on the grid in mm and finally the rotation of the zeppelin.\n"
 					+ "For example: setposition 1000 2000 3.14";
@@ -80,12 +82,12 @@ public class TextParser {
 		}
 	}
 	
-	public String addGoal(String[] command){
+	private String addGoal(String[] command){
 		return "You can add goals to the goal queue with commands.\n"+
 					"You can add a position with: 'addgoalposition x y' or a height by: 'addgoalheight z'.";
 	}
 	
-	public String addGoalPosition(String[] command){
+	private String addGoalPosition(String[] command){
 		if(command.length != 3)
 			return "Please enter exactly 3 words. First the command then the goal x and y poisition on the grid in mm.\n"
 					+ "For example: addgoalposition 1000 2000";
@@ -105,7 +107,7 @@ public class TextParser {
 		}
 	}
 	
-	public String addGoalHeight(String[] command){
+	private String addGoalHeight(String[] command){
 		if(command.length != 2)
 			return "Please enter exactly 2 words. First the command then the target goal height in mm.\n"
 					+ "For example: addgoalheight 1000";
@@ -125,7 +127,7 @@ public class TextParser {
 		}
 	}
 	
-	public String getHeight(String[] command){
+	private String getHeight(String[] command){
 		if(command.length != 1)
 			return "Please do not enter anything after the getheight command.";
 		else{
@@ -134,7 +136,7 @@ public class TextParser {
 		}
 	}
 	
-	public String help(String[] command){
+	private String help(String[] command){
 		String returnString = "NYI";
 		if(command.length == 1){
 			returnString = "Available commands are:";
@@ -147,13 +149,18 @@ public class TextParser {
 		return returnString;
 	}
 	
-	public String text(String[] command){
+	private String text(String[] command){
 		if(command.length == 1)
 			return "You can print text if you type 'text YOUR_TEXT_HERE'";
 		String returnString = "";
 		for(int i = 1; i < command.length; i++)
 			returnString += command[i] + " ";
 		return returnString;
+	}
+	
+	private String terminate(){
+		queue.add(new Terminate());
+		return "Terminating program. Bye bye";
 	}
 	
 }
