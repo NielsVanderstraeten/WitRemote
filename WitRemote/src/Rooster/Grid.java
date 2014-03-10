@@ -1,6 +1,9 @@
 package Rooster;
 
 
+import au.com.bytecode.opencsv.CSVReader;
+
+import java.io.FileReader;
 import java.util.ArrayList;
 
 public class Grid {
@@ -16,18 +19,51 @@ public class Grid {
 	private final double approx = 10;
 	//laatste afstand van 2 naast elkaar liggende punten
 	
-	public Grid(int width, int height) {
-		//myPoints = new ArrayList<String>(120);
-		this.width = width;
-		this.height = height;
-		myCalculator = new PositionCalculator(width, height);
-		
-	}
 	
+//	/*constructor for an object of Grid
+//	 * 
+//	 * width = aantal kolommen
+//	 * height = aantal rijen
+//	 * map = lijst van String objecten dat de Map voorsteld (vb: "BO", "WH", "YR",...)
+//	 */
+//	public Grid(int width, int height, String csvReference) {
+//		this.width = width;
+//		this.height = height;
+//		myCalculator = new PositionCalculator(width, height);
+//		lastZepPosition = new Vector(0,0);
+//		
+//	}
+	
+	public Grid(String plaatsVanCSV) {
+		parseCSV(plaatsVanCSV);
+		myCalculator = new PositionCalculator(width, height);
+	}
+
 	public void setMap(ArrayList<String> list) {
 		this.myMap = list;
 	}
 	
+	//Gebruikt OpenCSV: http://opencsv.sourceforge.net/
+		public void parseCSV(String csvRef) {
+			CSVReader reader;
+			java.util.List<String[]> myEntries = null;
+			try {
+				reader = new CSVReader(new FileReader("src/gui/resources/map.csv"), ',');
+				myEntries = (java.util.List<String[]>) reader.readAll();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(myEntries != null){
+				width = myEntries.size();
+				height = myEntries.get(0).length;
+				myMap = new ArrayList<String>();
+				for(String[] array: myEntries){
+					for(String something: array){
+						myMap.add(something);
+					}
+				}
+			}
+		}
 
 	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
 	public double getRotation(ArrayList<Shape> figures) {

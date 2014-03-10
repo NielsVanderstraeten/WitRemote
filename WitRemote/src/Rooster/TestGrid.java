@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import au.com.bytecode.opencsv.CSVReader;
+
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,7 +16,7 @@ public class TestGrid {
 	
 	@Test
 	public void testGetPosition() {
-		Grid myGrid = new Grid(4, 6);
+		Grid myGrid = new Grid(4, 6, "blabla");
 		ArrayList<String> myPoints = new ArrayList<String>();
 		myPoints.add("BB");
 		myPoints.add("AB");
@@ -104,5 +107,36 @@ public class TestGrid {
 		deviation = deviation/Math.PI*180;
 		System.out.println(deviation);
 	}
+	
+	//Gebruikt OpenCSV: http://opencsv.sourceforge.net/
+	@Test
+		public void parseCSV() {
+			CSVReader reader;	
+			java.util.List<String[]> myEntries = null;
+			try {
+				reader = new CSVReader(new FileReader("src/gui/resources/map.csv"), ',');
+				myEntries = (java.util.List<String[]>) reader.readAll();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			if(myEntries != null){
+				int width = myEntries.size();
+				int height = myEntries.get(0).length;
+				ArrayList<String> myMap = new ArrayList<String>();
+				for(String[] array: myEntries){
+					for(String something: array){
+						myMap.add(something);
+						System.out.print(something + " ");
+					}
+					System.out.println("");
+				}
+				System.out.println(width);
+				System.out.println(height);
+//				for (String string: myMap) {
+//					System.out.println(string);
+//				}
+
+			}				
+		}
 
 }

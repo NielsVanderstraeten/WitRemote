@@ -94,7 +94,7 @@ public class ControlManager implements Runnable{
 		setUpGui();
 		setUpGoals();
 		queue.add(new SetDimensions(2400,2000));
-		grid = new Grid(2400,2000);
+		grid = new Grid("plaats van CSV-bestand");
 	}
 	
 	public ControlManager(){
