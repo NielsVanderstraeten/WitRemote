@@ -31,6 +31,7 @@ public class Grid {
 		this.height = height;
 		myCalculator = new PositionCalculator(width, height);
 		lastZepPosition = new Vector(0,0);
+		lastRotation = 0;
 		
 	}
 	
@@ -38,6 +39,7 @@ public class Grid {
 		parseCSV(plaatsVanCSV);
 		myCalculator = new PositionCalculator(width, height);
 		lastZepPosition = new Vector(0,0);
+		lastRotation = 0;
 	}
 
 	public void setMap(ArrayList<String> list) {
@@ -45,7 +47,7 @@ public class Grid {
 	}
 	
 	//Gebruikt OpenCSV: http://opencsv.sourceforge.net/
-	public void parseCSV(String csvRef) {
+	private void parseCSV(String csvRef) {
 		CSVReader reader;
 		java.util.List<String[]> myEntries = null;
 		try {

@@ -120,8 +120,8 @@ public class TestGrid {
 				e.printStackTrace();
 			}
 			if(myEntries != null){
-				int width = myEntries.size();
-				int height = myEntries.get(0).length;
+				int height = myEntries.size();
+				int width = myEntries.get(0).length;
 				ArrayList<String> myMap = new ArrayList<String>();
 				for(String[] array: myEntries){
 					for(String something: array){
