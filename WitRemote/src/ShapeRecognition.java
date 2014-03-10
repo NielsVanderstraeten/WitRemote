@@ -86,7 +86,7 @@ public class ShapeRecognition implements Runnable{
 	 * 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	 */
 	private int threshMethode;
-	private String analyseImagePath = "C:/";
+	private String analyseImagePath = "D:/";
 	
 //	public static void main(String args[]){
 //		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg", n);
@@ -114,7 +114,7 @@ public class ShapeRecognition implements Runnable{
 	}
 	
 	public void run(){
-		System.out.println("TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST");
+		System.out.println("Analysing picture...");
 		/* Library loaden. NUMMER MOET OVEREENKOMEN MET UW VERSIE
 		 * Ook mogelijk om dit automatisch te doen met NATIVE_LIBRARY_NAME, werkte in het begin niet?
 		 */

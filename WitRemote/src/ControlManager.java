@@ -82,7 +82,7 @@ public class ControlManager implements Runnable{
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
-	private String path = "C:/";
+	private String path = "D:/";
 	private Grid grid;
 	
 	public ControlManager(String serverName, int port){
@@ -153,7 +153,7 @@ public class ControlManager implements Runnable{
 				}
 				else if(c instanceof GetHeight){
 					String recv = client.executeCommand(c);
-					gui.updateZeppHeight(Integer.parseInt(recv));
+					gui.updateZeppHeight((int) Double.parseDouble(recv));
 					gui.updateLastCommand(c.getConsole());
 				}
 				else if(c instanceof SetPosition){
