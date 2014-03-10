@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
@@ -71,6 +72,7 @@ public class KirovAirship extends JFrame {
 		setUpConsole();
 		setUpMission();
 		setUpInformation();
+		setUpPhoto();
 		
 		//Map moet laatste
 		setUpMap();
@@ -96,7 +98,7 @@ public class KirovAirship extends JFrame {
 		assert (source != null && width > 0 && height > 0);
 		BufferedImage srcImg = null;
 		try{
-			srcImg = ImageIO.read(getClass().getResource(source));
+			srcImg = ImageIO.read(new File(source));
 		}
 		catch(IOException e){
 			e.printStackTrace();
@@ -147,8 +149,8 @@ public class KirovAirship extends JFrame {
 	*/
 	private void setUpConsole(){
 		consolePane = new JLayeredPane();
-		consolePane.setLocation(10, 133);
-		consolePane.setSize(358, 598);
+		consolePane.setLocation(10, 422);
+		consolePane.setSize(358, 309);
 		totalPane.add(consolePane);
 		
 		consoleScroller = new JScrollPane();
@@ -233,6 +235,7 @@ public class KirovAirship extends JFrame {
 		updateOpponentPosition((int) (widthMeters*0.9), (int) (heightMeters*0.9));
 		updateGui();
 	}
+
 	private JLayeredPane informationPane;
 	private JLabel targetHeightLabel, currentHeightLabel, ownXPosLabel, ownYPosLabel, opponentXPosLabel, opponentYPosLabel;
 	
@@ -308,6 +311,21 @@ public class KirovAirship extends JFrame {
 		informationPane.add(opponentYPosLabel);
 	}
 	
+	private JLayeredPane photoPane;
+	private JLabel photoLabel;
+	private void setUpPhoto(){
+		photoPane = new JLayeredPane();
+		photoPane.setLocation(10, 133);
+		photoPane.setSize(358, 278);
+		totalPane.add(photoPane);
+		
+		photoLabel = new JLabel();
+		photoLabel.setSize(photoPane.getWidth(), photoPane.getHeight());
+		photoPane.add(photoLabel);
+		
+		updatePhoto();
+	}
+
 	private void moveZeppelins(){
 		mapMaker.moveOwnZeppelin(ownX * mapMaker.getWidth() / widthMeters, ownY * mapMaker.getHeight() / heightMeters);
 		mapMaker.rotateOwnZeppelin(ownRotation);
@@ -317,6 +335,7 @@ public class KirovAirship extends JFrame {
 	
 	public void updateGui(){
 		moveZeppelins();
+		updatePhoto();
 	}
 	
 	private int ownX, ownY;
@@ -363,6 +382,11 @@ public class KirovAirship extends JFrame {
 	public void updateZeppHeight(int newheight){
 		zeppHeight = newheight;
 		currentHeightLabel.setText(newheight + "mm");
+	}
+	
+	public void updatePhoto(){
+		ImageIcon photo = getImageIcon("C:/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
+		photoLabel.setIcon(photo);
 	}
 	
 	int zeppHeight;
