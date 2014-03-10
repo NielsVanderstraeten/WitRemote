@@ -1,8 +1,11 @@
+import gui.KirovAirship;
+
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,15 +24,18 @@ import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
+import Rooster.Grid;
 import Rooster.Shape;
 import Rooster.Vector;
+import commands.Command;
+import commands.SetPosition;
 
 /**
  * VORMEN: 1) Harten 2) Cirkels 3) Rechthoeken 4) Sterren
  * KLEUREN: 1) Blauw 2) Wit 3) Rood 4) Geel 5) Groen
  */
 
-public class ShapeRecognition{
+public class ShapeRecognition implements Runnable{
 
 	private BufferedImage buffered = null;
 	private ArrayList<String> shapes = new ArrayList<String>(); 
@@ -80,26 +86,35 @@ public class ShapeRecognition{
 	 * 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	 */
 	private int threshMethode;
+	private String analyseImagePath = "D:/";
 	
-	public static void main(String args[]){
-		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg");
-		test35.findAllShapesInImage();
-	}	
+//	public static void main(String args[]){
+//		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg", n);
+//		test35.run();
+//	}	
 	
-	public ShapeRecognition(String path){
+	private KirovAirship gui;
+	private Grid grid;
+	private LinkedList<Command> queue;
+	
+	public ShapeRecognition(String path, KirovAirship gui, Grid grid, LinkedList<Command> queue){
+		this.gui = gui;
+		this.grid = grid;
+		this.queue = queue;
 		originalImagePath = path;
 		writeToPath = "C:/Users/Jeroen/Desktop/";
 		//TODO: testen wat de minimale waarde hiervan moet zijn of robuuster maken adhv hoogte van zeppelin... 
 		minimalAreaOfRectangleAroundShape = 3000;
 		maximalAreaOfRectangleAroundShape = 14000;
 		printAllInfo = true;
-		saveAllImages = true;
+		saveAllImages = false;
 		threshValue1 = 100; // voor otsu maakt het niks uit
-		threshValue2 = 95;  // 95 voor de Test klasse
+		threshValue2 = 90;  // 95 voor de Test klasse
 		threshMethode = 1; // 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	}
 	
-	public ArrayList<Shape> findAllShapesInImage(){
+	public void run(){
+		System.out.println("Analysing picture...");
 		/* Library loaden. NUMMER MOET OVEREENKOMEN MET UW VERSIE
 		 * Ook mogelijk om dit automatisch te doen met NATIVE_LIBRARY_NAME, werkte in het begin niet?
 		 */
@@ -110,6 +125,7 @@ public class ShapeRecognition{
 
 		findShapesAndDrawPoints();
 		
+		gui.updatePhoto();
 		
 		if(printAllInfo == true){
 			System.out.println("Rectangles: " + rectangles);
@@ -130,9 +146,12 @@ public class ShapeRecognition{
 		
 		ArrayList<Shape> shapeList = makeShapeList();
 		
-		emptyAllParameters();
+		Vector position = grid.getPosition(shapeList);
+		double rotation = grid.getRotation(shapeList);
 		
-		return shapeList;
+		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
+		
+		emptyAllParameters();
 	}
 
 	private ArrayList<Shape> makeShapeList() {
@@ -494,8 +513,10 @@ public class ShapeRecognition{
 		}
 		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
 		prev = System.currentTimeMillis();
+		
+		Highgui.imwrite(analyseImagePath + "analyse.png",imageOriginal);
+		
 		if(saveAllImages){
-			Highgui.imwrite(writeToPath + "test2.png",imageOriginal);
 			Highgui.imwrite(writeToPath + "test2Blurr.png",imageBlurr);
 		}
 		if(printAllInfo){

@@ -65,6 +65,7 @@ public class Grid {
 	
 	public Vector getPosition(ArrayList<Shape> figures) {
 		ArrayList<Integer> points = getPoints(figures);
+		//TODO: steeds size 0, dus IndexOutOFBounsdException
 		int a = points.get(0);
 		int b = points.get(1);
 		if (points.size() == 3) {

@@ -385,7 +385,7 @@ public class KirovAirship extends JFrame {
 	}
 	
 	public void updatePhoto(){
-		ImageIcon photo = getImageIcon("C:/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
+		ImageIcon photo = getImageIcon("D:/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setIcon(photo);
 	}
 	

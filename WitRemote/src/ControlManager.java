@@ -1,3 +1,6 @@
+import goals.Goal;
+import goals.GoalHeight;
+import goals.GoalPosition;
 import gui.KirovAirship;
 import gui.Simulator;
 
@@ -6,12 +9,18 @@ import java.util.LinkedList;
 
 import javax.swing.JFrame;
 
+import Rooster.Grid;
+
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-
-import commands.*;
-import goals.*;
+import commands.Command;
+import commands.GetHeight;
+import commands.SetDimensions;
+import commands.SetGoalHeight;
+import commands.SetGoalPosition;
+import commands.SetPosition;
+import commands.TakePicture;
 
 
 public class ControlManager implements Runnable{
@@ -73,16 +82,19 @@ public class ControlManager implements Runnable{
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
+	private String path = "D:/";
+	private Grid grid;
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();
-		client = new Client(serverName, port, "src/resources");
+		client = new Client(serverName, port, path);
 		goals = new LinkedList<Goal>();
 		//-500 zodat er direct wordt gevraagd naar hoogte.
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
 		queue.add(new SetDimensions(2400,2000));
+		grid = new Grid(2400,2000);
 	}
 	
 	public ControlManager(){
@@ -141,7 +153,7 @@ public class ControlManager implements Runnable{
 				}
 				else if(c instanceof GetHeight){
 					String recv = client.executeCommand(c);
-					gui.updateZeppHeight(Integer.parseInt(recv));
+					gui.updateZeppHeight((int) Double.parseDouble(recv));
 					gui.updateLastCommand(c.getConsole());
 				}
 				else if(c instanceof SetPosition){
@@ -155,8 +167,11 @@ public class ControlManager implements Runnable{
 			}
 			
 			if(analysePicture){
-				//TODO Fotoanalyse klasse toevoegen.
-				//positionAnalyser = new Thread()
+				analyserThread = new Thread(new ShapeRecognition(path + client.getNamePicture(), gui, grid, queue));
+				analyserThread.start();
+				analysePicture = false;
+				//TODO: update GUI
+				//TODO: nog getMethode om locatie van gevonden shapes te
 			}
 			
 			if(System.currentTimeMillis() - lastCheck > 2000){
