@@ -29,7 +29,7 @@ import Rooster.Vector;
  * KLEUREN: 1) Blauw 2) Wit 3) Rood 4) Geel 5) Groen
  */
 
-public class ShapeRecognition{
+public class ShapeRecognition implements Runnable{
 
 	private BufferedImage buffered = null;
 	private ArrayList<String> shapes = new ArrayList<String>(); 
@@ -80,10 +80,21 @@ public class ShapeRecognition{
 	 * 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	 */
 	private int threshMethode;
+	private String analyseImagePath = "C:/";
+	
+	/**
+	 * Voor op te vragen voor wouter zijn shit.
+	 * @param args
+	 */
+	private ArrayList<Shape> shapeList = new ArrayList<Shape>();
+	
+	public ArrayList<Shape> getShapeList(){
+		return shapeList;
+	}
 	
 	public static void main(String args[]){
 		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg");
-		test35.findAllShapesInImage();
+		test35.run();
 	}	
 	
 	public ShapeRecognition(String path){
@@ -93,13 +104,14 @@ public class ShapeRecognition{
 		minimalAreaOfRectangleAroundShape = 3000;
 		maximalAreaOfRectangleAroundShape = 14000;
 		printAllInfo = true;
-		saveAllImages = true;
+		saveAllImages = false;
 		threshValue1 = 100; // voor otsu maakt het niks uit
 		threshValue2 = 95;  // 95 voor de Test klasse
 		threshMethode = 1; // 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	}
 	
-	public ArrayList<Shape> findAllShapesInImage(){
+	public void run(){
+		System.out.println("TEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEST");
 		/* Library loaden. NUMMER MOET OVEREENKOMEN MET UW VERSIE
 		 * Ook mogelijk om dit automatisch te doen met NATIVE_LIBRARY_NAME, werkte in het begin niet?
 		 */
@@ -128,11 +140,9 @@ public class ShapeRecognition{
 			System.out.println();
 		}
 		
-		ArrayList<Shape> shapeList = makeShapeList();
+		shapeList = makeShapeList();
 		
 		emptyAllParameters();
-		
-		return shapeList;
 	}
 
 	private ArrayList<Shape> makeShapeList() {
@@ -494,8 +504,10 @@ public class ShapeRecognition{
 		}
 		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
 		prev = System.currentTimeMillis();
+		
+		Highgui.imwrite(analyseImagePath + "analyse.png",imageOriginal);
+		
 		if(saveAllImages){
-			Highgui.imwrite(writeToPath + "test2.png",imageOriginal);
 			Highgui.imwrite(writeToPath + "test2Blurr.png",imageBlurr);
 		}
 		if(printAllInfo){
