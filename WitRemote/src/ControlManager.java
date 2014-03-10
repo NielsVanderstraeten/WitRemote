@@ -73,10 +73,11 @@ public class ControlManager implements Runnable{
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
+	private String path = "D:/";
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();
-		client = new Client(serverName, port, "src/resources");
+		client = new Client(serverName, port, path);
 		goals = new LinkedList<Goal>();
 		//-500 zodat er direct wordt gevraagd naar hoogte.
 		lastCheck = System.currentTimeMillis()-500;
@@ -155,8 +156,10 @@ public class ControlManager implements Runnable{
 			}
 			
 			if(analysePicture){
-				//TODO Fotoanalyse klasse toevoegen.
-				//positionAnalyser = new Thread()
+				analyserThread = new Thread(new ShapeRecognition(path + client.getNamePicture()));
+				analyserThread.start();
+				analysePicture = false;
+				//TODO: nog getMethode om locatie van gevonden shapes te
 			}
 			
 			if(System.currentTimeMillis() - lastCheck > 2000){
