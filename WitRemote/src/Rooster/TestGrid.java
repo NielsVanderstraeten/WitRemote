@@ -138,5 +138,28 @@ public class TestGrid {
 
 			}				
 		}
+	
+	@Test
+	public void completeGrid() {
+		System.out.println("in comleteGrid()");
+		Grid grid = new Grid("blablabla");
+		ArrayList<Shape> myList = new ArrayList<Shape>();
+		myList.add(new Shape(20,10,"BH"));
+		myList.add(new Shape(80,10,"BH"));
+		myList.add(new Shape(50,62,"BC"));
+		ArrayList<Integer> result = grid.getPoints(myList);
+		System.out.println("de gevonden punten op het rooster zijn:");
+		System.out.println("de size = " + result.size());
+		for (int i = 0; i< result.size(); i++) {
+			System.out.println(result.get(i));
+		}		
+		Vector vector = grid.getPosition(myList);
+		double rot = grid.getRotation(myList);
+		System.out.println(vector.getX());
+		System.out.println(vector.getY());
+		System.out.println(rot);
+
+		
+	}
 
 }
