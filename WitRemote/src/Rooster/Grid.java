@@ -37,6 +37,7 @@ public class Grid {
 	public Grid(String plaatsVanCSV) {
 		parseCSV(plaatsVanCSV);
 		myCalculator = new PositionCalculator(width, height);
+		lastZepPosition = new Vector(0,0);
 	}
 
 	public void setMap(ArrayList<String> list) {
