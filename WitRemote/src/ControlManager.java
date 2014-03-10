@@ -82,7 +82,7 @@ public class ControlManager implements Runnable{
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
-	private String path = "D:/";
+	private String path = "C:/";
 	private Grid grid;
 	
 	public ControlManager(String serverName, int port){
