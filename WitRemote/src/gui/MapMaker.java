@@ -36,6 +36,7 @@ public class MapMaker extends JPanel {
 		this.code = code;
 		createShapes();
 		setTemps();
+		//setUpMap();
 	}
 	
 	public MapMaker(int width, int height){
@@ -44,6 +45,7 @@ public class MapMaker extends JPanel {
 		parseCSV();
 		setTemps();
 		createShapes();
+		//setUpMap();
 	}
 	
 	private void setTemps(){
@@ -255,17 +257,22 @@ public class MapMaker extends JPanel {
 	
 	private Area ownZepp, oppZepp, firstZepp;
 	private int ownZeppX, ownZeppY, oppZeppX, oppZeppY;
+	private int timeToRedraw, drawThreshhold;
 	
 	public void moveOwnZeppelin(double ownX, double ownY){
-		double diffX = ownX - ownZeppX;
-		double diffY = ownY - ownZeppY;
-		ownZeppX = (int) ownX;
-		ownZeppY = (int) ownY;
-		
-		AffineTransform at = new AffineTransform();
-		at.translate(diffX, diffY);
-		ownZepp.transform(at);
-		firstZepp.transform(at);
+		//if(timeToRedraw < drawThreshhold){
+			double diffX = ownX - ownZeppX;
+			double diffY = ownY - ownZeppY;
+			ownZeppX = (int) ownX;
+			ownZeppY = (int) ownY;
+			
+			AffineTransform at = new AffineTransform();
+			at.translate(diffX, diffY);
+			ownZepp.transform(at);
+			firstZepp.transform(at);
+		//	timeToRedraw++;
+		//} else{
+		//	firstZepp.
 	}
 	
 	private double ownRotation = 0;
@@ -294,7 +301,7 @@ public class MapMaker extends JPanel {
 		code[41] = "XX";
 		
 		//MapMaker heart = new MapMaker(800, 800);
-		MapMaker heart = new MapMaker(1200, 800, 7, 7, code);
+		MapMaker heart = new MapMaker(1200, 800, 12, 7, code);
 		heart.addMouse();
 		JFrame f = new JFrame("Heart");
 		f.setBounds(4, 4, 816,  818);

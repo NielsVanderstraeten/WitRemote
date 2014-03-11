@@ -335,7 +335,7 @@ public class KirovAirship extends JFrame {
 	
 	public void updateGui(){
 		moveZeppelins();
-		updatePhoto();
+		//updatePhoto();
 	}
 	
 	private int ownX, ownY;
@@ -399,9 +399,21 @@ public class KirovAirship extends JFrame {
 		missionText.setText("Change height to: "+ height+"mm.");
 	}
 	
+	int goalX, goalY;
 	public void setGoalPosition(int x, int y){
 		missionText.setText("We have to go to: " + x + "mm, " + y +"mm");
+		goalX = x;
+		goalY = y;
 	}
+	
+	public int getGoalX(){
+		return goalX;
+	}
+	
+	public int getGoalY(){
+		return goalY;
+	}
+	
 	//TODO Testcode: wegdoen uiteindelijk
 	private String[] testcode(int rows, int colums){
 		String[] code = new String[rows*colums];
@@ -449,10 +461,11 @@ public class KirovAirship extends JFrame {
 	private class ZeppelinMouse implements MouseListener{
 		@Override
 		public void mousePressed(MouseEvent e){
-			int x = (int) e.getX();
+			int x = (int) e.getX() ;
 			int y = (int) e.getY();
 			if(SwingUtilities.isLeftMouseButton(e) ){
-				goals.offer(new GoalPosition(x, y));
+				//goals.offer(new GoalPosition(x, y));
+				setGoalPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight());
 			}
 			else if(SwingUtilities.isRightMouseButton(e) ){
 				updateOwnPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight(), ownRotation);

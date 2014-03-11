@@ -37,8 +37,8 @@ public class Simulator implements Runnable{
 		int maxvalue = 100;
 		while(i<maxvalue){
 			try {
-				Thread.sleep(5000/maxvalue); }
-			catch(Exception e){
+				Thread.sleep(50); 
+			} catch(Exception e){
 				System.err.println("Da werkt ni..... stoeme thread sleep");
 			}
 			getDestination();
@@ -52,19 +52,27 @@ public class Simulator implements Runnable{
 	
 	private void getDestination(){
 		ownX = gui.getOwnX(); ownY = gui.getOwnY();
-		oppX = gui.getOpponentX(); oppY = gui.getOpponentY();			
+		oppX = gui.getOpponentX(); oppY = gui.getOpponentY();
+		goalX = gui.getGoalX(); goalY = gui.getGoalY();
 	}
 	
+	double rotation = 0;
+	double speedOwn = 10;
+	double speedOpp = 8;
 	private void goToDestination(){
+		double speedOwn = 10; double speedOpp = 8; 
 		if(!(fuzzyEquals(ownY, goalY) && fuzzyEquals(ownX, goalX)) && !(fuzzyEquals(oppY, goalY) && fuzzyEquals(oppX, goalX))){
 			double distanceOwn = Math.sqrt(Math.pow(goalY - ownY, 2) + Math.pow(goalX - ownX, 2));
-			ownX = ownX + 5/distanceOwn*(goalX - ownX);
-			ownY = ownY + 5/distanceOwn*(goalY - ownY);
+			ownX = ownX + speedOwn*(goalX - ownX)/distanceOwn;
+			ownY = ownY + speedOwn*(goalY - ownY)/distanceOwn;
 			double distanceOpp = Math.sqrt(Math.pow(goalY - oppY, 2) + Math.pow(goalX - oppX, 2));
-			oppX = oppX + 5/distanceOpp*(goalX - oppX);
-			oppY = oppY + 5/distanceOpp*(goalY - oppY);
+			oppX = oppX + speedOpp*(goalX - oppX)/distanceOpp;
+			oppY = oppY + speedOpp*(goalY - oppY)/distanceOpp;
+			rotation = Math.atan((goalY - ownY)/(goalX - ownX)) + Math.PI/2;
+			if(goalX < ownX)
+				rotation += Math.PI;
 		}
-		gui.updateOwnPosition((int) ownX, (int) ownY, 0);
+		gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
 		gui.updateOpponentPosition((int) oppX, (int) oppY);
 		gui.updateGui();
 	}
