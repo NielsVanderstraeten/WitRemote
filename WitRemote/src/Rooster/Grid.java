@@ -70,9 +70,9 @@ public class Grid {
 
 	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
 	public double getRotation(ArrayList<Shape> figures) {
-		if (figuresContainTriangle(figures)) {
+		ArrayList<Integer> points = getPoints(figures);
+		if (figuresContainTriangle(figures) && points.size() >=2) {
 			ArrayList<Shape> rightFigures = this.getRightTriangle(figures);
-			ArrayList<Integer> points = getPoints(figures);
 			int a = points.get(0);
 			int b = points.get(1);
 			if (points.size() == 3) {
@@ -105,18 +105,21 @@ public class Grid {
 	public Vector getPosition(ArrayList<Shape> figures) {
 		ArrayList<Integer> points = getPoints(figures);
 		//TODO: steeds size 0, dus IndexOutOFBounsdException
-		int a = points.get(0);
-		int b = points.get(1);
-		if (points.size() == 3) {
-			int c = points.get(2);
-			lastZepPosition = myCalculator.calculateTriple(a, b, c);
+		if (points.size() >= 2) {
+			int a = points.get(0);
+			int b = points.get(1);
+			if (points.size() == 3) {
+				int c = points.get(2);
+				lastZepPosition = myCalculator.calculateTriple(a, b, c);
+			}
+			else if (points.size() == 2) {
+				lastZepPosition = myCalculator.calculateDouble(a, b);
+			}
+			else {
+				//nieuwe foto maken -> nog programmeren
+			}
 		}
-		else if (points.size() == 2) {
-			lastZepPosition = myCalculator.calculateDouble(a, b);
-		}
-		else {
-			//nieuwe foto maken -> nog programmeren
-		}
+		
 		return lastZepPosition;		
 	}
 	
