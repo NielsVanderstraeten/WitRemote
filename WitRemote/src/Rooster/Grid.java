@@ -70,9 +70,12 @@ public class Grid {
 
 	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
 	public double getRotation(ArrayList<Shape> figures) {
-		ArrayList<Integer> points = getPoints(figures);
-		if (figuresContainTriangle(figures) && points.size() >=2) {
+		if (figuresContainTriangle(figures)) {
 			ArrayList<Shape> rightFigures = this.getRightTriangle(figures);
+			for (Shape shape: rightFigures) {
+				System.out.println(shape.getCode());
+			}
+			ArrayList<Integer> points = getPoints(figures);
 			int a = points.get(0);
 			int b = points.get(1);
 			if (points.size() == 3) {
@@ -87,6 +90,8 @@ public class Grid {
 					}
 					if (!test) {
 						compare = rightFigures.get(i);
+//						System.out.println(compare.getPosition().getX() + ", " + compare.getPosition().getY());
+//						System.out.println(compare.getGridPosition());
 					}
 				}
 				Vector triCenter = myCalculator.calculateTriple(a, b, c);

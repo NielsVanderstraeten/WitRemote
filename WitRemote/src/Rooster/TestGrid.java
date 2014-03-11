@@ -144,9 +144,11 @@ public class TestGrid {
 		System.out.println("in comleteGrid()");
 		Grid grid = new Grid("blablabla");
 		ArrayList<Shape> myList = new ArrayList<Shape>();
-		myList.add(new Shape(20,10,"BH"));
+		myList.add(new Shape(50,62,"WR"));
 		myList.add(new Shape(80,10,"BH"));
-		myList.add(new Shape(50,62,"BC"));
+		myList.add(new Shape(140,10,"BH"));
+		myList.add(new Shape(110,62,"BC"));
+		
 		ArrayList<Integer> result = grid.getPoints(myList);
 		System.out.println("de gevonden punten op het rooster zijn:");
 		System.out.println("de size = " + result.size());
