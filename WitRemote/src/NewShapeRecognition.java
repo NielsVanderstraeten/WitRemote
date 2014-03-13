@@ -202,8 +202,9 @@ public class NewShapeRecognition{
 		//***********************************************************************************
 		//***********************************************************************************
 		//***********************************************************************************
-		//ignore this
 		IplImage imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
+		
+		// ignore deze, zo kon ik snel terug naar de nieuwe code gaan :p
 		IplImage channelRed = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.height());
 	    IplImage channelGreen = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), 1);
 	    IplImage channelBlue;
