@@ -159,6 +159,7 @@ public class ControlManager implements Runnable{
 				else if(c instanceof SetPosition){
 					client.executeCommand(c);
 					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), 0);
+					gui.setFoundFigures(grid.getLastTriangle());
 				}
 				else{
 					client.executeCommand(c);

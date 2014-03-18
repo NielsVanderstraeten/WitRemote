@@ -15,6 +15,7 @@ public class Grid {
 	private double pictureDistance;
 	private Vector lastZepPosition;
 	private double lastRotation;
+	private ArrayList<Integer> lastTriangle;
 	//toegelaten afwijking in percenten bij afstandsverglijking
 	private final double approx = 8;
 	//laatste afstand van 2 naast elkaar liggende punten
@@ -32,18 +33,27 @@ public class Grid {
 		myCalculator = new PositionCalculator(width, height);
 		lastZepPosition = new Vector(0,0);
 		lastRotation = 0;
+		lastTriangle = new ArrayList<Integer>();
 		
 	}
 	
+	/*
+	 * DIT IS DE GOEDE CONSTRUCTOR!!!
+	 */
 	public Grid(String plaatsVanCSV) {
 		parseCSV(plaatsVanCSV);
 		myCalculator = new PositionCalculator(width, height);
 		lastZepPosition = new Vector(0,0);
 		lastRotation = 0;
+		lastTriangle = new ArrayList<Integer>();
 	}
 
 	public void setMap(ArrayList<String> list) {
 		this.myMap = list;
+	}	
+
+	public ArrayList<Integer> getLastTriangle() {
+		return lastTriangle;
 	}
 	
 	//Gebruikt OpenCSV: http://opencsv.sourceforge.net/
@@ -116,13 +126,17 @@ public class Grid {
 			if (points.size() == 3) {
 				int c = points.get(2);
 				lastZepPosition = myCalculator.calculateTriple(a, b, c);
+				lastTriangle = points;
 			}
 			else if (points.size() == 2) {
 				lastZepPosition = myCalculator.calculateDouble(a, b);
+				lastTriangle = points;
 			}
 			else {
 				//nieuwe foto maken -> nog programmeren
 			}
+		} else {
+			// nieuwe foto maken -> nog programmeren
 		}
 		
 		return lastZepPosition;		
@@ -324,6 +338,7 @@ public class Grid {
 		return returnList;
 	}
 	
+	
 	//Methode om een gelijkzijdige driehoek uit de ontvangen hashmap van de fotoanalyse te verkrijgen
 	private ArrayList<Shape> getRightTriangle(ArrayList<Shape> figures) {
 //		HashSet<String> keys = new HashSet<String>(figures.keySet());
@@ -357,6 +372,7 @@ public class Grid {
 	
 	//methode dat uit een gegeven hashmap twee buren haalt.
 	public ArrayList<Shape> getRightNeighbours(ArrayList<Shape> figures) {
+		//TODO: implementatie methode
 		return new ArrayList<Shape>();
 	}
 	
