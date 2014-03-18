@@ -12,6 +12,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.io.FileReader;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -36,7 +37,7 @@ public class MapMaker extends JPanel {
 		this.code = code;
 		createShapes();
 		setTemps();
-		//setUpMap();
+		setUpMap();
 	}
 	
 	public MapMaker(int width, int height){
@@ -45,7 +46,7 @@ public class MapMaker extends JPanel {
 		parseCSV();
 		setTemps();
 		createShapes();
-		//setUpMap();
+		setUpMap();
 	}
 	
 	private void setTemps(){
@@ -54,6 +55,8 @@ public class MapMaker extends JPanel {
 		tempheight = (int) (height + (standardTotalScale - standardScale)/2.1/standardTotalScale*height/rows);
 		scaleX = 2*tempwidth/(2*colums+1)/standardTotalScale; 
 		scaleY = tempheight/rows/standardTotalScale;
+		
+		foundFigures = new ArrayList<Integer>();
 	}
 	
 	@Override
@@ -68,14 +71,41 @@ public class MapMaker extends JPanel {
 	
 	@Override
 	public void paintComponent (Graphics g){
-		int x = 0;
-		int y = 0;
-		// de temp vars die we mogen gebruiken is:
-		
+		Graphics2D g2 = (Graphics2D)g;
+		for(Component toPaint: toPaintAreas){
+			int position = toPaint.getPosition();
+			Area toPaintArea = (Area) toPaint.getArea().clone();
+			
+			if(!foundFigures.contains(position) && position != -1){
+				double scale = 0.5;
+				double x = toPaintArea.getBounds().getX();
+				double y = toPaintArea.getBounds().getY();
+				
+				AffineTransform at = new AffineTransform();
+				at.scale(scale, scale); //Kleiner maker
+				at.translate(x * (1/scale - 1), y * (1/scale - 1)); //Terug naar originele positie brengen.
+				toPaintArea.transform(at);
+			}
+			
+			g2.setColor(toPaint.getColor());
+			g2.draw(toPaintArea);
+			g2.fill(toPaintArea);
+		}
+	}
+	
+	private ArrayList<Component> toPaintAreas = new ArrayList<Component>();
+	private boolean startsWithIndent = true;
+	
+	private void setUpMap(){
 		Color color;
 		Area toPaint = null;
-		Graphics2D g2 = (Graphics2D)g;
-		boolean indent = true;
+		boolean indent = !startsWithIndent;
+		int y = 0;
+		int x = 0;
+		int position = 0;
+		
+		if(!indent)
+			x = (int) Math.floor(tempwidth/(2*colums+1));
 		
 		if (code != null && code.length > 0){
 			for(int i = 0; i < code.length; i++){
@@ -113,15 +143,14 @@ public class MapMaker extends JPanel {
 					else
 						toPaint = drawRetard(x,y);
 					
-					g2.setColor(color);
-					g2.draw(toPaint);
-					g2.fill(toPaint);
+					toPaintAreas.add(new Component(toPaint, color, position));
 				}
 				//Volgende coordinaten berekenen
 				//We gebruiken tempwidth om juist de plaatsen te berekenen. Omdat we alle figuren plaatsen in hun linksbovenhoek en met een standaardwaarde werken
 				//moeten we colums - 1 gebruiken.
 				//Omdat we met een inspringing werken, gebruiken we 2*colums, zodat de andere kan inspringen in de helft.
 				x = x + 2*tempwidth/(2*colums+1);
+				position++;
 				//Wanneer de linksbovenhoek groter wordt dan de breedtte - de marge - de grootte van het beeldje, moeten we de volgende lijn beginnen.
 				if(x > width - tempwidth/(2*colums+1)){
 					//Als we de vorige keer geen indent hebben gemaakt, moet dit nu wel.
@@ -134,17 +163,9 @@ public class MapMaker extends JPanel {
 				}
 			}
 		}
-		g2.setColor(Color.cyan);
-		g2.draw(ownZepp);
-		g2.fill(ownZepp);
-		
-		g2.setColor(Color.magenta);
-		g2.draw(oppZepp);
-		g2.fill(oppZepp);
-		
-		g2.setColor(Color.black);
-		g2.draw(firstZepp);
-		g2.fill(firstZepp);
+		toPaintAreas.add(new Component(oppZepp, Color.magenta, -1));
+		toPaintAreas.add(new Component(ownZepp, Color.cyan, -1));
+		toPaintAreas.add(new Component(firstZepp, Color.black, -1));
 	}
 	
 	private Area drawSquare(int x, int y){
@@ -296,12 +317,18 @@ public class MapMaker extends JPanel {
 		oppZepp.transform(at);
 	}
 	
+	private ArrayList<Integer> foundFigures;
+	
+	public void setFoundFigures(ArrayList<Integer> array){
+		foundFigures = array;
+	}
+	
 	public static void main(String[] args) {
 		String[] code = MapMaker.testcode(7, 7);
 		code[41] = "XX";
 		
-		//MapMaker heart = new MapMaker(800, 800);
-		MapMaker heart = new MapMaker(1200, 800, 12, 7, code);
+		MapMaker heart = new MapMaker(800, 800);
+		//MapMaker heart = new MapMaker(1200, 800, 12, 7, code);
 		heart.addMouse();
 		JFrame f = new JFrame("Heart");
 		f.setBounds(4, 4, 816,  818);
