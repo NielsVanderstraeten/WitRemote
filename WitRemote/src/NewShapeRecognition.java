@@ -13,12 +13,36 @@ import static com.googlecode.javacv.cpp.opencv_photo.*;
 import static com.googlecode.javacv.cpp.opencv_stitching.*;
 import static com.googlecode.javacv.cpp.opencv_video.*;
 import static com.googlecode.javacv.cpp.opencv_videostab.*;
+import Rooster.Shape;
+import Rooster.Vector;
+
+import com.googlecode.javacpp.Loader;
+import com.googlecode.javacpp.BoolPointer;
+import com.googlecode.javacpp.BuildMojo;
+import com.googlecode.javacpp.BytePointer;
+import com.googlecode.javacpp.Builder;
+import com.googlecode.javacpp.CharPointer;
+import com.googlecode.javacpp.CLongPointer;
+import com.googlecode.javacpp.DoublePointer;
+import com.googlecode.javacpp.FloatPointer;
+import com.googlecode.javacpp.FunctionPointer;
+import com.googlecode.javacpp.Generator;
+import com.googlecode.javacpp.IntPointer;
+import com.googlecode.javacpp.LongPointer;
+import com.googlecode.javacpp.Parser;
+import com.googlecode.javacpp.Pointer;
+import com.googlecode.javacpp.ShortPointer;
+import com.googlecode.javacpp.SizeTPointer;
+import com.googlecode.javacpp.annotation.*;
+import com.googlecode.javacpp.properties.*;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -28,23 +52,22 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.imgproc.Moments;
 
-import Rooster.Shape;
-import Rooster.Vector;
-
 import com.googlecode.javacv.cpp.opencv_core.CvArr;
+import com.googlecode.javacv.cpp.opencv_core.CvFont;
 import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint;
+import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
+import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-
-
-
-
 
 /**
  * VORMEN: 1) Harten 2) Cirkels 3) Rechthoeken 4) Sterren
@@ -96,8 +119,6 @@ public class NewShapeRecognition{
 	
 	private String originalImagePath;
 	
-	private Mat imageOriginal,imageGREY,imageBlurr,imageAdaptiveThreshold,imageThresh1,
-			imageThresh2, imageHSV;
 	private long prev;
 	private List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 	private String writeToPath;
@@ -111,21 +132,8 @@ public class NewShapeRecognition{
 	private int minimalAreaOfRectangleAroundShape;
 	private int maximalAreaOfRectangleAroundShape;
 	
-	/**
-	 * Threshvalue voor Otsu (maakt niks uit eigenlijk want algoritme bepaalt automatisch de waarde...)
-	 */
-	private int threshValue1;
-	/**
-	 * Threshvalue voor binary inverted.
-	 */
-	private int threshValue2;
-	/**
-	 * 1 voor twee keer thresh en 2 voor adaptiveThreshold
-	 */
-	private int threshMethode;
-	
 	public static void main(String args[]){
-		NewShapeRecognition shapeRecog = new NewShapeRecognition("C:/Users/Jeroen/Desktop/pic5.jpg");
+		NewShapeRecognition shapeRecog = new NewShapeRecognition("C:/Users/Jeroen/Desktop/Pics/TestC3.jpg");
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		shapeRecog.doAllTheStuff();
 	}	
@@ -136,17 +144,16 @@ public class NewShapeRecognition{
 		//TODO: testen wat de minimale waarde hiervan moet zijn of robuuster maken adhv hoogte van zeppelin... 
 		minimalAreaOfRectangleAroundShape = 3000;
 		maximalAreaOfRectangleAroundShape = 14000;
-		threshValue1 = 100; // voor otsu maakt het niks uit
-		threshValue2 = 90;  // 95 voor de Test klasse
-		threshMethode = 1; // 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	}
 	
 	public ArrayList<Shape> doAllTheStuff(){
+		emptyAllParameters();
+		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		createImagesAndFindContours();
 
-		findShapesAndDrawPoints();
+		//findShapesAndDrawPoints();
 		
 		System.out.println("Rectangles: " + rectangles);
 		System.out.println("Stars: "  + stars);
@@ -157,15 +164,16 @@ public class NewShapeRecognition{
 		System.out.println("Shapes found: ");
 		System.out.println(colors.size() + " " + shapes.size() + " "+ points.size());
 		for(int i = 0; i <= shapes.size() - 1; i++){
-			System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) + 
-					" (" + points.get(i) + " points) Found color-codes: " + foundColorCodesRGB.get(i));
+			//System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) + 
+			//		" (" + points.get(i) + " points) Found color-codes: " + foundColorCodesRGB.get(i));
+			System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) +
+					" Found color-codes: " + foundColorCodesRGB.get(i));
+		
 		}
 		System.out.println("Actual time needed (without writing away images): " + actualTimeToProcess + "ms");
 		System.out.println("Actual time needed JAVACV: " + javaCVTime +"ms");
 		
 		ArrayList<Shape> shapeList = makeShapeList();
-		
-		//emptyAllParameters();
 		
 		return shapeList;
 	}
@@ -184,89 +192,76 @@ public class NewShapeRecognition{
 		}
 		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
 		System.out.println("TIME BufferedImage inlezen: " + (System.currentTimeMillis() - prev) + "ms");
-		
-		//****** Afbeelding inladen, TODO nog nader bekijken wat Core.DEPTH_... juist is.*****//
+
+		//***********************************************************************************
+		//***********************************************************************************
+		//***********************************************************************************
 		prev = System.currentTimeMillis();
-		// image = Highgui.imread(originalImagePath, Imgproc.COLOR_BGR2GRAY);
-		// TODO: MASKS !!!
-		imageOriginal = Highgui.imread(originalImagePath);
-		imageHSV = new Mat(imageOriginal.size(), Core.DEPTH_MASK_8U);
-		imageGREY = new Mat(imageOriginal.size(), Core.DEPTH_MASK_8U);
-		imageBlurr = new Mat(imageOriginal.size(), Core.DEPTH_MASK_8U);
-		imageAdaptiveThreshold = new Mat(imageOriginal.size(), Core.DEPTH_MASK_8U);
-		imageThresh1 = new Mat(imageOriginal.size(), Core.DEPTH_MASK_8U);
-		imageThresh2 = new Mat(imageOriginal.size(), Core.DEPTH_MASK_8U);
-		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME MatImage inlezen + Mats aan maken: " + (System.currentTimeMillis() - prev) + "ms");
-
-		//***********************************************************************************
-		//***********************************************************************************
-		//***********************************************************************************
 		IplImage imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
-		
-		// ignore deze, zo kon ik snel terug naar de nieuwe code gaan :p
-		IplImage channelRed = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.height());
-	    IplImage channelGreen = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), 1);
-	    IplImage channelBlue;
-	    IplImage channelGreenBlue;
-	    IplImage channelGreenRed;
-	    IplImage channelRedBlue;
-	    IplImage channelRedSeperated;
-	    IplImage channelBlueSeperated;
-	    IplImage channelGreenSeperated;
-
+		System.out.println("TIME IplImage inlezen: " + (System.currentTimeMillis() - prev) + "ms");
 	    
-	    // CvScalar arg2 = new CvScalar(0, 0, 255, 0);
-	    // BEWARE: the params for the cvScalar constructor are not in RGB order
-	    //      it is:   new cvScalar(blue, green, red, unused)
-	    // note how the 4th scalar is unused.
-	   
 	    //***** HSV en GREYSCALE *****//
 	    // http://ganeshtiwaridotcomdotnp.blogspot.be/2011/12/javacv-image-thresholding-hsv-color.html
 	    // Nog niet geprobeerd: http://ganeshtiwaridotcomdotnp.blogspot.be/2011/12/javacv-image-thresholding-hsv-color.html
 	    IplImage imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
-	    IplImage imgGrayscale = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 	    cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
-	    cvCvtColor(imgOrg, imgGrayscale, CV_BGR2GRAY);
 	    //cvInRangeS(imgHSV, cvScalar(15, 234, 120, 0), cvScalar(21, 234, 120, 0), imgHSV);
 	    cvSaveImage(writeToPath + "HSV.jpg", imgHSV);
-	    cvSaveImage(writeToPath + "grayScale.jpg", imgGrayscale);
+	    
 	    
 	    //***** Color based thresholding *****//
 	    //http://ganeshtiwaridotcomdotnp.blogspot.be/2011/12/javacv-simple-color-detection-using.html
 	    //TODO: kleuren al testend bepalen of overschakelen op HSV.
 	    //TODO: HSV zou beter moeten zijn omdat de invloed van licht/belichting (veel) minder is dacht ik
+
+	    cvSmooth(imgOrg, imgOrg, CV_GAUSSIAN, 5);
 	    
-	    // ROOD
+	    
+	    // BLAUW
 	    prev = System.currentTimeMillis();
-	    CvScalar minRed = cvScalar(0, 0, 130, 0);//BGR-A
-	    CvScalar maxRed= cvScalar(140, 110, 255, 0);//BGR-A
+	    CvScalar minBlue = cvScalar(1, 1, 1, 0);//BGR-A
+	    CvScalar maxBlue = cvScalar(255, 255, 90, 0);//BGR-A
 	    //create binary image of original size
-	    IplImage imgThresholdRed = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+	    IplImage imgThresholdBlue = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 	    //apply thresholding
-	    cvInRangeS(imgOrg, minRed, maxRed, imgThresholdRed);
+	    cvInRangeS(imgOrg, minBlue, maxBlue, imgThresholdBlue);
 	    //smooth filter- median
-	    cvSmooth(imgThresholdRed, imgThresholdRed, CV_MEDIAN, 13);
-	 	//time recording
+	    //cvSmooth(imgThresholdBlue, imgThresholdBlue, CV_MEDIAN, 13);
+	    //time recording
 	    javaCVTime =+ (System.currentTimeMillis() - prev);
 	    //save
-	    cvSaveImage(writeToPath + "thresholdRed.jpg", imgThresholdRed);
-	    
+	    cvSaveImage(writeToPath + "thresholdBlue.jpg", imgThresholdBlue);
+
 	    // GROEN
 	    prev = System.currentTimeMillis();
-	    CvScalar minGreen = cvScalar(50, 1, 1, 0);//BGR-A
-	    CvScalar maxGreen = cvScalar(255, 100, 100, 0);//BGR-A
+	    CvScalar minGreen = cvScalar(1, 70, 1, 0);//BGR-A
+	    CvScalar maxGreen = cvScalar(120, 255, 70, 0);//BGR-A
 	    //create binary image of original size
 	    IplImage imgThresholdGreen = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 	    //apply thresholding
 	    cvInRangeS(imgOrg, minGreen, maxGreen, imgThresholdGreen);
 	    //smooth filter- median
-	    cvSmooth(imgThresholdGreen, imgThresholdGreen, CV_MEDIAN, 13);
+	    //cvSmooth(imgThresholdGreen, imgThresholdGreen, CV_MEDIAN, 13);
 	    //time recording
 	    javaCVTime =+ (System.currentTimeMillis() - prev);
 	    //save
 	    cvSaveImage(writeToPath + "thresholdGreen.jpg", imgThresholdGreen);
-	    
+
+	    // ROOD
+	    prev = System.currentTimeMillis();
+	    CvScalar minRed = cvScalar(0, 0, 130, 0);//BGR-A
+	    CvScalar maxRed= cvScalar(140, 70, 255, 0);//BGR-A
+	    //create binary image of original size
+	    IplImage imgThresholdRed = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+	    //apply thresholding
+	    cvInRangeS(imgOrg, minRed, maxRed, imgThresholdRed);
+	    //smooth filter- median
+	    //cvSmooth(imgThresholdRed, imgThresholdRed, CV_MEDIAN, 13);
+	 	//time recording
+	    javaCVTime =+ (System.currentTimeMillis() - prev);
+	    //save
+	    cvSaveImage(writeToPath + "thresholdRed.jpg", imgThresholdRed);
+
 	    // WIT
 	    prev = System.currentTimeMillis();
 	    CvScalar minWhite = cvScalar(170, 170, 170, 0);//BGR-A
@@ -275,29 +270,56 @@ public class NewShapeRecognition{
 	    IplImage imgThresholdWhite = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 	    //apply thresholding
 	    cvInRangeS(imgOrg, minWhite, maxWhite, imgThresholdWhite);
+	    //CANNY EDGE
+	    IplImage cannyEdge = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+        cvCanny(imgThresholdWhite, imgThresholdWhite, 0, 255, 3);
+        cvSaveImage(writeToPath + "cannyEdge.jpg", cannyEdge);
 	    //smooth filter- median
-	   // cvSmooth(imgThresholdWhite, imgThresholdWhite, CV_MEDIAN, 13);
+	    // cvSmooth(imgThresholdWhite, imgThresholdWhite, CV_MEDIAN, 13);
 	    //time recording
 	    javaCVTime =+ (System.currentTimeMillis() - prev);
 	    //save
 	    cvSaveImage(writeToPath + "thresholdWhite.jpg", imgThresholdWhite);
+
+	    // YELLOW
+	    prev = System.currentTimeMillis();
+	    CvScalar minYellow = cvScalar(0, 150, 150, 0);//BGR-A
+	    CvScalar maxYellow = cvScalar(150, 255, 255, 0);//BGR-A
+	    //create binary image of original size
+	    IplImage imgThresholdYellow = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+	    //apply thresholding
+	    cvInRangeS(imgOrg, minYellow, maxYellow, imgThresholdYellow);
+	    //smooth filter- median
+	    // cvSmooth(imgThresholdWhite, imgThresholdWhite, CV_MEDIAN, 13);
+	    //time recording
+	    javaCVTime =+ (System.currentTimeMillis() - prev);
+	    //save
+	    cvSaveImage(writeToPath + "thresholdYellow.jpg", imgThresholdYellow);
+
+	    // HSV => DONKEREKLEUREN
+	    prev = System.currentTimeMillis();
+	    CvScalar minWhiteHSV = cvScalar(50, 50, 50, 0);//BGR-A
+	    CvScalar maxWhiteHSV = cvScalar(255, 255, 255, 0);//BGR-A
+	    //create binary image of original size
+	    IplImage imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
+	    //apply thresholding
+	    cvInRangeS(imgHSV, minWhiteHSV, maxWhiteHSV, imgThresholdHSVDarkColors);
+	    //CANNY EDGE
+	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
+	    cvCanny(imgThresholdHSVDarkColors, cannyEdge2, 0, 255, 3);
+        cvSaveImage(writeToPath + "cannyEdge.jpg", cannyEdge2);
+	    //smooth filter- median
+	    //cvSmooth(imgThresholdWhite, imgThresholdWhite, CV_MEDIAN, 13);
+	    //time recording
+	    javaCVTime =+ (System.currentTimeMillis() - prev);
+	    //save
+	    cvSaveImage(writeToPath + "thresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 	    
-	    int header_size = 0;
-		CvSeq first_contour = new CvSeq();
-		CvMemStorage contouren = new CvMemStorage();
-		cvFindContours(imgThresholdWhite, contouren, first_contour, header_size, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-		System.out.println("Test9999");
-		System.out.println(contouren.top());
-	    //Imgproc.findContours(imageThresh1, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+	    findContoursAndHull(imgOrg, imgThresholdWhite);
+	    findContoursAndHull(imgOrg, imgThresholdYellow);
+	    findContoursAndHull(imgOrg, imgThresholdHSVDarkColors);
 	    
-	    //cvApproxPoly(arg0, arg1, arg2, arg3, arg4, arg5)
-	    //cvConvexHull2(arg0, arg1, arg2, arg3)
-	    
-	    // TODO
-	    // wat als ge nu eerst foto pakt van de vloer en zowa het gemiddelde bepaalt van die kleur,
-	    // daarna gade die kleur (en natuurlijk de kleuren die daar dicht bij liggen) er uit filteren 
-		// met bovenstaande methode ...
-	    // TODO
+	    cvSaveImage(writeToPath + "zzz.jpg", imgOrg);
 
 	    /*TODO: ge kunt iets fancy demonstreren door om de 5 seconden ofzo de verschillende afbeeldingen
 	     *			te laten zien met CanvasFrame https://code.google.com/p/javacv/wiki/ConvertingOpenCV
@@ -311,145 +333,116 @@ public class NewShapeRecognition{
 	    //***********************************************************************************
 	    //***********************************************************************************
 	    //***********************************************************************************
-
-	    //***** Afbeelding BGR naar HSV *****//
-	    prev = System.currentTimeMillis();
-	    //TODO er is ook nog nen COLOR_BGR2HSV_FULL
-	    Imgproc.cvtColor(imageOriginal, imageHSV, Imgproc.COLOR_BGR2HSV);
-	    actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-	    System.out.println("TIME HSV: " + (System.currentTimeMillis() - prev) + "ms");
-
-	    //***** Afbeeldingen grijs maken*****//
-		prev = System.currentTimeMillis();
-		Imgproc.cvtColor(imageOriginal, imageGREY, Imgproc.COLOR_BGR2GRAY); 
-		//TODO: Imgproc.cvtColor(image, imageHSV, Imgproc.COLOR_RGB2GRAY);
-		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME cvtColor: " + (System.currentTimeMillis() - prev) + "ms");
-
-		//***** Blur *****//
-		prev = System.currentTimeMillis();
-		Imgproc.medianBlur(imageGREY, imageBlurr, 5);
-		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME Blur: " + (System.currentTimeMillis() - prev) + "ms");
-		
-		//***** Adaptive Thresh *****//
-		prev = System.currentTimeMillis();
-		Imgproc.adaptiveThreshold(imageBlurr, imageAdaptiveThreshold, 255, 
-				Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY_INV, 13, 3); /// Gaussian_C ipv Mean_C
-		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME AdaptiveThreshold: " + (System.currentTimeMillis() - prev) + "ms");
-
-		//***** Otsu en binary inverted thresh *****//
-		prev = System.currentTimeMillis();
-		//Imgproc.threshold(src, dst, thresh, maxval, type)
-		double thresh1 = Imgproc.threshold(imageBlurr, imageThresh1, threshValue1, 255, Imgproc.THRESH_OTSU);
-		//TODO
-		double thresh2 = Imgproc.threshold(imageBlurr, imageThresh2, threshValue2, 255, Imgproc.THRESH_BINARY_INV);
-		System.out.println();
-		System.out.println("Thresh1 = " + thresh1 + ", Thresh2 = " + thresh2);
-		System.out.println();
-		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME Mat voor Thresh aan maken + threshold: " + (System.currentTimeMillis() - prev) + "ms");
-		
-		//***** Voorbeelden van imageHSV, imageA, imageBlurr en imageThresh wegschrijven. *****//
-		prev = System.currentTimeMillis();
-		Highgui.imwrite(writeToPath + "testOriginal.png", imageOriginal);
-		Highgui.imwrite(writeToPath + "testHSV.png", imageHSV);
-		Highgui.imwrite(writeToPath + "testImagGREY.png",imageGREY);
-		Highgui.imwrite(writeToPath + "testImageADAPTIVE.png",imageAdaptiveThreshold);
-		Highgui.imwrite(writeToPath + "testBlurr.png",imageBlurr);
-		Highgui.imwrite(writeToPath + "testThreshOtsu.png",imageThresh1);
-		Highgui.imwrite(writeToPath + "testThreshBinaryInverted.png",imageThresh2);
-		
-		System.out.println("TIME Images wegschrijven: " + (System.currentTimeMillis() - prev) + "ms");
-
-		
-		//***** Contours vinden. *****//
-		prev = System.currentTimeMillis();
-		if(threshMethode == 1){
-			Imgproc.findContours(imageThresh1, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-			Imgproc.findContours(imageThresh2, contours, new Mat(),Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		}
-		else if(threshMethode == 2){
-			Imgproc.findContours(imageAdaptiveThreshold, contours, new Mat(),Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-		}
-		actualTimeToProcess =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME Contours vinden: " + (System.currentTimeMillis() - prev) + "ms");
-		System.out.println("Aantal gevonden contours1: " + contours.size());
-		System.out.println("Aantal gevonden contours2: " + contours.size());
 	}
+	
+	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
+		CvSeq contour = new CvSeq();
+	    CvMemStorage memory = CvMemStorage.create();
+	    int numberOfContours = cvFindContours(imgThreshold, memory, contour, Loader.sizeof(CvContour.class), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+	    System.out.println("Number of contours: " + numberOfContours);
 
-	private void findShapesAndDrawPoints() {
-		/**
-		 * KLEUR: SCALAR(BLAUW,GROEN,ROOD)
-		 * Blauw: Scalar(255,0,0)
-		 * Wit: Scalar(255,255,255)
-		 * Rood: Scalar(0,0,255)
-		 * Geel: Scalar(0,255,255)		 
-		 * Groen: Scalar(0,255,0)
-		 * 
-		 * Zwart: Scalar(0,0,0)
-		 */
-		
-		prev = System.currentTimeMillis();
-		for(int i=0; i< contours.size();i++){
-			Rect rect = Imgproc.boundingRect(contours.get(i));
-			
-			//TODO MANIER VERFIJNEN OM TE KLEINE GEVONDEN VORMEN TE VERWIJDEREN
-			if((rect.height*rect.width*2) > minimalAreaOfRectangleAroundShape && (rect.height*rect.width*2) < maximalAreaOfRectangleAroundShape) {
-				System.out.println("Area of rectangle: " + (rect.height*rect.width*2));
-				MatOfPoint2f mMOP2f1 = new MatOfPoint2f();
-				MatOfPoint2f mMOP2f2 = new MatOfPoint2f();
-				contours.get(i).convertTo(mMOP2f1, CvType.CV_32FC2);
+	    CvMemStorage storage = CvMemStorage.create();    
+	    while (contour != null && !contour.isNull()) {
+            if (contour.elem_size() > 0) {
+                CvSeq points = cvApproxPoly(contour, Loader.sizeof(CvContour.class),
+                        storage, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
+                cvDrawContours(imgOrg, points, CvScalar.MAGENTA, CvScalar.MAGENTA, -1, 1, CV_AA);
+                int centerX = 0;
+                int centerY = 0;        
+                CvMoments moments = new CvMoments();
+                cvMoments(contour, moments, 1);
+                // cv Spatial moment : Mji=sumx,y(I(x,y)•xj•yi)
+                // where I(x,y) is the intensity of the pixel (x, y).
+                double momX10 = cvGetSpatialMoment(moments, 1, 0); // (x,y)
+                double momY01 = cvGetSpatialMoment(moments, 0, 1);// (x,y)
+                double area = cvGetCentralMoment(moments, 0, 0);
+                centerX = (int) (momX10 / area);
+                centerY = (int) (momY01 / area);
+                //System.out.println("("+posX+", "+posY+")");
+                if(area > 500){
+                System.out.println("area = " + area);
+                
+                //convex omhullende
+                CvSeq convexContour = cvConvexHull2(contour, storage, CV_CLOCKWISE, 1);
+                cvDrawContours(imgOrg, convexContour, CvScalar.CYAN, CvScalar.CYAN, -1, 1, CV_AA);
+                cvMoments(convexContour, moments, 1);
+                double areaHull = cvGetCentralMoment(moments, 0, 0);
+                System.out.println("areaHull = " + areaHull);
+                
+                System.out.println("Verhouding " + areaHull/area);
+                //draw points
+                for(int i = 0; i < contour.total(); i++){
+                	CvPoint v=new CvPoint(cvGetSeqElem(contour, i));
+                	cvDrawCircle(imgOrg, v, 1, CvScalar.WHITE, -1, 8, 0);
+                	//System.out.println(" X value = "+v.x()+" ; Y value ="+v.y());
+                }
+                
+                
+                System.out.println("CENTER:("+centerX+", " + centerY+")");
+                Vector vectorCenter = new Vector(centerX, centerY);
 
-				double length = Imgproc.arcLength(mMOP2f1, true);
-
-				//Imgproc.approxPolyDP(curve, approxCurve, epsilon, closed);
-				Imgproc.approxPolyDP(mMOP2f1, mMOP2f2, 0.02*length, true);
-
-				/**
-				 * Midden van contour krijgen:
-				 */
-				Moments moments = Imgproc.moments(contours.get(i));
-				double centerX = (moments.get_m10()/moments.get_m00());
-				double centerY = (moments.get_m01()/moments.get_m00());
-				centers.add(new Vector(centerX, centerY));
-				points.add(mMOP2f2.height());
-				
-				if(mMOP2f2.height() <= 6){
-					shapes.add("Rectangle");
-					rectangles++;
-				}
-				else if(mMOP2f2.height() <= 8){
-					shapes.add("Circle");
-					circles++;
-				}
-				else if(mMOP2f2.height() <= 9){
-					shapes.add("Heart");
-					hearts++;
-				}
-				else if(mMOP2f2.height() <= 10){
+                ArrayList<Double> list = new ArrayList<Double>();
+                for(int i = 0; i < contour.total(); i++){
+                	CvPoint v =new CvPoint(cvGetSeqElem(contour, i));
+                	Vector punt = new Vector(v.x(), v.y());
+                	list.add(punt.getDistance(vectorCenter));
+                }            
+                Collections.sort(list);
+                double radius = list.get(list.size()-1);
+                System.out.println("radius " + radius);
+				double areaCircle = Math.PI*radius*radius;
+				System.out.println("oppervlakte cirkel = "+ areaCircle);
+				System.out.println("verhouding oppervlakte cirkel = "+ areaCircle/area);
+				String imageTxt = "";
+				if(areaHull/area > 1.2){
 					shapes.add("Star");
 					stars++;
+					imageTxt = "S";
+				}
+				else if(areaCircle/area > 1.6){
+					shapes.add("Rectangle");
+					rectangles++;
+					imageTxt = "R";
+				}
+				else if(areaCircle/area > 1.3){
+					shapes.add("Heart");
+					hearts++;
+					imageTxt = "H";
+				}
+				else if(areaCircle/area >= 1){
+					shapes.add("Circle");
+					circles++;
+					imageTxt = "C";
 				}
 				else {
 					shapes.add("Unidentified");
 					unidentifiedShapes++;
-				} 
+					imageTxt = "U";
+				}
 				
-				/**
-				 * Diameter van cirkel verkrijgen:
-				 */
-				double oppervlakte = Imgproc.contourArea(contours.get(i));
-				int diameter = (int) Math.sqrt(4 * oppervlakte/Math.PI);
-				
-				/**
-				 * Kleur vinden.
-				 */
+				//KLEUR TOEVOEGEN
 				Color figureColor = findColorAtXY(centerX, centerY, 3);
-				colors.add(colorToString(figureColor));
-			}
-		}
+				String figureColorString = colorToString(figureColor);
+				colors.add(figureColorString);
+				imageTxt = figureColorString.substring(0,1) + imageTxt;
+				
+				
+				//CENTER TOEVOEGEN
+				centers.add(new Vector(centerX, centerY));
+	
+				cvPutText(imgOrg, imageTxt, cvPoint((int)centerX, (int)centerY), 
+						cvFont(2, 3), CvScalar.BLACK);
+				
+				
+//				CvRect rect = cvBoundingRect(contour, 0);
+//				System.out.println("Area rectangle = " + (rect.height()*rect.width()));
+//				cvRectangle(imgOrg, cvPoint(rect.x(), rect.y()), cvPoint(rect.x()+rect.width(), rect.y()+rect.height()), 
+//						cvScalar(255,0,0,0), 1, 0, 0);
+				System.out.println();
+                }
+            }
+            contour = contour.h_next();
+        }
 	}
 	
 	private String colorToString(Color figureColor) {
@@ -499,14 +492,12 @@ public class NewShapeRecognition{
 				}
 			}
 		}
-
-		System.out.println("Aantal pixels geïnspecteerd voor de kleur: " + numberOfPixelsInspected);
+		//System.out.println("Aantal pixels geïnspecteerd voor de kleur: " + numberOfPixelsInspected);
 		averageRed = averageRed/(numberOfPixelsInspected);
 		averageGreen = averageGreen/(numberOfPixelsInspected);
 		averageBlue = averageBlue/(numberOfPixelsInspected);
 		 
 		foundColorCodesRGB.add("RGB: [" + averageRed + ", " + averageGreen + ", "+ averageBlue + "]");
-		//System.out.println("Averages (red, green, blue): " + averageRed + ", " + averageGreen + ", "+ averageBlue);
 		return findColor(averageRed, averageGreen, averageBlue);
 	}
 	
@@ -526,9 +517,6 @@ public class NewShapeRecognition{
 	 */
 	private Color findColor(int averageRed, int averageGreen, int averageBlue) {
 		int min = 150;
-		//System.out.println("AverageColors: "+ averageRed + " " +averageGreen +" "+  averageBlue);
-		//color = new Color(averageRed, averageGreen, averageBlue);
-		
 		if(averageRed >= min && averageGreen >= min && averageBlue >= min){
 			return Color.white;
 		}
