@@ -78,6 +78,7 @@ public class KirovAirship extends JFrame {
 		totalPane.setBounds(0, 0, width - 16, height - 18);
 		getContentPane().add(totalPane);
 		addKeyListener(new EventKey());
+		setResizable(false);
 		
 		setUpConsole();
 		setUpMission();
@@ -94,7 +95,7 @@ public class KirovAirship extends JFrame {
 	 * @param goals
 	 */
 	public KirovAirship(LinkedList<Command> queue, LinkedList<Goal> goals){
-		this(1280, 780, 4000, 4000, queue, goals);
+		this(1200, 650, 4000, 4000, queue, goals);
 	}
 	
 	/**
@@ -151,7 +152,7 @@ public class KirovAirship extends JFrame {
 	 * @param text
 	 */
 	private void textEntered(String text){
-		if(text != null && text != ""){
+		if(text != null && !text.isEmpty()){
 			String printer = parser.parse(text);
 			outputConsole.append(printer + "\n");
 			inputConsole.setText("");
@@ -181,7 +182,7 @@ public class KirovAirship extends JFrame {
 	private void setUpConsole(){
 		consolePane = new JLayeredPane();
 		consolePane.setLocation(10, 355);
-		consolePane.setSize(300, 246);
+		consolePane.setSize(300, 256);
 		totalPane.add(consolePane);
 		
 		consoleScroller = new JScrollPane();
@@ -245,10 +246,10 @@ public class KirovAirship extends JFrame {
 	 */
 	private void setUpMap(){
 		mapPane = new JLayeredPane();
-		mapPane.setBackground(new Color(175,123,167));
+		mapPane.setBackground(new Color(153, 153, 204));
 		mapPane.setOpaque(true);
 		mapPane.setBorder(new LineBorder(new Color(0, 0, 0), 3));
-		mapPane.setBounds(320, 11, 854, 590);
+		mapPane.setBounds(320, 11, 864, 600);
 		totalPane.add(mapPane);
 		
 		//TODO Dit wegdoen
@@ -277,7 +278,7 @@ public class KirovAirship extends JFrame {
 		informationPane = new JLayeredPane();
 		informationPane.setBorder(new LineBorder(new Color(0, 0, 0)));
 		informationPane.setBounds(10, 43, 300, 60);
-		informationPane.setBackground(new Color(145,145,145));
+		informationPane.setBackground(Color.WHITE);
 		informationPane.setOpaque(true);
 		totalPane.add(informationPane);
 		informationPane.setLayout(new GridLayout(3, 5, 0, 0));
@@ -474,7 +475,7 @@ public class KirovAirship extends JFrame {
 		photoLabel.setIcon(photo);
 	}
 	
-	int zeppHeight;
+	private int zeppHeight;
 	/**
 	 * Returnt de hoogte van de eigen zeppelin in mm. 
 	 * @return
@@ -483,13 +484,19 @@ public class KirovAirship extends JFrame {
 		return zeppHeight;
 	}
 	
+	private int targetheight;
 	/**
 	 * Zet een nieuwe targethoogte. In mm.
 	 * @param height
 	 */
 	public void setTargetHeight(int height){
+		targetheight = height;
 		targetHeightLabel.setText(height + "mm");
 		missionText.setText("Change height to: "+ height+"mm.");
+	}
+	
+	public int getTargetHeight(){
+		return targetheight;
 	}
 	
 	int goalX, goalY;
@@ -609,10 +616,6 @@ public class KirovAirship extends JFrame {
 		public void keyPressed(KeyEvent arg0) {
 			if(arg0.getKeyCode() == KeyEvent.VK_ENTER){
 				textEntered(inputConsole.getText());
-			}
-			if(arg0.getKeyCode() == KeyEvent.VK_T){
-				ownRotation += Math.PI/6;
-				moveZeppelins();
 			}
 		}
 

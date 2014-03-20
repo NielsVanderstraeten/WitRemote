@@ -75,8 +75,9 @@ public class MapMaker extends JPanel {
 		for(Component toPaint: toPaintAreas){
 			int position = toPaint.getPosition();
 			Area toPaintArea = (Area) toPaint.getArea().clone();
-			
-			if(!foundFigures.contains(position) && position != -1){
+			//Als er figuren herkent zijn (en anderen kleiner moeten voorgesteld worden)
+			//Als de figuur NIET herkend is, geen positie -1 heeft (voor de zeppelins) en foundfigures niet leeg is (er zijn wel figures herkend)
+			if(!foundFigures.contains(position) && position != -1 && !foundFigures.isEmpty()){
 				double scale = 0.5;
 				double x = toPaintArea.getBounds().getX();
 				double y = toPaintArea.getBounds().getY();
