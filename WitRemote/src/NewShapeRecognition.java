@@ -33,15 +33,18 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvGetSpatialMoment;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvMoments;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvPointPolygonTest;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
+import gui.KirovAirship;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.opencv.core.Core;
 import org.opencv.core.MatOfPoint;
 
+import Rooster.Grid;
 import Rooster.Shape;
 import Rooster.Vector;
 
@@ -56,12 +59,15 @@ import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
 
+import commands.Command;
+import commands.SetPosition;
+
 /**
  * VORMEN: 1) Harten 2) Cirkels 3) Rechthoeken 4) Sterren
  * KLEUREN: 1) Blauw 2) Wit 3) Rood 4) Geel 5) Groen
  */
 
-public class NewShapeRecognition{
+public class NewShapeRecognition implements Runnable {
 	
 	/**
 	 * Lijst met alle vormen. 
@@ -125,13 +131,24 @@ public class NewShapeRecognition{
 	private int minimalAreaOfRectangleAroundShape;
 	private int maximalAreaOfRectangleAroundShape;
 	
-	public static void main(String args[]){
-		NewShapeRecognition shapeRecog = new NewShapeRecognition("C:/Users/Jeroen/Desktop/Pics/TestA6.jpg");
-		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
-		shapeRecog.doAllTheStuff();
-	}	
+	private KirovAirship gui;
+	private Grid grid;
+	private LinkedList<Command> queue;
 	
-	public NewShapeRecognition(String path){
+	public static void main(String args[]){
+		
+		Grid grid = new Grid("");
+		NewShapeRecognition shapeRecog = new NewShapeRecognition("C:/Users/Jeroen/Desktop/Pics/TestA2.jpg", null, grid, null);
+		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
+		Thread t = new Thread(shapeRecog);
+		t.start();
+	}	
+
+	public NewShapeRecognition(String path, KirovAirship gui, Grid grid, LinkedList<Command> queue){
+		this.gui = gui;
+		this.grid = grid;
+		this.queue = queue;
+
 		originalImagePath = path;
 		writeToPath = "C:/Users/Jeroen/Desktop/ShapeRecognition/";
 		//TODO: testen wat de minimale waarde hiervan moet zijn of robuuster maken adhv hoogte van zeppelin... 
@@ -139,14 +156,15 @@ public class NewShapeRecognition{
 		maximalAreaOfRectangleAroundShape = 14000;
 	}
 	
-	public ArrayList<Shape> doAllTheStuff(){
+	public void run(){
+		
 		emptyAllParameters();
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		createImagesAndFindContours();
 
-		//findShapesAndDrawPoints();
+//		gui.updatePhoto(); //TODO
 		
 		System.out.println("Rectangles: " + rectangles);
 		System.out.println("Stars: "  + stars);
@@ -170,7 +188,15 @@ public class NewShapeRecognition{
 		
 		ArrayList<Shape> shapeList = makeShapeList();
 		
-		return shapeList;
+		
+		Vector position = grid.getPosition(shapeList);
+		double rotation = grid.getRotation(shapeList);
+		
+		System.out.println("Position: " + position.toString());
+		System.out.println("Rotation: " + rotation);
+		
+//		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation)); //TODO
+
 	}
 	
 	private void createImagesAndFindContours() {
@@ -345,6 +371,7 @@ public class NewShapeRecognition{
 	    
 	    prev = System.currentTimeMillis();
 	    cvSaveImage(writeToPath + "zzz.jpg", imgOrg);
+	    cvSaveImage("src/images/analyse.jpg", imgOrg);
 	    imageWritingTime += System.currentTimeMillis() - prev;
 
 	   /* cvNamedWindow("HERPEDERP");
