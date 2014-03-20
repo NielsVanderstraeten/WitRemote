@@ -16,6 +16,12 @@ public class Simulator implements Runnable{
 	public Simulator(String host){
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
+		
+		goals.addLast(new GoalHeight(1700));
+		goals.addLast(new GoalPosition(1000, 1000));
+		goals.addLast(new GoalPosition(3000, 1000));
+		goals.addLast(new GoalPosition(3000, 3000));
+		goals.addLast(new GoalPosition(1000, 3000));
 		createGUI();
 	}
 	private KirovAirship gui;
@@ -34,15 +40,17 @@ public class Simulator implements Runnable{
 	}
 	
 	public void run(){
-		int i = 0;
-		int maxvalue = 100;
 		lastCalc = System.currentTimeMillis();
-		while(i<maxvalue){
+		if(!goals.isEmpty())
+			addNextGoal();
+		while(true){
 			try {
 				Thread.sleep(50); 
 			} catch(Exception e){
 				System.err.println("Da werkt ni..... stoeme thread sleep");
 			}
+			if(goalReached())
+				addNextGoal();
 			getDestination();
 			goToDestination();
 		}
@@ -50,22 +58,23 @@ public class Simulator implements Runnable{
 	
 	private int goalX, goalY;
 	private double ownX, ownY;
-	private double oppX, oppY;
 	
 	private void getDestination(){
 		ownX = gui.getOwnX(); ownY = gui.getOwnY();
-		oppX = gui.getOpponentX(); oppY = gui.getOpponentY();
 		goalX = gui.getGoalX(); goalY = gui.getGoalY();
+		height = gui.getZeppHeight(); targetHeight = gui.getTargetHeight();
 	}
 	
 	private double rotation = 0;
-	private double speedOwn = 1; //millimeter per Millisecond
-	private double speedOpp = 1; //millimeter per Millisecond
+	private long time = 0;
 	
 	private void goToDestination(){
-		if(goalX == 0 && goalY == 0)
-			lastCalc = System.currentTimeMillis();
+		long newCalc = System.currentTimeMillis();
+		time = newCalc - lastCalc;
+		lastCalc = newCalc;
 		calcNextPosition();
+		calcNextHeight();
+		gui.updateGui();
 	}
 	
 	private boolean fuzzyEquals(double first, double second){
@@ -84,46 +93,17 @@ public class Simulator implements Runnable{
 	private double speedX, speedY;
 	private static double accelX = 0.0003; //  mm*(ms)^-2
 	private static double accelY = 0.0003; //  mm*(ms)^-2
-	private static double maxSpeedX = 0.2; // mm/ms
-	private static double maxSpeedY = 0.2; // mm/ms
-	
-	private void calcNewPosition(){
-		long newCalc = System.currentTimeMillis();
-		long time = newCalc - lastCalc;
-		lastCalc = newCalc;
-		
-//		double distanceOwn = Math.sqrt(Math.pow(goalY - ownY, 2) + Math.pow(goalX - ownX, 2));
-//		speedX = speedOwn*(goalX - ownX)/distanceOwn;
-//		speedY = speedOwn*(goalY - ownY)/distanceOwn;
-//		
-//		ownX = ownX + speedX*time;
-//		ownY = ownY + speedY*time;
-		
-		rotation = Math.atan((goalY - ownY)/(goalX - ownX)) + Math.PI/2;
-		if(goalX < ownX)
-			rotation += Math.PI;
-		
-//		double distanceOpp = Math.sqrt(Math.pow(goalY - oppY, 2) + Math.pow(goalX - oppX, 2));
-//		speedOppX = speedOpp*(goalX - oppX)/distanceOpp;
-//		speedOppY = speedOpp*(goalY - oppY)/distanceOpp;
-//		oppX = oppX + speedOppX * time;
-//		oppY = oppY + speedOppY * time;
-//		
-		gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
-//		gui.updateOpponentPosition((int) oppX, (int) oppY);
-		gui.updateGui();
-	}
+	private static double maxSpeedX = 0.5; // mm/ms
+	private static double maxSpeedY = 0.5; // mm/ms
 	
 	private void calcNextPosition(){
-		long newCalc = System.currentTimeMillis();
-		long time = newCalc - lastCalc;
-		lastCalc = newCalc;
-		
 		double diffX = goalX - ownX;
 		double diffY = goalY - ownY;
 		int directionX = (int) Math.signum(diffX);
 		int directionY = (int) Math.signum(diffY);
 		
+		if(goalX == 0 && goalY == 0)
+			return;
 		if(fuzzyEquals(ownX, goalX)){ //If almost there
 			if(speedX == 0)
 				;//Do nothing
@@ -177,12 +157,45 @@ public class Simulator implements Runnable{
 
 		gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
 		gui.updateSpeed((int) (speedX*100), (int) (speedY * 100));
-		gui.updateGui();
+	}
+	
+	private double height = 1000;
+	private double targetHeight = 1200;
+	private double heightSpeed;
+	private static double maxSpeedHeight = 0.1;
+	private static double accelHeight = 0.00003;
+	
+	private void calcNextHeight(){
+		double diff = targetHeight - height;
+		int direction = (int) Math.signum(diff);
+		
+		if(fuzzyEqualsParam(height, targetHeight, 10)){ //If almost there
+			if(heightSpeed == 0)
+				;//Do nothing
+			else if(fuzzyEqualsParam(heightSpeed, 0, accelHeight*time)) //If speed is almost 0, we set to 0
+				heightSpeed = 0;
+			else // If speed is less than 0, we decrease the speed by the acceleration * time, in the opposite direction of the speed (deceleration).
+				heightSpeed = heightSpeed - Math.signum(heightSpeed)*accelHeight*time;
+		} else{ // If not there
+			if(!isSameDirection(diff, heightSpeed)) // If we aren't going the right way, we try to accelerate the right way.
+				heightSpeed = heightSpeed + direction * accelHeight * time;
+			else {
+				int accel = canSlowDown(diff, heightSpeed, -direction*accelHeight);
+				if(accel == 1) //If we can slow down fast enough to get there
+					heightSpeed = heightSpeed + direction * heightSpeed * time; //We go faster
+				else if(accel == -1) //If we can't slow down, we should really start deceleration some time soon.
+					heightSpeed = heightSpeed - direction * accelHeight * time; // we go slower
+				//If accel = 0, we do not change the speed.
+				if(Math.abs(heightSpeed) > Math.abs(maxSpeedHeight)) // If we are faster than the maximum speed, then we slow down to max speed.
+					heightSpeed = maxSpeedHeight * direction;
+			}
+		}
+		
+		height = height + heightSpeed*time;
+		gui.updateZeppHeight((int) height);
 	}
 	
 	private boolean isSameDirection(double position, double speed){
-//		if(fuzzyEqualsParam(speed, 0, position/10))
-//			return false;
 		if(position * speed > 0)
 			return true;
 		return false;
@@ -209,5 +222,29 @@ public class Simulator implements Runnable{
 			return 0;
 		else // Else we will be able to slow down fast enough. We can signal to accelerate further.
 			return 1;
+	}
+	
+	private boolean goalReached(){
+		if(nextGoal instanceof GoalPosition)
+			if(fuzzyEquals(ownX, goalX) && fuzzyEquals(ownY, goalY) && speedX == 0 && speedY == 0)
+				return true;
+		if(nextGoal instanceof GoalHeight)
+			if(fuzzyEqualsParam(height, targetHeight, 10) && fuzzyEqualsParam(heightSpeed, 0, 2))
+				return true;
+		return false;
+	}
+	
+	private void addNextGoal(){
+		if(goals.isEmpty())
+			return;
+		gui.updateLastCommand("We reached our goal.");
+		nextGoal = goals.poll();
+		if(nextGoal instanceof GoalHeight)
+			gui.setTargetHeight(((GoalHeight) nextGoal).getTargetHeight());
+		else if(nextGoal instanceof GoalPosition)
+			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
+		else
+			System.err.println("ERROR bij addnextgoal");
+		nextGoal.print();
 	}
 }
