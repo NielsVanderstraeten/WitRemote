@@ -94,7 +94,7 @@ public class MapMaker extends JPanel {
 	}
 	
 	private ArrayList<Component> toPaintAreas = new ArrayList<Component>();
-	private boolean startsWithIndent = true;
+	private boolean startsWithIndent = false;
 	
 	private void setUpMap(){
 		Color color;

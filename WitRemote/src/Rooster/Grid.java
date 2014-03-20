@@ -17,7 +17,7 @@ public class Grid {
 	private double lastRotation;
 	private ArrayList<Integer> lastTriangle;
 	//toegelaten afwijking in percenten bij afstandsverglijking
-	private final double approx = 8;
+	private final double approx = 20;
 	//laatste afstand van 2 naast elkaar liggende punten
 	
 	
@@ -80,6 +80,7 @@ public class Grid {
 
 	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
 	public double getRotation(ArrayList<Shape> figures) {
+		//TODO: nullpointer indien driehoek maar niet in map!!!
 		if (figuresContainTriangle(figures)) {
 			ArrayList<Shape> rightFigures = this.getRightTriangle(figures);
 			for (Shape shape: rightFigures) {
