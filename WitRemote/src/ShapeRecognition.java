@@ -86,7 +86,7 @@ public class ShapeRecognition implements Runnable{
 	 * 1 voor twee keer thresh en 2 voor adaptiveThreshold
 	 */
 	private int threshMethode;
-	private String analyseImagePath = "D:/";
+	private String analyseImagePath = "src/images/";
 	
 //	public static void main(String args[]){
 //		ShapeRecognition test35 = new ShapeRecognition("C:/Users/Jeroen/Desktop/test97.jpg", n);

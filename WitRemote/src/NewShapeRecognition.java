@@ -164,7 +164,7 @@ public class NewShapeRecognition implements Runnable {
 
 		createImagesAndFindContours();
 
-//		gui.updatePhoto(); //TODO
+		gui.updatePhoto();
 		
 		System.out.println("Rectangles: " + rectangles);
 		System.out.println("Stars: "  + stars);
@@ -188,14 +188,14 @@ public class NewShapeRecognition implements Runnable {
 		
 		ArrayList<Shape> shapeList = makeShapeList();
 		
-		
+		System.out.println("Made shape list");
 		Vector position = grid.getPosition(shapeList);
+		System.out.println("Position: " + position.toString());
 		double rotation = grid.getRotation(shapeList);
 		
-		System.out.println("Position: " + position.toString());
 		System.out.println("Rotation: " + rotation);
 		
-//		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation)); //TODO
+		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 
 	}
 	
