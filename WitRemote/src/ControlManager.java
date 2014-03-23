@@ -167,6 +167,8 @@ public class ControlManager implements Runnable{
 				}
 			}
 			
+			
+			
 			if(analysePicture){
 				analyserThread = new Thread(new NewShapeRecognition(path + client.getNamePicture(), gui, grid, queue));
 				analyserThread.start();
@@ -174,6 +176,8 @@ public class ControlManager implements Runnable{
 				//TODO: update GUI
 				//TODO: nog getMethode om locatie van gevonden shapes te
 			}
+			
+			gui.updateGui();
 			
 			if(System.currentTimeMillis() - lastCheck > 2000){
 				lastCheck = System.currentTimeMillis();
