@@ -228,7 +228,7 @@ public class NewShapeRecognition implements Runnable {
 	    
 	    
 	    // BLAUW
-	    prev = System.currentTimeMillis();
+	    /*prev = System.currentTimeMillis();
 	    CvScalar minBlue = cvScalar(1, 1, 1, 0);//BGR-A
 	    CvScalar maxBlue = cvScalar(255, 255, 90, 0);//BGR-A
 	    //create binary image of original size
@@ -242,10 +242,10 @@ public class NewShapeRecognition implements Runnable {
 	    //save
 	    prev = System.currentTimeMillis();
 	    cvSaveImage(writeToPath + "thresholdBlue.jpg", imgThresholdBlue);
-	    imageWritingTime += System.currentTimeMillis() - prev;
+	    imageWritingTime += System.currentTimeMillis() - prev;*/
 
 	    // GROEN
-	    prev = System.currentTimeMillis();
+	    /*prev = System.currentTimeMillis();
 	    CvScalar minGreen = cvScalar(1, 70, 1, 0);//BGR-A
 	    CvScalar maxGreen = cvScalar(120, 255, 70, 0);//BGR-A
 	    //create binary image of original size
@@ -259,10 +259,10 @@ public class NewShapeRecognition implements Runnable {
 	    //save
 	    prev = System.currentTimeMillis();
 	    cvSaveImage(writeToPath + "thresholdGreen.jpg", imgThresholdGreen);
-	    imageWritingTime += System.currentTimeMillis() - prev;
+	    imageWritingTime += System.currentTimeMillis() - prev;*/
 
 	    // ROOD
-	    prev = System.currentTimeMillis();
+	   /* prev = System.currentTimeMillis();
 	    CvScalar minRed = cvScalar(0, 0, 130, 0);//BGR-A
 	    CvScalar maxRed= cvScalar(140, 70, 255, 0);//BGR-A
 	    //create binary image of original size
@@ -276,7 +276,7 @@ public class NewShapeRecognition implements Runnable {
 	    //save
 	    prev = System.currentTimeMillis();
 	    cvSaveImage(writeToPath + "thresholdRed.jpg", imgThresholdRed);
-	    imageWritingTime += System.currentTimeMillis() - prev;
+	    imageWritingTime += System.currentTimeMillis() - prev;*/
 	    
 	    // WIT
 	    prev = System.currentTimeMillis();
@@ -298,15 +298,16 @@ public class NewShapeRecognition implements Runnable {
 	    cvSaveImage(writeToPath + "thresholdWhiteWithCanny.jpg", imgThresholdWhite);
 	    imageWritingTime += System.currentTimeMillis() - prev;
 
-	    // YELLOW
-	    prev = System.currentTimeMillis();
-	    CvScalar minYellow = cvScalar(0, 150, 150, 0);//BGR-A
-	    CvScalar maxYellow = cvScalar(150, 255, 255, 0);//BGR-A
+	    // YELLOW 
+	    /*prev = System.currentTimeMillis();
+	    CvScalar minYellow = cvScalar(100, 170, 170, 0);
+	    CvScalar maxYellow = cvScalar(150, 255, 255, 0);
 	    //create binary image of original size
 	    IplImage imgThresholdYellow = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 	    //apply thresholding
 	    cvInRangeS(imgOrg, minYellow, maxYellow, imgThresholdYellow);
 	    // canny
+	    cvSaveImage(writeToPath + "thresholdYellow.jpg", imgThresholdYellow);
 	    //TODO canny weg of niet?	    
 	    cvCanny(imgThresholdYellow, imgThresholdYellow, 0, 255, 3);
 	    cvDilate(imgThresholdYellow, imgThresholdYellow, null, 1);
@@ -327,11 +328,11 @@ public class NewShapeRecognition implements Runnable {
 	    //save
 	    prev = System.currentTimeMillis();
 	    cvSaveImage(writeToPath + "thresholdYellowWithCanny.jpg", imgThresholdYellow);
-	    imageWritingTime += System.currentTimeMillis() - prev;
+	    imageWritingTime += System.currentTimeMillis() - prev;*/
 	    
 	    // HSV => DONKEREKLEUREN
 	    prev = System.currentTimeMillis();
-	    CvScalar minHSV = cvScalar(50, 50, 50, 0);//BGR-A
+	    CvScalar minHSV = cvScalar(0, 50, 50, 0);//BGR-A
 	    CvScalar maxHSV = cvScalar(255, 255, 255, 0);//BGR-A
 	    //create binary image of original size
 	    IplImage imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
@@ -349,7 +350,7 @@ public class NewShapeRecognition implements Runnable {
 	    
 	    // HSV => GEEL
 	    /*prev = System.currentTimeMillis();
-	    CvScalar minYellowHSV = cvScalar(20, 100, 100, 0);//BGR-A
+	    CvScalar minYellowHSV = cvScalar(0, 80, 80, 0);//BGR-A
 	    CvScalar maxYellozHSV = cvScalar(30, 255, 255, 0);//BGR-A
 	    //create binary image of original size
 	    IplImage imgThresholdHSVYellow = cvCreateImage(cvGetSize(imgHSV), 8, 1);
@@ -366,7 +367,7 @@ public class NewShapeRecognition implements Runnable {
 	    imageWritingTime += System.currentTimeMillis() - prev;*/
 	    
 	    findContoursAndHull(imgOrg, imgThresholdWhite);
-	    findContoursAndHull(imgOrg, imgThresholdYellow);
+	    //findContoursAndHull(imgOrg, imgThresholdYellow);
 	    findContoursAndHull(imgOrg, imgThresholdHSVDarkColors);
 	    
 	    prev = System.currentTimeMillis();
@@ -378,7 +379,7 @@ public class NewShapeRecognition implements Runnable {
 	    cvShowImage("HERPEDERP", imgOrg);
 	    cvWaitKey(0);*/
 
-	    /*TODO: ge kunt iets fancy demonstreren door om de 5 seconden ofzo de verschillende afbeeldingen
+	    /*ge kunt iets fancy demonstreren door om de 5 seconden ofzo de verschillende afbeeldingen
 	     *			te laten zien met CanvasFrame https://code.google.com/p/javacv/wiki/ConvertingOpenCV
 	     * Of met dit:
 	     * cvNamedWindow("HERPEDERP");
@@ -459,7 +460,7 @@ public class NewShapeRecognition implements Runnable {
 
 						//draw points
 						for(int i = 0; i < contour.total(); i++){
-							CvPoint v=new CvPoint(cvGetSeqElem(contour, i));
+							CvPoint v = new CvPoint(cvGetSeqElem(contour, i));
 							cvDrawCircle(imgOrg, v, 1, CvScalar.WHITE, -1, 8, 0);
 						}
 
