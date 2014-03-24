@@ -3,8 +3,12 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="src/gui/resources/opencv-248.jar"/>
-	<classpathentry kind="lib" path="src/gui/resources/jsch-0.1.50.jar"/>
-	<classpathentry kind="lib" path="src/gui/resources/opencsv-2.3.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Dropbox/P&amp;O WIT/jsch-0.1.50.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Dropbox/P&amp;O WIT/opencsv-2.3.jar"/>
+	<classpathentry kind="lib" path="C:/OpenCV-2.4.6/build/java/opencv-246.jar"/>
+	<classpathentry kind="lib" path="C:/opencv/build/java/opencv-248.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Documents/KU Leuven/2013-2014/sem1/P&amp;O/JavaCV/javacv-bin/javacpp.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Documents/KU Leuven/2013-2014/sem1/P&amp;O/JavaCV/javacv-bin/javacv.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Documents/KU Leuven/2013-2014/sem1/P&amp;O/JavaCV/javacv-bin/javacv-windows-x86_64.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

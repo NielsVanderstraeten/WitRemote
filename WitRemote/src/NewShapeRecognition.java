@@ -158,9 +158,9 @@ public class NewShapeRecognition implements Runnable {
 	
 	public void run(){
 		
-		emptyAllParameters();
-		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		emptyAllParameters();
 
 		createImagesAndFindContours();
 
@@ -177,8 +177,8 @@ public class NewShapeRecognition implements Runnable {
 		for(int i = 0; i <= shapes.size() - 1; i++){
 			//System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) + 
 			//		" (" + points.get(i) + " points) Found color-codes: " + foundColorCodesRGB.get(i));
-			System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) +
-					" Found color-codes: " + foundColorCodesRGB.get(i));
+			System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) + " - Center: ("+ centers.get(i) +") "
+					+ foundColorCodesRGB.get(i));
 		
 		}
 		System.out.println("Time needed to read images: " + imageReadingTime + "ms");
@@ -196,7 +196,7 @@ public class NewShapeRecognition implements Runnable {
 		System.out.println("Rotation: " + rotation);
 		
 		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
-
+		//gui.updateRecognisedShapes(shapeList);
 	}
 	
 	private void createImagesAndFindContours() {
@@ -400,7 +400,7 @@ public class NewShapeRecognition implements Runnable {
 		//cvFindCoc
 		//cvFindContours
 		//int  numberOfContours= cvFindContours(imgThreshold, memory, contour, Loader.sizeof(CvContour.class),  CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cvPoint(-1, -1));
-		System.out.println("Number of contours: " + numberOfContours);
+		System.out.println("Number of contours found: " + numberOfContours);
 
 		CvMemStorage storage = CvMemStorage.create();    
 		while (contour != null && !contour.isNull()) {
@@ -418,7 +418,6 @@ public class NewShapeRecognition implements Runnable {
 				centerX = (int) (momX10 / area);
 				centerY = (int) (momY01 / area);
 				if(area > 500){
-					System.out.println("area = " + area);
 					ArrayList<CvPoint2D32f> punten = new ArrayList<CvPoint2D32f>();
 					boolean onEdge = false;
 
@@ -441,8 +440,10 @@ public class NewShapeRecognition implements Runnable {
 						if (cvPointPolygonTest(contour, p, 0) != -1)
 							onEdge = true;
 
-					if (onEdge)
+					if (onEdge){
 						System.out.println("Ligt op rand!");
+						System.out.println();
+					}
 					else
 						System.out.println("Niet op rand.");
 
@@ -454,17 +455,14 @@ public class NewShapeRecognition implements Runnable {
 						cvDrawContours(imgOrg, convexContour, CvScalar.CYAN, CvScalar.CYAN, -1, 1, CV_AA);
 						cvMoments(convexContour, moments, 1);
 						double areaHull = cvGetCentralMoment(moments, 0, 0);
-						System.out.println("areaHull = " + areaHull);
-
-						System.out.println("Verhouding " + areaHull/area);
+						
 
 						//draw points
 						for(int i = 0; i < contour.total(); i++){
 							CvPoint v = new CvPoint(cvGetSeqElem(contour, i));
 							cvDrawCircle(imgOrg, v, 1, CvScalar.WHITE, -1, 8, 0);
 						}
-
-						System.out.println("CENTER:("+centerX+", " + centerY+")");
+						
 						Vector vectorCenter = new Vector(centerX, centerY);
 
 						ArrayList<Double> list = new ArrayList<Double>();
@@ -475,10 +473,7 @@ public class NewShapeRecognition implements Runnable {
 						}            
 						Collections.sort(list);
 						double radius = list.get(list.size()-1);
-						System.out.println("radius " + radius);
 						double areaCircle = Math.PI*radius*radius;
-						System.out.println("oppervlakte cirkel = "+ areaCircle);
-						System.out.println("verhouding oppervlakte cirkel = "+ areaCircle/area);
 						String imageTxt = "";
 						if(areaHull/area > 1.2){
 							shapes.add("Star");
@@ -527,9 +522,16 @@ public class NewShapeRecognition implements Runnable {
 						//				System.out.println("Area rectangle = " + (rect.height()*rect.width()));
 						//				cvRectangle(imgOrg, cvPoint(rect.x(), rect.y()), cvPoint(rect.x()+rect.width(), rect.y()+rect.height()), 
 						//						cvScalar(255,0,0,0), 1, 0, 0);
+						System.out.println("FOUND COLOR & SHAPE: " + colors.get(colors.size()-1)+ " " + shapes.get(shapes.size()-1) +" --- CENTER:("+centerX+", " + centerY+")" + " --- AREA = " + area);
+						System.out.println("AREAHULL = " + areaHull + " --- AreaHull/Area = " + areaHull/area);
+						System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 						System.out.println();
 					}
 				}
+//				else{
+//					System.out.println("Area < 500!");
+//					System.out.println();
+//				}
             }
             contour = contour.h_next();
         }

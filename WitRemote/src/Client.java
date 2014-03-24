@@ -14,7 +14,8 @@ import commands.Command;
 public class Client
 {
 	private String serverName, path;
-	private String namePicture = "recv.jpg";
+	private String namePicture = "recv";
+	private int numberOfPicture = 0;
 	private int port;
 	private String previousCommand = "";
 
@@ -33,7 +34,7 @@ public class Client
 	}
 	
 	public String getNamePicture() {
-		return namePicture;
+		return namePicture + numberOfPicture + ".jpg";
 	}
 
 	
@@ -53,8 +54,13 @@ public class Client
 			
 			if(str.equals("takepicture")){
 				InputStream inFromServer = client.getInputStream();
-				namePicture = "recv.jpg"; //Kan eventueel vervangen worden door dynamische bestandsnaam. Nu wordt telkens de laatste foto overschreven door een nieuwe
-				File file = new File(path+namePicture);
+				
+				numberOfPicture++;
+				if(numberOfPicture > 9){
+					numberOfPicture = 1;
+				}
+				File file = new File(path+getNamePicture());
+				System.out.println("************"+path+getNamePicture());
 				OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
 				copy(inFromServer, outFile);
 				outFile.close();
