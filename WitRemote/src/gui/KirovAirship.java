@@ -33,6 +33,8 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
+import Rooster.Shape;
+
 import commands.Command;
 
 public class KirovAirship extends JFrame {
@@ -123,7 +125,7 @@ public class KirovAirship extends JFrame {
 	 * Takes a source string, finds the image, rescales to give width and height, and returns the imageIcon.
 	 * @param source
 	 * @param width
-	 * @param height
+	 * @param heightf
 	 * @return
 	 */
 	private ImageIcon getImageIcon(String source, int width, int height){
@@ -181,8 +183,8 @@ public class KirovAirship extends JFrame {
 	*/
 	private void setUpConsole(){
 		consolePane = new JLayeredPane();
-		consolePane.setLocation(10, 355);
-		consolePane.setSize(300, 256);
+		consolePane.setLocation(10, 374);
+		consolePane.setSize(300, 237);
 		totalPane.add(consolePane);
 		
 		consoleScroller = new JScrollPane();
@@ -261,6 +263,10 @@ public class KirovAirship extends JFrame {
 		mapMaker.setBounds(9, 9, mapMaker.getWidth(), mapPane.getHeight());
 		mapPane.add(mapMaker);
 		mapMaker.addMouseListener(new ZeppelinMouse());
+		
+//		JLabel background = new JLabel(getImageIcon("src/gui/resources/startphoto.jpg", mapPane.getWidth(), mapPane.getHeight()));
+//		background.setSize(mapPane.getWidth(), mapPane.getHeight());
+//		mapPane.add(background);
 		
 		//TODO wegdoen
 		updateOwnPosition((int) (widthMeters*0.1), 	(int) (heightMeters*0.1), 0);
@@ -347,21 +353,28 @@ public class KirovAirship extends JFrame {
 	}
 	
 	private JLayeredPane photoPane;
-	private JLabel photoLabel;
+	private JLabel photoLabel, recognShapeLabel;
 	/**
 	 * Maakt het fotopaneel.
 	 */
 	private void setUpPhoto(){
 		photoPane = new JLayeredPane();
 		photoPane.setLocation(10, 114);
-		photoPane.setSize(300, 230);
+		photoPane.setSize(300, 256);
 		totalPane.add(photoPane);
 		
 		photoLabel = new JLabel();
-		photoLabel.setSize(photoPane.getWidth(), photoPane.getHeight());
+		photoLabel.setSize(photoPane.getWidth(), photoPane.getHeight() - 20);
 		photoPane.add(photoLabel);
+		ImageIcon photo = getImageIcon("src/gui/resources/startphoto.jpg", photoLabel.getWidth(), photoLabel.getHeight());
+		photoLabel.setIcon(photo);
 		
-		updatePhoto();
+		recognShapeLabel = new JLabel();
+		recognShapeLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
+		recognShapeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		recognShapeLabel.setText("Found shapes");
+		recognShapeLabel.setBounds(0, photoPane.getHeight() - 20, photoPane.getWidth(), 20);
+		photoPane.add(recognShapeLabel);
 	}
 
 	/**
@@ -374,7 +387,6 @@ public class KirovAirship extends JFrame {
 		repaint();
 	}
 	
-	//TODO updatePhoto best weghalen.
 	/**
 	 * Update de relevante waarden van de gui.
 	 */
@@ -471,8 +483,27 @@ public class KirovAirship extends JFrame {
 	 * Zorgt voor de uitbeelding van de geanalyseerde foto in de gui.
 	 */
 	public void updatePhoto(){
-		ImageIcon photo = getImageIcon("src/images/analyse.jpg", photoLabel.getWidth(), photoLabel.getHeight());
+		ImageIcon photo = getImageIcon("src/gui/resources/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
+		//ImageIcon photo = getImageIcon("src/images/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setIcon(photo);
+	}
+	
+	public void setSimulatorPhoto(){
+		photoPane.remove(recognShapeLabel);
+		ImageIcon photo = getImageIcon("src/gui/resources/simulator.jpg", photoLabel.getWidth(), photoLabel.getHeight());
+		photoLabel.setSize(photoPane.getWidth(), photoPane.getHeight());
+		photoLabel.setIcon(photo);
+	}
+	
+	public void updateRecognisedShapes(ArrayList<Shape> shapes){
+		String shapeString = "";
+		for(int i = 0; i < shapes.size(); i++){
+			Shape shape = shapes.get(i);
+			shapeString += shape.getCode();
+			if(!(i == shapes.size() - 1))
+				shapeString += ", ";
+		}
+		recognShapeLabel.setText(shapeString);
 	}
 	
 	private int zeppHeight;
@@ -616,7 +647,8 @@ public class KirovAirship extends JFrame {
 		public void keyPressed(KeyEvent arg0) {
 			if(arg0.getKeyCode() == KeyEvent.VK_ENTER){
 				textEntered(inputConsole.getText());
-			}
+			} else if(arg0.getKeyCode() == KeyEvent.VK_Y)
+				updatePhoto();
 		}
 
 		@Override
