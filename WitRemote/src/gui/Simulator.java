@@ -33,6 +33,7 @@ public class Simulator implements Runnable{
 		gui.setSize(gui.getWidth(), gui.getHeight());
 		gui.setVisible(true);
 		gui.requestFocus();
+		gui.setSimulatorPhoto();
 	}
 	public static void main(String[] argvs) throws InterruptedException{
 		Simulator simulator = new Simulator("localhost");
@@ -66,14 +67,14 @@ public class Simulator implements Runnable{
 	}
 	
 	private double rotation = 0;
-	private long time = 0;
+	private long lastCalc = 0;
 	
 	private void goToDestination(){
 		long newCalc = System.currentTimeMillis();
-		time = newCalc - lastCalc;
+		long time = newCalc - lastCalc;
 		lastCalc = newCalc;
-		calcNextPosition();
-		calcNextHeight();
+		calcNextPosition(time);
+		calcNextHeight(time);
 		gui.updateGui();
 	}
 	
@@ -89,14 +90,13 @@ public class Simulator implements Runnable{
 		return false;
 	}
 	
-	private long lastCalc;
 	private double speedX, speedY;
 	private static double accelX = 0.0003; //  mm*(ms)^-2
 	private static double accelY = 0.0003; //  mm*(ms)^-2
 	private static double maxSpeedX = 0.5; // mm/ms
 	private static double maxSpeedY = 0.5; // mm/ms
 	
-	private void calcNextPosition(){
+	private void calcNextPosition(long time){
 		double diffX = goalX - ownX;
 		double diffY = goalY - ownY;
 		int directionX = (int) Math.signum(diffX);
@@ -165,7 +165,11 @@ public class Simulator implements Runnable{
 	private static double maxSpeedHeight = 0.1;
 	private static double accelHeight = 0.00003;
 	
-	private void calcNextHeight(){
+	/**
+	 * Calculates the next height.
+	 * This is based on a parabole flight, with a saved position, speed and a constant acceleration.
+	 */
+	private void calcNextHeight(long time){
 		double diff = targetHeight - height;
 		int direction = (int) Math.signum(diff);
 		
@@ -237,14 +241,15 @@ public class Simulator implements Runnable{
 	private void addNextGoal(){
 		if(goals.isEmpty())
 			return;
-		gui.updateLastCommand("We reached our goal.");
+		if(nextGoal != null)
+			gui.updateLastCommand("We reached our goal.");
 		nextGoal = goals.poll();
 		if(nextGoal instanceof GoalHeight)
 			gui.setTargetHeight(((GoalHeight) nextGoal).getTargetHeight());
 		else if(nextGoal instanceof GoalPosition)
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
 		else
-			System.err.println("ERROR bij addnextgoal");
+			System.err.println("Error bij addnextgoal");
 		nextGoal.print();
 	}
 }
