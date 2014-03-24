@@ -653,12 +653,7 @@ public class NewShapeRecognition implements Runnable {
 				shapeList.add(new Shape(centers.get(i), colors.get(i), shapes.get(i)));
 			}
 		}
-		if(shapeList.size() > 0){
-			return shapeList;
-		}
-		else{
-			return null;
-		}
+		return shapeList;
 	}
 	
 	public List<MatOfPoint> getContours(){
