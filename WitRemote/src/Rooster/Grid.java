@@ -357,10 +357,10 @@ public class Grid {
 						returnList.add(figures.get(i));
 						returnList.add(figures.get(j));
 						returnList.add(figures.get(k));
-//						System.out.println("in returnList: " );
-//						for (Shape shape: returnList) {
-//							System.out.println(shape.getCode());
-//						}
+						System.out.println("in returnList: " );
+						for (Shape shape: returnList) {
+							System.out.println(shape.getCode());
+						}
 						return returnList;
 					}
 				}
