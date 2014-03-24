@@ -283,15 +283,17 @@ public class MapMaker extends JPanel {
 	
 	public void moveOwnZeppelin(double ownX, double ownY){
 		//if(timeToRedraw < drawThreshhold){
-			double diffX = ownX - ownZeppX;
-			double diffY = ownY - ownZeppY;
-			ownZeppX = (int) ownX;
-			ownZeppY = (int) ownY;
-			
-			AffineTransform at = new AffineTransform();
-			at.translate(diffX, diffY);
-			ownZepp.transform(at);
-			firstZepp.transform(at);
+		ownX = ownX*0.9;
+		ownY = ownY*0.9;
+		double diffX = ownX - ownZeppX;
+		double diffY = ownY - ownZeppY;
+		ownZeppX = (int) ownX;
+		ownZeppY = (int) ownY;
+
+		AffineTransform at = new AffineTransform();
+		at.translate(diffX, diffY);
+		ownZepp.transform(at);
+		firstZepp.transform(at);
 		//	timeToRedraw++;
 		//} else{
 		//	firstZepp.

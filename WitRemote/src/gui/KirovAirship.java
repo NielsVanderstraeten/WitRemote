@@ -471,20 +471,19 @@ public class KirovAirship extends JFrame {
 	}
 	
 	/**
-	 * Verandert de zeppelinoogte naar de huidige waarde. Waardes moeten ingegeven worden in mm.
+	 * Verandert de zeppelinoogte naar de huidige waarde. Waardes moeten ingegeven worden in cm.
 	 * @param newheight
 	 */
 	public void updateZeppHeight(int newheight){
 		zeppHeight = newheight;
-		currentHeightLabel.setText(newheight + "mm");
+		currentHeightLabel.setText(newheight*10 + "mm");
 	}
 	
 	/**
 	 * Zorgt voor de uitbeelding van de geanalyseerde foto in de gui.
 	 */
 	public void updatePhoto(){
-		ImageIcon photo = getImageIcon("src/gui/resources/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
-		//ImageIcon photo = getImageIcon("src/images/analyse.png", photoLabel.getWidth(), photoLabel.getHeight());
+		ImageIcon photo = getImageIcon("src/images/analyse.jpg", photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setIcon(photo);
 	}
 	

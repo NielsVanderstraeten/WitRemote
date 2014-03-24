@@ -78,7 +78,7 @@ public class Grid {
 		}
 	}
 
-	//returns de rotatie in graden (x-as naar rechts, y-as naar onder)
+	//returns de rotatie in radialen (x-as naar rechts, y-as naar onder)
 	public double getRotation(ArrayList<Shape> figures) {
 		//TODO: nullpointer indien driehoek maar niet in map!!!
 		if (figuresContainTriangle(figures)) {
@@ -111,7 +111,7 @@ public class Grid {
 				Vector picCenter = myCalculator.calculateTriple(rightFigures.get(0).getPosition(), rightFigures.get(1).getPosition(), rightFigures.get(2).getPosition());
 				double pictureAngle = compare.getPosition().getAngle(picCenter);
 //				System.out.println("pictureAngle = " + pictureAngle);
-				lastRotation = (gridAngle - pictureAngle + 270)%360;
+				lastRotation = ((gridAngle - pictureAngle + 270)%360)/180*Math.PI;
 			}
 		}
 		
@@ -140,7 +140,7 @@ public class Grid {
 			// nieuwe foto maken -> nog programmeren
 		}
 		
-		return lastZepPosition;		
+		return new Vector(-1,-1);		
 	}
 	
 	private boolean figuresContainTriangle(ArrayList<Shape> figures) {

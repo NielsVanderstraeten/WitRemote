@@ -25,8 +25,8 @@ import commands.TakePicture;
 
 public class ControlManager implements Runnable{
 
-	private int REAL_WIDTH = 2400;
-	private int REAL_HEIGHT = 2000;
+	private int REAL_WIDTH = 2600;
+	private int REAL_HEIGHT = (int) (2400*Math.sqrt(3)/2);
 	
 	public static void main(String[] args){
 		Simulator simulator;
@@ -158,7 +158,7 @@ public class ControlManager implements Runnable{
 				}
 				else if(c instanceof SetPosition){
 					client.executeCommand(c);
-					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), 0);
+					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastTriangle());
 				}
 				else{

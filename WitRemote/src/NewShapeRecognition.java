@@ -10,7 +10,6 @@ import static com.googlecode.javacv.cpp.opencv_core.cvInRangeS;
 import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
 import static com.googlecode.javacv.cpp.opencv_core.cvPoint2D32f;
 import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
-import static com.googlecode.javacv.cpp.opencv_core.cvRectangle;
 import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
 import static com.googlecode.javacv.cpp.opencv_highgui.CV_LOAD_IMAGE_UNCHANGED;
 import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
@@ -26,13 +25,15 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvCanny;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvContourPerimeter;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvConvexHull2;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvCvtColor;
-import static com.googlecode.javacv.cpp.opencv_imgproc.cvDilate;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvFindContours;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvGetCentralMoment;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvGetSpatialMoment;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvMoments;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvPointPolygonTest;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
+
+
+
 import gui.KirovAirship;
 
 import java.awt.Color;
@@ -53,12 +54,10 @@ import com.googlecode.javacv.cpp.opencv_core.CvContour;
 import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
-import com.googlecode.javacv.cpp.opencv_core.CvRect;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
-
 import commands.Command;
 import commands.SetPosition;
 
@@ -195,8 +194,10 @@ public class NewShapeRecognition implements Runnable {
 		
 		System.out.println("Rotation: " + rotation);
 		
-		queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
-		//gui.updateRecognisedShapes(shapeList);
+		if (position.getX() != -1 && position.getY() != -1)
+			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
+		
+		gui.updateRecognisedShapes(shapeList);
 	}
 	
 	private void createImagesAndFindContours() {
@@ -394,8 +395,12 @@ public class NewShapeRecognition implements Runnable {
 	}
 
 	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
-		CvSeq contour = new CvSeq();
+//		CvMemStorage memStorage = CvMemStorage.create();
+//	    CvSeq seq = cvCreateSeq(0, Loader.sizeof(CvSeq.class), 
+//	          Loader.sizeof(CvPoint.class), memStorage);
 		CvMemStorage memory = CvMemStorage.create();
+		CvSeq contour = CvSeq.create(0, Loader.sizeof(CvSeq.class), 
+		          Loader.sizeof(CvPoint.class), memory);
 		int numberOfContours = cvFindContours(imgThreshold, memory, contour, Loader.sizeof(CvContour.class), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 		//cvFindCoc
 		//cvFindContours
@@ -535,6 +540,7 @@ public class NewShapeRecognition implements Runnable {
             }
             contour = contour.h_next();
         }
+		memory.release();
 	}
 	
 	private String colorToString(Color figureColor) {
