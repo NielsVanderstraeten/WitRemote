@@ -187,17 +187,18 @@ public class NewShapeRecognition implements Runnable {
 		
 		ArrayList<Shape> shapeList = makeShapeList();
 		
-		System.out.println("Made shape list");
+//		System.out.println("Made shape list");
 		Vector position = grid.getPosition(shapeList);
-		System.out.println("Position: " + position.toString());
+//		System.out.println("Position: " + position.toString());
 		double rotation = grid.getRotation(shapeList);
 		
-		System.out.println("Rotation: " + rotation);
+//		System.out.println("Rotation: " + rotation);
 		
-		if (position.getX() != -1 && position.getY() != -1)
+		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
-		
-		gui.updateRecognisedShapes(shapeList);
+			gui.updateRecognisedShapes(shapeList);
+			gui.updateOwnPosition((int) position.getX(), (int) position.getY(), rotation);
+		}
 	}
 	
 	private void createImagesAndFindContours() {

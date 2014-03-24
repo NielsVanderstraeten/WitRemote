@@ -407,6 +407,7 @@ public class KirovAirship extends JFrame {
 		ownY = y;
 		ownRotation = rotation;
 		ownXPosLabel.setText(x+" mm"); ownYPosLabel.setText(y+" mm");
+		updateGui();
 	}
 	
 	private int opponentX, opponentY;

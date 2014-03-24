@@ -120,7 +120,8 @@ public class Grid {
 	
 	public Vector getPosition(ArrayList<Shape> figures) {
 		ArrayList<Integer> points = getPoints(figures);
-		//TODO: steeds size 0, dus IndexOutOFBounsdException
+		//TODO: steeds size 0, dus IndexOutOFBounsdException OK!!
+		lastZepPosition = new Vector(-1, -1);
 		if (points.size() >= 2) {
 			int a = points.get(0);
 			int b = points.get(1);
@@ -128,6 +129,7 @@ public class Grid {
 				int c = points.get(2);
 				lastZepPosition = myCalculator.calculateTriple(a, b, c);
 				lastTriangle = points;
+				
 			}
 			else if (points.size() == 2) {
 				lastZepPosition = myCalculator.calculateDouble(a, b);
@@ -140,7 +142,7 @@ public class Grid {
 			// nieuwe foto maken -> nog programmeren
 		}
 		
-		return new Vector(-1,-1);		
+		return lastZepPosition;		
 	}
 	
 	private boolean figuresContainTriangle(ArrayList<Shape> figures) {
@@ -158,6 +160,12 @@ public class Grid {
 				ArrayList<Integer> points0 = new ArrayList<Integer>();
 				ArrayList<Integer> points1 = new ArrayList<Integer>();
 				ArrayList<Integer> points2 = new ArrayList<Integer>();
+				System.out.println("in getPoints met 3 juiste figuren:");
+				System.out.println("op zoek naar: "); 
+				for (Shape shape: rightFigures) {
+					System.out.println(shape.getCode());
+				}
+				
 				for (int i = 0; i < myMap.size(); i++) {
 					if (rightFigures.get(0).getCode().equals(myMap.get(i))) {
 						points0.add(i);
@@ -198,13 +206,13 @@ public class Grid {
 									ArrayList<Integer> returnList = new ArrayList<Integer>();
 									returnList.add(points0.get(i));
 									rightFigures.get(0).setGridPosition(points0.get(i));
-//									System.out.println("gridPosition setted: " + points0.get(i));
+									System.out.println("gridPosition setted: " + points0.get(i));
 									returnList.add(points1.get(j));
 									rightFigures.get(1).setGridPosition(points1.get(j));
-//									System.out.println("gridPosition setted: " + points1.get(j));
+									System.out.println("gridPosition setted: " + points1.get(j));
 									returnList.add(points2.get(k));
 									rightFigures.get(2).setGridPosition(points2.get(k));
-//									System.out.println("gridPosition setted: " + points2.get(k));
+									System.out.println("gridPosition setted: " + points2.get(k));
 									return returnList;
 								}
 							}
@@ -357,6 +365,7 @@ public class Grid {
 						returnList.add(figures.get(i));
 						returnList.add(figures.get(j));
 						returnList.add(figures.get(k));
+						System.out.println("------------");
 						System.out.println("in returnList: " );
 						for (Shape shape: returnList) {
 							System.out.println(shape.getCode());

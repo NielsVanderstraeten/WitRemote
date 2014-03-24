@@ -278,7 +278,7 @@ public class MapMaker extends JPanel {
 	}
 	
 	private Area ownZepp, oppZepp, firstZepp;
-	private int ownZeppX, ownZeppY, oppZeppX, oppZeppY;
+	private double ownZeppX, ownZeppY, oppZeppX, oppZeppY;
 	private int timeToRedraw, drawThreshhold;
 	
 	public void moveOwnZeppelin(double ownX, double ownY){
@@ -287,8 +287,8 @@ public class MapMaker extends JPanel {
 		ownY = ownY*0.9;
 		double diffX = ownX - ownZeppX;
 		double diffY = ownY - ownZeppY;
-		ownZeppX = (int) ownX;
-		ownZeppY = (int) ownY;
+		ownZeppX = ownX;
+		ownZeppY = ownY;
 
 		AffineTransform at = new AffineTransform();
 		at.translate(diffX, diffY);

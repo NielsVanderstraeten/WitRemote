@@ -93,7 +93,7 @@ public class ControlManager implements Runnable{
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
-		queue.add(new SetDimensions(2400,2000));
+		queue.add(new SetDimensions(REAL_WIDTH,REAL_HEIGHT));
 		grid = new Grid("plaats van CSV-bestand");
 	}
 	
@@ -102,7 +102,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public void setUpGui(){
-		gui = new KirovAirship(1280, 780, 2400, 2000, queue, goals);
+		gui = new KirovAirship(1200, 650, REAL_WIDTH, REAL_HEIGHT, queue, goals);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Zeppelin Group White");
 		gui.setSize(gui.getWidth(), gui.getHeight());
@@ -158,7 +158,7 @@ public class ControlManager implements Runnable{
 				}
 				else if(c instanceof SetPosition){
 					client.executeCommand(c);
-					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
+//					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastTriangle());
 				}
 				else{
