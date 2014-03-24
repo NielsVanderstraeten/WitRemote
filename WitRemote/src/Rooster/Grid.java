@@ -83,13 +83,13 @@ public class Grid {
 		//TODO: nullpointer indien driehoek maar niet in map!!!
 		if (figuresContainTriangle(figures)) {
 			ArrayList<Shape> rightFigures = this.getRightTriangle(figures);
-			for (Shape shape: rightFigures) {
-				System.out.println(shape.getCode());
-			}
+//			for (Shape shape: rightFigures) {
+//				System.out.println(shape.getCode());
+//			}
 			ArrayList<Integer> points = getPoints(figures);
-			int a = points.get(0);
-			int b = points.get(1);
 			if (points.size() == 3) {
+				int a = points.get(0);
+				int b = points.get(1);
 				int c = points.get(2);
 				Shape compare = null;
 				for (int i = 0; i<3; i++) {
