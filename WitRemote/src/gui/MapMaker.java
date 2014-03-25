@@ -22,15 +22,15 @@ import au.com.bytecode.opencsv.CSVReader;
 
 public class MapMaker extends JPanel {
 	private String[] code;
-	private int colums, rows, width, height;
-	private static final double standardScale = 42.5;
-	private static final double standardTotalScale = 71;
+	private int columns, rows, width, height;
+	private static final double standardScale = 10;
+	private static final double standardTotalScale = 20;
 	private double scaleX, scaleY;
 	private final double zeppScale = 1.2;	
 	private int tempwidth, tempheight;
 	
 	public MapMaker(int width, int height, int colums, int rows, String[] code){
-		this.colums = colums;
+		this.columns = colums;
 		this.rows = rows;
 		this.height = height;
 		this.width = width;
@@ -49,13 +49,7 @@ public class MapMaker extends JPanel {
 		setUpMap();
 	}
 	
-	private void setTemps(){
-		//WHY? CUZ IT WORKS!
-		tempwidth = (int) (width + (standardTotalScale - standardScale)/standardTotalScale*width/colums);
-		tempheight = (int) (height + (standardTotalScale - standardScale)/2.1/standardTotalScale*height/rows);
-		scaleX = 2*tempwidth/(2*colums+1)/standardTotalScale; 
-		scaleY = tempheight/rows/standardTotalScale;
-		
+	private void setTemps(){		
 		foundFigures = new ArrayList<Integer>();
 	}
 	
@@ -77,14 +71,14 @@ public class MapMaker extends JPanel {
 			Area toPaintArea = (Area) toPaint.getArea().clone();
 			//Als er figuren herkent zijn (en anderen kleiner moeten voorgesteld worden)
 			//Als de figuur NIET herkend is, geen positie -1 heeft (voor de zeppelins) en foundfigures niet leeg is (er zijn wel figures herkend)
-			if(!foundFigures.contains(position) && position != -1 && !foundFigures.isEmpty()){
+			if(!foundFigures.contains(position) && position != -1){
 				double scale = 0.5;
 				double x = toPaintArea.getBounds().getX();
 				double y = toPaintArea.getBounds().getY();
 				
 				AffineTransform at = new AffineTransform();
 				at.scale(scale, scale); //Kleiner maker
-				at.translate(x * (1/scale - 1), y * (1/scale - 1)); //Terug naar originele positie brengen.
+				at.translate((x + heightPerPiece/4) * (1/scale - 1), (y +heightPerPiece/4) * (1/scale - 1)); //Terug naar originele positie brengen.
 				toPaintArea.transform(at);
 			}
 			
@@ -96,27 +90,34 @@ public class MapMaker extends JPanel {
 	
 	private ArrayList<Component> toPaintAreas = new ArrayList<Component>();
 	private boolean startsWithIndent = false;
+	private int widthPerPiece, heightPerPiece;
 	
 	private void setUpMap(){
 		Color color;
 		Area toPaint = null;
-		boolean indent = !startsWithIndent;
-		int y = 0;
-		int x = 0;
-		int position = 0;
+		boolean indent = startsWithIndent;
 		
-		if(!indent)
-			x = (int) Math.floor(tempwidth/(2*colums+1));
+		widthPerPiece = (int) (width/(columns + 0.5));
+		heightPerPiece = (int) (height/rows);
+		scaleX = widthPerPiece/standardTotalScale;
+		scaleY = heightPerPiece/standardTotalScale;
 		
-		if (code != null && code.length > 0){
+		int x = 0;	int y = 0; int position = 0; //positie in het rooster, gewoon de hoeveelste.
+		if(indent)
+			x = (int) widthPerPiece/2;
+		
+		x += scaleX*(standardTotalScale - standardScale)/2;
+		y += scaleY*(standardTotalScale - standardScale)/2;
+		
+		if(code != null && code.length > 0){
 			for(int i = 0; i < code.length; i++){
 				String info = code[i];
-				color = Color.pink;
+				color = Color.pink; //debug color. Pink stuff are evil.
 				if( y > height){
-					System.err.println("Te veel symbolen om weer te geven in de figuur.\n@MapMaker - Paint: rows= " + rows + " ,colums= " + colums + "code.length= " + code.length);
-					System.exit(1);
+					System.err.println("Te veel symbolen om weer te geven in de figuur.\n@MapMaker - Paint: rows= " + rows + " ,colums= " + columns + "code.length= " + code.length);
+					return;
 				}
-				if(info != null && info.length()==2 && !info.equalsIgnoreCase("xx")){
+				if(info !=null && info.length() == 2 && !info.equalsIgnoreCase("XX")){
 					String[] letters = info.split("(?!^)");
 					//Kleur toewijzen
 					if(letters[0].equals("G"))
@@ -150,23 +151,73 @@ public class MapMaker extends JPanel {
 				//We gebruiken tempwidth om juist de plaatsen te berekenen. Omdat we alle figuren plaatsen in hun linksbovenhoek en met een standaardwaarde werken
 				//moeten we colums - 1 gebruiken.
 				//Omdat we met een inspringing werken, gebruiken we 2*colums, zodat de andere kan inspringen in de helft.
-				x = x + 2*tempwidth/(2*colums+1);
+				x = x + widthPerPiece;
 				position++;
 				//Wanneer de linksbovenhoek groter wordt dan de breedtte - de marge - de grootte van het beeldje, moeten we de volgende lijn beginnen.
-				if(x > width - tempwidth/(2*colums+1)){
+				if(x > width - widthPerPiece/2){
 					//Als we de vorige keer geen indent hebben gemaakt, moet dit nu wel.
+					indent = !indent;
 					if(indent)
-						x = (int) Math.floor(tempwidth/(2*colums+1));
+						x = (int) widthPerPiece/2;
 					else
 						x = 0;
-					y = y + tempheight/rows;
-					indent = !indent;
+					x += (standardTotalScale - standardScale)/2*scaleX;
+					y = y + heightPerPiece;
 				}
 			}
 		}
 		toPaintAreas.add(new Component(oppZepp, Color.magenta, -1));
 		toPaintAreas.add(new Component(ownZepp, Color.cyan, -1));
 		toPaintAreas.add(new Component(firstZepp, Color.black, -1));
+	}
+	
+	private Area ownZepp, oppZepp, firstZepp;
+	private double ownZeppX, ownZeppY, oppZeppX, oppZeppY;
+	private int timeToRedraw, drawThreshhold;
+	
+	public void moveOwnZeppelin(double realX, double realY){
+		double ownX = realX/400*widthPerPiece;
+		double ownY = realY/(400*Math.sqrt(3)/2)*heightPerPiece;
+		
+		ownX = ownX + widthPerPiece/2;
+		ownY = ownY + heightPerPiece/2;
+		
+		double diffX = ownX - ownZeppX;
+		double diffY = ownY - ownZeppY;
+		ownZeppX = ownX;
+		ownZeppY = ownY;
+
+		AffineTransform at = new AffineTransform();
+		at.translate(diffX, diffY);
+		ownZepp.transform(at);
+		firstZepp.transform(at);
+	}
+	
+	private double ownRotation = 0;
+	public void rotateOwnZeppelin(double rotation){
+		double diffRot = (rotation - ownRotation);
+		ownRotation = rotation;
+		
+		AffineTransform at = new AffineTransform();
+		at.rotate(diffRot, ownZeppX, ownZeppY);
+		ownZepp.transform(at);
+		firstZepp.transform(at);
+	}
+	
+	public void moveOppZeppelin(int oppX, int oppY){
+		double diffX = oppX - oppZeppX;
+		double diffY = oppY - oppZeppY;
+		oppZeppX = oppX; oppZeppY = oppY;
+		
+		AffineTransform at = new AffineTransform();
+		at.translate(diffX, diffY);
+		oppZepp.transform(at);
+	}
+	
+	private ArrayList<Integer> foundFigures;
+	
+	public void setFoundFigures(ArrayList<Integer> array){
+		foundFigures = array;
 	}
 	
 	private Area drawSquare(int x, int y){
@@ -231,14 +282,14 @@ public class MapMaker extends JPanel {
 	private void createShapes(){
 		//Scource http://www.cs.bham.ac.uk/~szh/teaching/graphics/sourcecode/DrawHeart.java
 		
-		//De shapes worden gemaakt als in een 41 op 41 vierkant. Dit is de standaardschaling.
-		Ellipse2D circle1 = new Ellipse2D.Double(0, 0, 30, 30);
-		Ellipse2D circle2 = new Ellipse2D.Double(20, 0, 30, 30);
+		//De shapes worden gemaakt als in een 10 op 10 vierkant. Dit is de standaardschaling.
+		Ellipse2D circle1 = new Ellipse2D.Double(0, 0, 7, 7);
+		Ellipse2D circle2 = new Ellipse2D.Double(5, 0, 7, 7);
 		Polygon circlePolygon = new Polygon();
-		circlePolygon.addPoint(4, 25);		
-		circlePolygon.addPoint(25, 45);
-		circlePolygon.addPoint(46,25);
-		circlePolygon.addPoint(25, 15);
+		circlePolygon.addPoint(1, 6);		
+		circlePolygon.addPoint(6, 11);
+		circlePolygon.addPoint(11,6);
+		circlePolygon.addPoint(6, 4);
 		Area area1 = new Area(circle1); // circle 1
 		Area area2 = new Area(circle2); // circle 1
 		Area area3 = new Area(circlePolygon); // diamond
@@ -246,22 +297,21 @@ public class MapMaker extends JPanel {
 		heart.add(area1);
 		heart.add(area3);
 		AffineTransform at = new AffineTransform();
-		at.translate(4,0);
-		at.scale(0.85,0.85);
+		at.translate(1,0);
 		heart.transform(at);
 		
-		Rectangle2D rectangle = new Rectangle2D.Double(0, 0, 41, 41);
+		Rectangle2D rectangle = new Rectangle2D.Double(0, 0, 10, 10);
 		square = new Area(rectangle);
 		
-		Ellipse2D circleForm = new Ellipse2D.Double(0, 0, 41, 41);
+		Ellipse2D circleForm = new Ellipse2D.Double(0, 0, 10, 10);
 		circle = new Area(circleForm);
 		
 		Polygon starPolygon = new Polygon();
-		starPolygon.addPoint(21,0);
-		starPolygon.addPoint(33,37);
-		starPolygon.addPoint(1,14);
-		starPolygon.addPoint(40,14);
-		starPolygon.addPoint(8,37);
+		starPolygon.addPoint(5,0);
+		starPolygon.addPoint(8,9);
+		starPolygon.addPoint(0,3);
+		starPolygon.addPoint(10,3);
+		starPolygon.addPoint(2,9);
 		star = new Area(starPolygon);
 			
 		Ellipse2D zeppelinShape = new Ellipse2D.Double(0, 0, 40*zeppScale, 60*zeppScale);
@@ -277,60 +327,16 @@ public class MapMaker extends JPanel {
 		firstZepp = new Area(one);
 	}
 	
-	private Area ownZepp, oppZepp, firstZepp;
-	private double ownZeppX, ownZeppY, oppZeppX, oppZeppY;
-	private int timeToRedraw, drawThreshhold;
+	private boolean simulator = false;
 	
-	public void moveOwnZeppelin(double ownX, double ownY){
-		//if(timeToRedraw < drawThreshhold){
-		ownX = ownX*0.9;
-		ownY = ownY*0.9;
-		double diffX = ownX - ownZeppX;
-		double diffY = ownY - ownZeppY;
-		ownZeppX = ownX;
-		ownZeppY = ownY;
-
-		AffineTransform at = new AffineTransform();
-		at.translate(diffX, diffY);
-		ownZepp.transform(at);
-		firstZepp.transform(at);
-		//	timeToRedraw++;
-		//} else{
-		//	firstZepp.
+	public void setSimulator(){
+		simulator = true;
 	}
-	
-	private double ownRotation = 0;
-	public void rotateOwnZeppelin(double rotation){
-		double diffRot = (rotation - ownRotation);
-		ownRotation = rotation;
-		
-		AffineTransform at = new AffineTransform();
-		at.rotate(diffRot, ownZeppX, ownZeppY);
-		ownZepp.transform(at);
-		firstZepp.transform(at);
-	}
-	
-	public void moveOppZeppelin(int oppX, int oppY){
-		double diffX = oppX - oppZeppX;
-		double diffY = oppY - oppZeppY;
-		oppZeppX = oppX; oppZeppY = oppY;
-		
-		AffineTransform at = new AffineTransform();
-		at.translate(diffX, diffY);
-		oppZepp.transform(at);
-	}
-	
-	private ArrayList<Integer> foundFigures;
-	
-	public void setFoundFigures(ArrayList<Integer> array){
-		foundFigures = array;
-	}
-	
 	public static void main(String[] args) {
 		String[] code = MapMaker.testcode(7, 7);
 		code[41] = "XX";
 		
-		MapMaker heart = new MapMaker(800, 800);
+		MapMaker heart = new MapMaker(1000, 800);
 		//MapMaker heart = new MapMaker(1200, 800, 12, 7, code);
 		heart.addMouse();
 		JFrame f = new JFrame("Heart");
@@ -386,8 +392,8 @@ public class MapMaker extends JPanel {
 		}
 		if(myEntries != null){
 			rows = myEntries.size();
-			colums = myEntries.get(0).length;
-			code = new String[rows*colums];
+			columns = myEntries.get(0).length;
+			code = new String[rows*columns];
 			int i = 0;
 			for(String[] array: myEntries){
 				for(String something: array){
@@ -408,9 +414,12 @@ public class MapMaker extends JPanel {
 		public void mousePressed(MouseEvent e){
 			int x = (int) e.getX();
 			int y = (int) e.getY();
+			System.out.println("pixel: " + x + " " + y);
+			x = changePixelToReal(x, true);
+			y = changePixelToReal(y, false);
+			System.out.println("real: " + x + " " + y);
 			if(SwingUtilities.isLeftMouseButton(e) ){
-				System.out.println("x: " + x + "\ny: " +  y);
-				moveOwnZeppelin(e.getX(), e.getY());
+				moveOwnZeppelin(x, y);
 				repaint();
 			}
 		}
@@ -430,5 +439,18 @@ public class MapMaker extends JPanel {
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
 		}
+	}
+	
+	public int changePixelToReal(int pos, boolean horizontal){
+		int direction;
+		if(horizontal)
+			direction = widthPerPiece;
+		else
+			direction = heightPerPiece;
+		pos = pos - direction/2;
+		pos = pos * 400/direction;
+		if(!horizontal)
+			pos = (int) (pos/2*Math.sqrt(3));
+		return pos;
 	}
 }
