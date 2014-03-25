@@ -133,6 +133,8 @@ public class ControlManager implements Runnable{
 		if(!goals.isEmpty())
 			nextGoal = goals.getFirst();
 		
+		NewShapeRecognition recog = new NewShapeRecognition(path + client.getNamePicture(), gui, grid, queue);
+		
 		while(!terminate){
 			Command c = null;
 			boolean analysePicture = false;
@@ -148,6 +150,8 @@ public class ControlManager implements Runnable{
 			while(!queue.isEmpty()){
 				c = queue.poll();
 				if(c instanceof TakePicture && !isThreadStillAlive(analyserThread)) {
+//					if (analyserThread != null)
+//						analyserThread.
 					analysePicture = true;
 					gui.updateLastCommand(c.getConsole());
 					client.executeCommand(c);
@@ -171,7 +175,8 @@ public class ControlManager implements Runnable{
 			
 			
 			if(analysePicture){
-				analyserThread = new Thread(new NewShapeRecognition(path + client.getNamePicture(), gui, grid, queue));
+				recog.setFile(path + client.getNamePicture());
+				analyserThread = new Thread(recog);
 				analyserThread.start();
 				analysePicture = false;
 				//TODO: update GUI
