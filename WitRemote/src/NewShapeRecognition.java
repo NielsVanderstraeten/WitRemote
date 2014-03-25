@@ -180,10 +180,10 @@ public class NewShapeRecognition implements Runnable {
 					+ foundColorCodesRGB.get(i));
 		
 		}
-		System.out.println("Time needed to read images: " + imageReadingTime + "ms");
-		System.out.println("Time needed to write images: " + imageWritingTime + "ms");
-		System.out.println("Actual time needed processing images with JAVACV: " + javaCVProcessingTime +"ms");
-		System.out.println("Total time for real program: " + (imageReadingTime + javaCVProcessingTime));
+//		System.out.println("Time needed to read images: " + imageReadingTime + "ms");
+//		System.out.println("Time needed to write images: " + imageWritingTime + "ms");
+//		System.out.println("Actual time needed processing images with JAVACV: " + javaCVProcessingTime +"ms");
+//		System.out.println("Total time for real program: " + (imageReadingTime + javaCVProcessingTime));
 		
 		ArrayList<Shape> shapeList = makeShapeList();
 		
@@ -209,7 +209,7 @@ public class NewShapeRecognition implements Runnable {
 		prev = System.currentTimeMillis();
 		imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
 		imageReadingTime =+ (System.currentTimeMillis() - prev);
-		System.out.println("TIME IplImage inlezen: " + (System.currentTimeMillis() - prev) + "ms");
+//		System.out.println("TIME IplImage inlezen: " + (System.currentTimeMillis() - prev) + "ms");
 	    
 	    //***** HSV en GREYSCALE *****//
 	    // http://ganeshtiwaridotcomdotnp.blogspot.be/2011/12/javacv-image-thresholding-hsv-color.html
@@ -447,11 +447,11 @@ public class NewShapeRecognition implements Runnable {
 							onEdge = true;
 
 					if (onEdge){
-						System.out.println("Ligt op rand!");
-						System.out.println();
+//						System.out.println("Ligt op rand!");
+//						System.out.println();
 					}
 					else
-						System.out.println("Niet op rand.");
+//						System.out.println("Niet op rand.");
 
 					if (! onEdge) {
 

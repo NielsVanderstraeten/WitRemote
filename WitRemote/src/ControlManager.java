@@ -114,6 +114,7 @@ public class ControlManager implements Runnable{
 		//Standaard hoogte van 1m invoeren als targethoogte.
 		nextGoal = new GoalHeight(1000);
 		gui.updateZeppHeight(1500);
+		queue.add(new SetGoalHeight(1000));
 		//TODO HIER MOETEN DE GOALS KOMEN.
 		//WE KUNNEN MISSCHIEN AUTOMATISEREN, MAAR DAS LASTIG :D
 	}

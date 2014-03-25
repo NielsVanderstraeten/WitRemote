@@ -121,7 +121,7 @@ public class TextParser {
 			if(height < 0)
 				return "Please enter a positive amount.";
 			else{
-				goals.add(new GoalHeight(height));
+				queue.add(new SetGoalHeight(height));
 				return "Adding a new goal height: height = "+ height + "mm.";
 			}
 		}

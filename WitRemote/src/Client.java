@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -78,6 +79,9 @@ public class Client
 						
 			previousCommand = str;
 			client.close();	
+		}
+		catch (ConnectException e) {
+			System.out.println("Connectie nog niet aanvaard.");
 		}
 		catch(UnknownHostException e)
 		{
