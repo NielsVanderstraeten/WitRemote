@@ -25,8 +25,10 @@ import commands.TakePicture;
 
 public class ControlManager implements Runnable{
 
-	private int REAL_WIDTH = 2600;
-	private int REAL_HEIGHT = (int) (2400*Math.sqrt(3)/2);
+	private final static int columnReal = 7;
+	private final static int rowReal = 7;
+	private final static int REAL_WIDTH = 400*columnReal;
+	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
 	
 	public static void main(String[] args){
 		Simulator simulator;
@@ -102,7 +104,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public void setUpGui(){
-		gui = new KirovAirship(1200, 650, REAL_WIDTH, REAL_HEIGHT, queue, goals);
+		gui = new KirovAirship(1280, 780, REAL_WIDTH, REAL_HEIGHT, queue, goals);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Zeppelin Group White");
 		gui.setSize(gui.getWidth(), gui.getHeight());
@@ -114,7 +116,6 @@ public class ControlManager implements Runnable{
 		//Standaard hoogte van 1m invoeren als targethoogte.
 		nextGoal = new GoalHeight(1000);
 		gui.updateZeppHeight(1500);
-		queue.add(new SetGoalHeight(1000));
 		//TODO HIER MOETEN DE GOALS KOMEN.
 		//WE KUNNEN MISSCHIEN AUTOMATISEREN, MAAR DAS LASTIG :D
 	}
@@ -159,7 +160,7 @@ public class ControlManager implements Runnable{
 				}
 				else if(c instanceof SetPosition){
 					client.executeCommand(c);
-//					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
+					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastTriangle());
 				}
 				else{

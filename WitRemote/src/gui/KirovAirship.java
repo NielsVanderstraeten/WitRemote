@@ -34,11 +34,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import Rooster.Shape;
-
 import commands.Command;
 
 public class KirovAirship extends JFrame {
-
+	
+	private final static int columnReal = 7;
+	private final static int rowReal = 7;
+	public final static int REAL_WIDTH = 400*columnReal;
+	public final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
 	private static final long serialVersionUID = 1L;
 	private JLayeredPane totalPane;
 	//Height en width van het scherm
@@ -97,7 +100,7 @@ public class KirovAirship extends JFrame {
 	 * @param goals
 	 */
 	public KirovAirship(LinkedList<Command> queue, LinkedList<Goal> goals){
-		this(1200, 650, 4000, 4000, queue, goals);
+		this(1200, 650, REAL_WIDTH, REAL_HEIGHT, queue, goals);
 	}
 	
 	/**
@@ -381,9 +384,9 @@ public class KirovAirship extends JFrame {
 	 * Beweegt de zeppelins naar de coordinaten die in de gui zitten.
 	 */
 	private void moveZeppelins(){
-		mapMaker.moveOwnZeppelin(ownX * mapMaker.getWidth() / widthMeters, ownY * mapMaker.getHeight() / heightMeters);
+		mapMaker.moveOwnZeppelin(ownX, ownY);
 		mapMaker.rotateOwnZeppelin(ownRotation);
-		mapMaker.moveOppZeppelin(opponentX * mapMaker.getWidth() / widthMeters, opponentY * mapMaker.getHeight() / heightMeters);
+		mapMaker.moveOppZeppelin(opponentX, opponentY);
 		repaint();
 	}
 	
@@ -407,7 +410,6 @@ public class KirovAirship extends JFrame {
 		ownY = y;
 		ownRotation = rotation;
 		ownXPosLabel.setText(x+" mm"); ownYPosLabel.setText(y+" mm");
-		updateGui();
 	}
 	
 	private int opponentX, opponentY;
@@ -562,6 +564,10 @@ public class KirovAirship extends JFrame {
 		mapMaker.setFoundFigures(array);
 	}
 	
+	public void setDebug(){
+		
+	}
+	
 	//TODO Testcode: wegdoen uiteindelijk
 	private String[] testcode(int rows, int colums){
 		String[] code = new String[rows*colums];
@@ -607,19 +613,22 @@ public class KirovAirship extends JFrame {
 	
 	//TODO dit weghalen, of toch alleen doel bijhouden.
 	private class ZeppelinMouse implements MouseListener{
+		int mouseX, mouseY;
 		@Override
 		public void mousePressed(MouseEvent e){
-			int x = (int) e.getX() ;
-			int y = (int) e.getY();
+			mouseX = (int) e.getX();
+			mouseY = (int) e.getY();
+			System.out.println("pixel: " + mouseX + " " + mouseY);
+			changePixelToReal();
 			if(SwingUtilities.isLeftMouseButton(e) ){
 				//goals.offer(new GoalPosition(x, y));
-				setGoalPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight());
+				setGoalPosition(mouseX,mouseY);
 			}
 			else if(SwingUtilities.isRightMouseButton(e) ){
-				updateOwnPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight(), ownRotation);
+				updateOwnPosition(mouseX, mouseY, ownRotation);
 			}
 			else if(SwingUtilities.isMiddleMouseButton(e) ){
-				updateOpponentPosition(x * widthMeters / mapMaker.getWidth(), y * heightMeters / mapMaker.getHeight());
+				updateOpponentPosition(mouseX, mouseY);
 			}
 			updateGui();
 		}
@@ -638,6 +647,11 @@ public class KirovAirship extends JFrame {
 
 		@Override
 		public void mouseReleased(MouseEvent arg0) {
+		}
+		private void changePixelToReal(){
+			mouseX = mapMaker.changePixelToReal(mouseX, true);
+			mouseY = mapMaker.changePixelToReal(mouseY, false);
+			System.out.println("real: " + mouseX + " " + mouseY);
 		}
 	}
 
@@ -665,9 +679,4 @@ public class KirovAirship extends JFrame {
 		
 	}
 	
-	//DEBUGMETHODE voor simulator
-	public void updateSpeed(int x, int y){
-		currentHeightLabel.setText(x + "");
-		targetHeightLabel.setText(y +"");
-	}
 }

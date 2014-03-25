@@ -24,4 +24,8 @@ public class Component {
 	public int getPosition(){
 		return position;
 	}
+	
+	public void setArea(Area area){
+		this.area=area;
+	}
 }
