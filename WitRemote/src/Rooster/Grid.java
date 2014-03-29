@@ -316,16 +316,9 @@ public class Grid {
 		lastFoundZepPosition = new Vector(-1, -1);
 		if (rightpoints.size() >= 2) {
 			int a = rightpoints.get(0);
-//			System.out.println("a = " + a + ", " + myMap.get(a));
-//			System.out.println("a = " + triangles.get(lastTriangle).get(0).getCode());
 			int b = rightpoints.get(1);
-//			System.out.println("b = " + b + ", " + myMap.get(b));
-//			System.out.println("b = " + triangles.get(lastTriangle).get(1).getCode());
 			if (rightpoints.size() == 3) {
-				int c = rightpoints.get(2);
-//				System.out.println("c = " + c + ", " + myMap.get(c));
-//				System.out.println("c = " + triangles.get(lastTriangle).get(2).getCode());
-//				lastFoundZepPosition = myCalculator.calculateTriple(a, b, c);
+//				int c = rightpoints.get(2);
 				lastFoundZepPosition = myCalculator.getPictureMiddle(triangles.get(lastTriangle).get(0).getPosition(), a, triangles.get(lastTriangle).get(1).getPosition(), b);
 				
 			}

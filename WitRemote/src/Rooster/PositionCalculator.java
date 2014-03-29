@@ -9,7 +9,6 @@ public class PositionCalculator {
 	private int height;
 	private final int distance = 400; // in mm
 	private final boolean startLeft;
-	private final Vector pictureSize;
 	private final Vector pictureMiddle;
 	
 	public PositionCalculator(int width, int height, boolean startLeft, Vector pictureSize) {
@@ -18,7 +17,6 @@ public class PositionCalculator {
 		this.width = width;
 		this.height = height;
 		this.startLeft = startLeft;
-		this.pictureSize = pictureSize;
 		this.pictureMiddle = new Vector(pictureSize.getX()/2, pictureSize.getY()/2);
 	}
 	
