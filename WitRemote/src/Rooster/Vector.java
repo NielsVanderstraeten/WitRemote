@@ -40,7 +40,6 @@ public class Vector {
 		else if (deltaX > 0) {
 			//deviation = Math.PI/2 - Math.atan(slope);
 			deviation = Math.atan(slope);
-			System.out.println(deviation);
 		}
 		else {
 			//deviation = -(Math.PI/2 + Math.atan(slope));

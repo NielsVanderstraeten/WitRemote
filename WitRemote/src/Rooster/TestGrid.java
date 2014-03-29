@@ -144,28 +144,63 @@ public class TestGrid {
 		System.out.println("in comleteGrid()");
 		Grid grid = new Grid("blablabla");
 		ArrayList<Shape> myList = new ArrayList<Shape>();
-		myList.add(new Shape(50,62,"WR"));
-		myList.add(new Shape(80,10,"BH"));
-		myList.add(new Shape(140,10,"BH"));
-		myList.add(new Shape(110,62,"BC"));
+//		myList.add(new Shape(377,381,"GH"));
+//		myList.add(new Shape(435,381,"YR"));
+//		myList.add(new Shape(495,381,"RR"));
+//		myList.add(new Shape(405,330,"YS"));
+//		myList.add(new Shape(465,330,"WR"));
 		
-		ArrayList<Integer> result = grid.getPoints(myList);
-		System.out.println("de gevonden punten op het rooster zijn:");
-		System.out.println("de size = " + result.size());
-		for (int i = 0; i< result.size(); i++) {
-			System.out.println(result.get(i));
-		}		
-		Vector vector = grid.getPosition(myList);
-		double rot = grid.getRotation(myList);
-		System.out.println(vector.getX());
-		System.out.println(vector.getY());
-		System.out.println(rot);
+		myList.add(new Shape(323,281,"GC"));
+		myList.add(new Shape(427,281,"BH"));
+		myList.add(new Shape(375,251,"BC"));
+		myList.add(new Shape(375,311,"BH"));
 		
-		ArrayList<Integer> points = grid.getLastTriangle(); 
-		for (int i: points) {
+		
+//		ArrayList<Integer> result = grid.getPoints(myList);
+//		System.out.println("de gevonden punten op het rooster zijn:");
+//		System.out.println("de size = " + result.size());
+//		for (int i = 0; i< result.size(); i++) {
+//			System.out.println(result.get(i));
+//		}		
+//		Vector vector = grid.getPosition(myList);
+//		double rot = grid.getRotation(myList);
+//		System.out.println(vector.getX());
+//		System.out.println(vector.getY());
+//		System.out.println(rot);
+//		
+//		ArrayList<Integer> points = grid.getLastTriangle(); 
+//		for (int i: points) {
+//			System.out.println(i);
+//		}
+		
+		System.out.println("-------------------------------");
+		Vector uitkomst = grid.getPositionNew(myList);
+		System.out.println(uitkomst.toString());
+		System.out.println("rotation:");
+		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
+		System.out.println("foundFigures:");
+		ArrayList<Integer> figures = grid.getLastFigures();
+		for (Integer i: figures) {
 			System.out.println(i);
+			System.out.println(grid.getPositionCalculator().getVector(i).toString());
 		}
-		
+//		System.out.println(grid.getPositionCalculator().getVector(11).toString());
+//		System.out.println(grid.getPositionCalculator().getVector(12).toString());
+//		System.out.println(grid.getPositionCalculator().getVector(18).toString());
+//		System.out.println(grid.getPositionCalculator().getVector(19).toString());
+//		System.out.println(grid.getPositionCalculator().getVector(20).toString());
+	}
+	
+	@Test
+	public void VectorTest() {
+		System.out.println("vector angle test");
+		Vector vec = new Vector(0,0);
+		Vector test = new Vector(1,1);
+		Vector test2 = new Vector(1,-1);
+		System.out.println(vec.getAngle(test));
+		System.out.println(vec.getAngle(test2));
+		System.out.println(test.getAngle(vec));
+		System.out.println(test2.getAngle(vec));
 	}
 
 }
