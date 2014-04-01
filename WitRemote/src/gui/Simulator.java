@@ -17,9 +17,7 @@ public class Simulator implements Runnable{
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
 		
-		goals.addLast(new GoalHeight(500));
-		goals.addLast(new GoalHeight(500));
-		goals.addLast(new GoalHeight(200));
+		goals.addLast(new GoalHeight(100));
 		createGUI();
 		ownX = gui.getOwnX();
 		ownY = gui.getOwnY();
