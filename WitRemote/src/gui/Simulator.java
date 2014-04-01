@@ -18,8 +18,11 @@ public class Simulator implements Runnable{
 		goals = new LinkedList<Goal>();
 		
 		goals.addLast(new GoalHeight(500));
-	//	goals.addLast(new GoalHeight(200));
+		goals.addLast(new GoalHeight(500));
+		goals.addLast(new GoalHeight(200));
 		createGUI();
+		ownX = gui.getOwnX();
+		ownY = gui.getOwnY();
 	}
 	
 	private KirovAirship gui;
@@ -27,12 +30,13 @@ public class Simulator implements Runnable{
 	private void createGUI(){
 		gui = new KirovAirship(1200, 650, KirovAirship.REAL_WIDTH, KirovAirship.REAL_HEIGHT, queue, goals);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gui.setTitle("Genious Labelling and Distancesensor Operating Zeppelin (G.L.A.D.O.Z.)");
+		gui.setTitle("Genious Label Analyser and Distancesensor Operating Zeppelin (G.L.A.D.O.Z.)");
 		gui.setSize(gui.getWidth(), gui.getHeight());
 		gui.setVisible(true);
 		gui.requestFocus();
 		gui.setSimulatorPhoto();
 	}
+	
 	public static void main(String[] argvs) throws InterruptedException{
 		Simulator simulator = new Simulator("localhost");
 		if(argvs.length > 0 && argvs[0].equals("-debug"))
@@ -60,9 +64,8 @@ public class Simulator implements Runnable{
 	private double ownX, ownY;
 	
 	private void getDestination(){
-		ownX = gui.getOwnX(); ownY = gui.getOwnY();
 		goalX = gui.getGoalX(); goalY = gui.getGoalY();
-		height = gui.getZeppHeight(); targetHeight = gui.getTargetHeight();
+		targetHeight = gui.getTargetHeight();
 	}
 	
 	private double rotation = 0;
@@ -159,9 +162,10 @@ public class Simulator implements Runnable{
 	
 	private double height = 0;
 	private double targetHeight;
-	private double heightSpeed;
+	private double heightSpeed = 0;
 	private static double maxSpeedHeight = 0.1;
 	private static double accelHeight = 0.00003;
+	private boolean fancy = true; //TODO veranderen
 	
 	/**
 	 * Calculates the next height.
@@ -170,41 +174,31 @@ public class Simulator implements Runnable{
 	private void calcNextHeight(long time){
 		double diff = targetHeight - height;
 		int direction = (int) Math.signum(diff);
+		int accel = 0;
 		
-//		if(fuzzyEquals(height, targetHeight)){ //If almost there
-//			if(heightSpeed == 0)
-//				;//Do nothing
-//			else if(fuzzyEqualsParam(heightSpeed, 0, accelHeight*time)) //If speed is almost 0, we set to 0
-//				heightSpeed = 0;
-//			else // If speed is less than 0, we decrease the speed by the acceleration * time, in the opposite direction of the speed (deceleration).
-//				heightSpeed = heightSpeed - Math.signum(heightSpeed)*accelHeight*time;
-//		} else{ // If not there
-//			if(!isSameDirection(diff, heightSpeed)) // If we aren't going the right way, we try to accelerate the right way.
-//				heightSpeed = heightSpeed + direction * accelHeight * time;
-//			else {
-//				int accel = canSlowDown(diff, heightSpeed, -direction*accelHeight);
-//				if(accel == 1) //If we can slow down fast enough to get there
-//					heightSpeed = heightSpeed + direction * heightSpeed * time; //We go faster
-//				else if(accel == -1) //If we can't slow down, we should really start deceleration some time soon.
-//					heightSpeed = heightSpeed - direction * accelHeight * time; // we go slower
-//				//If accel = 0, we do not change the speed.
-//				if(Math.abs(heightSpeed) > Math.abs(maxSpeedHeight)) // If we are faster than the maximum speed, then we slow down to max speed.
-//					heightSpeed = maxSpeedHeight * direction;
-//			}
-//		}
-		
-		if(fuzzyEqualsParam(height, targetHeight, maxSpeedHeight*time)){
-			if(height == targetHeight)
+		if(fuzzyEquals(height, targetHeight)){ //If almost there
+			if(heightSpeed == 0)
+				;//Do nothing
+			else if(fuzzyEqualsParam(heightSpeed, 0, accelHeight*time)) //If speed is almost 0, we set to 0
 				heightSpeed = 0;
-			else
-				heightSpeed = diff/time;
-		} else{
-			heightSpeed = direction * maxSpeedHeight;
+			else // If speed is less than 0, we decrease the speed by the acceleration * time, in the opposite direction of the speed (deceleration).
+				heightSpeed = heightSpeed - Math.signum(heightSpeed)*accelHeight*time;
+		} else{ // If not there
+			if(!isSameDirection(diff, heightSpeed)) // If we aren't going the right way, we try to accelerate the right way.
+				heightSpeed = heightSpeed + direction * accelHeight * time;
+			else {
+				accel = canSlowDown(diff, heightSpeed, -direction*accelHeight);
+				if(accel == 1) //If we can slow down fast enough to get there
+					heightSpeed = heightSpeed + direction * accelHeight * time; //We go faster
+				else if(accel == -1) //If we can't slow down, we should really start deceleration some time soon.
+					heightSpeed = heightSpeed - direction * accelHeight * time; // we go slower
+				//If accel = 0, we do not change the speed.
+				if(Math.abs(heightSpeed) > Math.abs(maxSpeedHeight)) // If we are faster than the maximum speed, then we slow down to max speed.
+					heightSpeed = maxSpeedHeight * direction;
+			}
 		}
-		
-		//System.out.println("T " +  targetHeight + " C " + height + " S " + heightSpeed + " " + direction  +" " + accel + " D " + diff);
 		height = height + heightSpeed*time;
-		gui.updateZeppHeight((int) height);
+		gui.updateZeppHeightMM((int) (height));
 	}
 	
 	private boolean isSameDirection(double position, double speed){
