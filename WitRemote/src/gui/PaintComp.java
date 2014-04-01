@@ -3,9 +3,9 @@ package gui;
 import java.awt.Color;
 import java.awt.geom.Area;
 
-public class Component {
+public class PaintComp {
 
-	public Component(Area area, Color color, int position){
+	public PaintComp(Area area, Color color, int position){
 		this.area = area;
 		this.color = color;
 		this.position = position;

@@ -1,6 +1,6 @@
 package gui;
 
-import goals.Goal;
+import goals.*;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -293,7 +293,7 @@ public class KirovAirship extends JFrame {
 		informationPane.setLayout(new GridLayout(3, 5, 0, 0));
 		
 		// Eerst rij
-		JLabel emptyLabel = new JLabel("dist in mm");
+		JLabel emptyLabel = new JLabel("");
 		informationPane.add(emptyLabel);
 		
 		JLabel heightTextLabel = new JLabel("Height");
@@ -478,8 +478,12 @@ public class KirovAirship extends JFrame {
 	 * @param newheight
 	 */
 	public void updateZeppHeight(int newheight){
-		zeppHeight = newheight;
-		currentHeightLabel.setText(newheight*10 + "mm");
+		updateZeppHeight(newheight * 10);
+	}
+	
+	public void updateZeppHeightMM(int newheight){
+		zeppHeight = newheight/10;
+		currentHeightLabel.setText(newheight + "mm");
 	}
 	
 	/**
@@ -607,7 +611,6 @@ public class KirovAirship extends JFrame {
 //		for(int i = 0; i < code.length; i++)
 //			test += code[i];
 //		System.out.println(test);
-		
 		return code;
 	}
 	
@@ -618,11 +621,10 @@ public class KirovAirship extends JFrame {
 		public void mousePressed(MouseEvent e){
 			mouseX = (int) e.getX();
 			mouseY = (int) e.getY();
-			System.out.println("pixel: " + mouseX + " " + mouseY);
 			changePixelToReal();
 			if(SwingUtilities.isLeftMouseButton(e) ){
-				//goals.offer(new GoalPosition(x, y));
-				setGoalPosition(mouseX,mouseY);
+				goals.addFirst(new GoalPosition(mouseX ,mouseY));
+				//setGoalPosition(mouseX,mouseY);
 			}
 			else if(SwingUtilities.isRightMouseButton(e) ){
 				updateOwnPosition(mouseX, mouseY, ownRotation);
@@ -651,7 +653,6 @@ public class KirovAirship extends JFrame {
 		private void changePixelToReal(){
 			mouseX = mapMaker.changePixelToReal(mouseX, true);
 			mouseY = mapMaker.changePixelToReal(mouseY, false);
-			System.out.println("real: " + mouseX + " " + mouseY);
 		}
 	}
 

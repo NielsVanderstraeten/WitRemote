@@ -66,7 +66,7 @@ public class MapMaker extends JPanel {
 	@Override
 	public void paintComponent (Graphics g){
 		Graphics2D g2 = (Graphics2D)g;
-		for(Component toPaint: toPaintAreas){
+		for(PaintComp toPaint: toPaintAreas){
 			int position = toPaint.getPosition();
 			Area toPaintArea = (Area) toPaint.getArea().clone();
 			//Als er figuren herkent zijn (en anderen kleiner moeten voorgesteld worden)
@@ -88,7 +88,7 @@ public class MapMaker extends JPanel {
 		}
 	}
 	
-	private ArrayList<Component> toPaintAreas = new ArrayList<Component>();
+	private ArrayList<PaintComp> toPaintAreas = new ArrayList<PaintComp>();
 	private boolean startsWithIndent = false;
 	private int widthPerPiece, heightPerPiece;
 	
@@ -145,7 +145,7 @@ public class MapMaker extends JPanel {
 					else
 						toPaint = drawRetard(x,y);
 					
-					toPaintAreas.add(new Component(toPaint, color, position));
+					toPaintAreas.add(new PaintComp(toPaint, color, position));
 				}
 				//Volgende coordinaten berekenen
 				//We gebruiken tempwidth om juist de plaatsen te berekenen. Omdat we alle figuren plaatsen in hun linksbovenhoek en met een standaardwaarde werken
@@ -166,9 +166,9 @@ public class MapMaker extends JPanel {
 				}
 			}
 		}
-		toPaintAreas.add(new Component(oppZepp, Color.magenta, -1));
-		toPaintAreas.add(new Component(ownZepp, Color.cyan, -1));
-		toPaintAreas.add(new Component(firstZepp, Color.black, -1));
+		toPaintAreas.add(new PaintComp(oppZepp, Color.magenta, -1));
+		toPaintAreas.add(new PaintComp(ownZepp, Color.cyan, -1));
+		toPaintAreas.add(new PaintComp(firstZepp, Color.black, -1));
 	}
 	
 	private Area ownZepp, oppZepp, firstZepp;
@@ -414,10 +414,8 @@ public class MapMaker extends JPanel {
 		public void mousePressed(MouseEvent e){
 			int x = (int) e.getX();
 			int y = (int) e.getY();
-			System.out.println("pixel: " + x + " " + y);
 			x = changePixelToReal(x, true);
 			y = changePixelToReal(y, false);
-			System.out.println("real: " + x + " " + y);
 			if(SwingUtilities.isLeftMouseButton(e) ){
 				moveOwnZeppelin(x, y);
 				repaint();
