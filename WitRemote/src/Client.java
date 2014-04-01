@@ -13,8 +13,7 @@ import java.net.UnknownHostException;
 
 import commands.Command;
 
-public class Client
-{
+public class Client implements Runnable {
 	private String serverName, path;
 	private String namePicture = "recv";
 	private int numberOfPicture = 0;
@@ -46,6 +45,7 @@ public class Client
 		executeCommand(cmd.toString());
 	}
 	*/
+	//De bedoeling is dat de socket connectie enkel de foto's ontvangt. Daarom zal de executeCommand vervangen worden door de executeCommand van RabbitClient
 	@Deprecated
 	public String executeCommand(Command c){
 		String str = c.getPiCommand();

@@ -37,7 +37,7 @@ public class TestServer implements Runnable{
 			channel.basicQos(1);
 			consumer = new QueueingConsumer(channel);
 			channel.basicConsume(queueName, true, consumer);
-			System.out.println(" [x] Awaiting RPC requests");
+			System.out.println("[x] Awaiting RPC requests");
 		}
 		catch(Exception e){
 			System.err.println("Error in TestServer constructor");

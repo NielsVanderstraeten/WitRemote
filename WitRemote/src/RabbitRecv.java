@@ -39,7 +39,7 @@ public class RabbitRecv {
 			channel.basicQos(1);
 			consumer = new QueueingConsumer(channel);
 			channel.basicConsume(queueName, true, consumer);
-			System.out.println(" [x] Awaiting RPC requests");
+			System.out.println("[x] Awaiting RPC requests");
 		}
 		catch(Exception e){
 			System.err.println("Error in TestServer constructor");
@@ -61,16 +61,18 @@ public class RabbitRecv {
 				if(topic.equals("white.info.height"))
 					gui.updateZeppHeightMM(Integer.parseInt(message));
 				
-				else if(topic.equals("white.private.terminate"))
-					if(message.equals("true"))
-							terminated = true;
-				
+				else if(topic.equals("white.private.terminate")){
+					System.out.println(message);
+					if(message.equalsIgnoreCase("true"))
+						terminated = true;
+				}
 				System.out.println("[.] " + topic + ": " + message);
 			}
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
+		System.out.println("terminate");
 	}
 	private ArrayList<String> topics;
 	private void setUpTopics(){
@@ -82,6 +84,11 @@ public class RabbitRecv {
 	private void declareTopicBinds() throws IOException{
 		for(String topic: topics)
 			channel.queueBind(queueName, exchangeName, topic);
+	}
+	
+	public static void main(String[] args){
+		RabbitRecv recv = new RabbitRecv("localhost", "server", null);
+		recv.run();
 	}
 
 }

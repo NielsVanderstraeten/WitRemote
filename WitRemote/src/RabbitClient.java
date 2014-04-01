@@ -36,7 +36,6 @@ public class RabbitClient implements Runnable{
 	
 	public RabbitClient(String host, String exchangeName){
 		setUpConnection(host, exchangeName);
-		setUpSocket(server, port);
 		this.exchangeName = exchangeName;
 	}
 	
@@ -69,16 +68,7 @@ public class RabbitClient implements Runnable{
 		}
 	}
 	
-	private void setUpSocket(String server, int port){
-		try{
-			socket = new Socket(server, port);
-			inFromServer = socket.getInputStream();
-		} catch(IOException ioe){
-			System.err.println("Error in setting up socket.");
-		}
-	}
-	
-	private String sendMessage(String message, String topic){
+	public String sendMessage(String message, String topic){
 		String response = null;
 		try{
 			//Sending the message
@@ -99,7 +89,7 @@ public class RabbitClient implements Runnable{
 		String returnMessage = "";
 //		try{
 			String str = command.getPiCommand();
-			String topic = command.getTopic();
+			String topic = "white." + command.getTopic();
 			
 			sendMessage(str, topic);
 			
@@ -140,13 +130,9 @@ public class RabbitClient implements Runnable{
 		
 	public static void main(String[] argvs) throws InterruptedException{
 		RabbitClient client = new RabbitClient("localhost", "server");
-		int i = 0;
-		while(i < 10){
-			String recv = client.sendMessage(""+i, "white.test");
-			System.out.println(recv);
-			i++;
-			Thread.sleep(1000);
-		}
+		//client.sendMessage("1000", "white.info.height");
+		client.sendMessage("spam", "white.private.terminate");
+		client.sendMessage("true", "white.private.terminate");
 		client.closeChannel();
 	}
 	
