@@ -318,9 +318,26 @@ public class Grid {
 			int a = rightpoints.get(0);
 			int b = rightpoints.get(1);
 			if (rightpoints.size() == 3) {
-//				int c = rightpoints.get(2);
-				lastFoundZepPosition = myCalculator.getPictureMiddle(triangles.get(lastTriangle).get(0).getPosition(), a, triangles.get(lastTriangle).get(1).getPosition(), b);
-				
+				int c = rightpoints.get(2);
+				Shape compare = null;
+				for (int i = 0; i<3; i++) {
+					boolean test = false;
+					for (int j = 0; j<3; j++) {
+						if (i !=j) {
+							test = (triangles.get(lastTriangle).get(i).getCode() == triangles.get(lastTriangle).get(j).getCode());
+						}
+					}
+					if (!test) {
+						compare = triangles.get(lastTriangle).get(i);
+					}
+				}
+				if (!(compare == null)) {
+					Vector vector1 = triangles.get(lastTriangle).get(0).getPosition();
+					Vector vector2 = triangles.get(lastTriangle).get(1).getPosition();
+					Vector vector3 = triangles.get(lastTriangle).get(2).getPosition();
+					lastFoundZepPosition = myCalculator.getPictureMiddle(myCalculator.calculateTriple(vector1, vector2, vector3), myCalculator.calculateTriple(a, b, c), compare.getPosition(), compare.getGridPosition());
+//					lastFoundZepPosition = myCalculator.getPictureMiddle(triangles.get(lastTriangle).get(0).getPosition(), a, triangles.get(lastTriangle).get(1).getPosition(), b);
+				}
 			}
 			else if (rightpoints.size() == 2) {
 				lastFoundZepPosition = myCalculator.calculateDouble(a, b);

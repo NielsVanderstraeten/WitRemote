@@ -478,7 +478,7 @@ public class KirovAirship extends JFrame {
 	 * @param newheight
 	 */
 	public void updateZeppHeight(int newheight){
-		updateZeppHeight(newheight * 10);
+		updateZeppHeightMM(newheight * 10);
 	}
 	
 	public void updateZeppHeightMM(int newheight){

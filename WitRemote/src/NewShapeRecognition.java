@@ -52,6 +52,7 @@ import Rooster.Shape;
 import Rooster.Vector;
 
 import com.googlecode.javacpp.Loader;
+import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvContour;
 import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
@@ -60,6 +61,7 @@ import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
+import com.googlecode.javacv.cpp.opencv_core.IplImageArray;
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
 
 import commands.Command;
@@ -97,6 +99,17 @@ public class NewShapeRecognition implements Runnable {
 	 */
 	private ArrayList<String> foundColorCodesRGB = new ArrayList<String>();
 	
+	/**
+	 * list van shapes
+	 */
+	private ArrayList<Shape> shapeList = new ArrayList<Shape>();
+	
+	/**
+	 * iplimages
+	 */
+	private IplImage imgOrg, imgHSV, imgSmooth, imgThresholdWhite, 
+	imgThresholdWhiteCanny, imgThresholdHSVDarkColors;
+	
 	@SuppressWarnings("unused")
 	private int stars,rectangles,hearts,circles,unidentifiedShapes,unidentifiedColors;
 	
@@ -132,7 +145,7 @@ public class NewShapeRecognition implements Runnable {
 		originalImagePath = path;
 	}
 	
-	public void run(){
+	public synchronized void run(){ //TODO: synchronised?
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
@@ -149,10 +162,10 @@ public class NewShapeRecognition implements Runnable {
 					+ foundColorCodesRGB.get(i));
 		}*/
 		
-		ArrayList<Shape> shapeList = makeShapeList();
+		shapeList = makeShapeList();
 		
-		Vector position = grid.getPosition(shapeList);
-		double rotation = grid.getRotation(shapeList);
+		Vector position = grid.getPositionNew(shapeList);
+		double rotation = grid.getRotationNew(shapeList);
 		
 		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
@@ -162,35 +175,46 @@ public class NewShapeRecognition implements Runnable {
 	}
 	
 	private void createImagesAndFindContours() {
-		IplImage imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
-//		Mat imgOrg = Highgui.imread(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
+		imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
 		
-	    IplImage imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+		//TODO TODO TODO
+		imgHSV = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+//	    imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+//		imgHSV = null;
 	    cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
 	    
-	    cvSmooth(imgOrg, imgOrg, CV_GAUSSIAN, 5);
+	    imgSmooth = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+//	    imgSmooth = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+	    cvSmooth(imgOrg, imgSmooth, CV_GAUSSIAN, 5);
 
 	    // WIT   
-	    IplImage imgThresholdWhite = cvCreateImage(cvGetSize(imgOrg), 8, 1);
-	    cvInRangeS(imgOrg, minWhite, maxWhite, imgThresholdWhite);
-        cvCanny(imgThresholdWhite, imgThresholdWhite, 0, 255, 3);
+	    imgThresholdWhite = IplImage.create(cvGetSize(imgOrg), 8, 1);
+//	    imgThresholdWhite = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+	    cvInRangeS(imgSmooth, minWhite, maxWhite, imgThresholdWhite);
+	    imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
+//	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+        cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
         //TODO wit dmv hsv
 
 	    // HSV => DONKEREKLEUREN
-	    IplImage imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
+        imgThresholdHSVDarkColors = IplImage.create(cvGetSize(imgOrg), 8, 1);
+//	    imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 	    cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
 //	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 //	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
 	    
-	    findContoursAndHull(imgOrg, imgThresholdWhite);
-	    findContoursAndHull(imgOrg, imgThresholdHSVDarkColors);
+	    findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
+	    findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
 
-	    cvSaveImage("src/images/analyse.jpg", imgOrg);
+	    cvSaveImage("src/images/analyse.jpg", imgSmooth);
 	    
+	    //opencv_core.cvReleaseImage(imgHSV);
 	    imgHSV.release();
 	    imgThresholdHSVDarkColors.release();
 	    imgThresholdWhite.release();
 	    imgOrg.release();
+	    imgSmooth.release();
+	    imgThresholdWhiteCanny.release();
 	}
 
 	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
@@ -326,6 +350,9 @@ public class NewShapeRecognition implements Runnable {
 		else if(figureColor == Color.cyan){
 			return "Cyan";
 		}
+		else if(figureColor == Color.black){
+			return "Black";
+		}
 		else{
 			unidentifiedColors++;
 			return "Unidentified";
@@ -345,8 +372,12 @@ public class NewShapeRecognition implements Runnable {
 	 */
 	private Color findColor(int averageRed, int averageGreen, int averageBlue) {
 		int min = 150;
+		int zwartGrijs = 50;
 		if(averageRed >= min && averageGreen >= min && averageBlue >= min){
 			return Color.white;
+		}
+		else if(averageRed <= zwartGrijs && averageGreen <= zwartGrijs && averageBlue <= zwartGrijs){
+			return Color.black;
 		}
 		else if(averageRed >= min && averageGreen >= min){
 			return Color.yellow;
@@ -381,7 +412,7 @@ public class NewShapeRecognition implements Runnable {
 	}
 
 	private ArrayList<Shape> makeShapeList() {
-		ArrayList<Shape> shapeList = new ArrayList<Shape>();
+		shapeList.clear();
 		for(int i = 0; i < shapes.size(); i++){
 			if(!shapes.get(i).equals("Unidentified")){
 				shapeList.add(new Shape(centers.get(i), colors.get(i), shapes.get(i)));

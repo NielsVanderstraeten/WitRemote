@@ -60,20 +60,20 @@ public class PositionCalculator {
 		return new Vector(xcoord,ycoord);
 	}
 	
-	public Vector getPictureMiddle(Vector vector1, int point1, Vector vector2, int point2) {
-		double delta1to2Picture = vector1.getDistance(vector2);
-		double delta1to2Real = getVector(point1).getDistance(getVector(point2));
-		double delta1toMiddlePicture = vector1.getDistance(pictureMiddle);
+	public Vector getPictureMiddle(Vector picture1, Vector real1, Vector picture2, int point2) {
+		double delta1to2Picture = picture1.getDistance(picture2);
+		double delta1to2Real = real1.getDistance(getVector(point2));
+		double delta1toMiddlePicture = picture1.getDistance(pictureMiddle);
 				
 		double realDistance = delta1to2Real/delta1to2Picture*delta1toMiddlePicture;
 		
-		double deltaAngle = vector2.getAngle(vector1)-getVector(point2).getAngle(getVector(point1));
-		double angleMiddle = pictureMiddle.getAngle(vector1);
+		double deltaAngle = picture2.getAngle(picture1)-getVector(point2).getAngle(real1);
+		double angleMiddle = pictureMiddle.getAngle(picture1);
 		//rotation staat in radialen!
 		//graden omzetten naar radialen! 
 		double totalAngle = (angleMiddle-deltaAngle + 720)%360*Math.PI/180;
-		double middleX = getVector(point1).getX() + realDistance*Math.cos(totalAngle);
-		double middleY = getVector(point1).getY() + realDistance*Math.sin(totalAngle);
+		double middleX = real1.getX() + realDistance*Math.cos(totalAngle);
+		double middleY = real1.getY() + realDistance*Math.sin(totalAngle);
 		
 		return new Vector(middleX, middleY);
 	}
