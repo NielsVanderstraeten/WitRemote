@@ -145,7 +145,7 @@ public class NewShapeRecognition implements Runnable {
 		originalImagePath = path;
 	}
 	
-	public void run(){
+	public synchronized void run(){ //TODO: synchronised?
 		
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 		
@@ -350,6 +350,9 @@ public class NewShapeRecognition implements Runnable {
 		else if(figureColor == Color.cyan){
 			return "Cyan";
 		}
+		else if(figureColor == Color.black){
+			return "Black";
+		}
 		else{
 			unidentifiedColors++;
 			return "Unidentified";
@@ -369,8 +372,12 @@ public class NewShapeRecognition implements Runnable {
 	 */
 	private Color findColor(int averageRed, int averageGreen, int averageBlue) {
 		int min = 150;
+		int zwartGrijs = 50;
 		if(averageRed >= min && averageGreen >= min && averageBlue >= min){
 			return Color.white;
+		}
+		else if(averageRed <= zwartGrijs && averageGreen <= zwartGrijs && averageBlue <= zwartGrijs){
+			return Color.black;
 		}
 		else if(averageRed >= min && averageGreen >= min){
 			return Color.yellow;

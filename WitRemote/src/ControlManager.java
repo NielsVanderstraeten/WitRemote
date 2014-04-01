@@ -14,6 +14,7 @@ import Rooster.Grid;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+
 import commands.Command;
 import commands.GetHeight;
 import commands.SetDimensions;
@@ -86,6 +87,7 @@ public class ControlManager implements Runnable{
 	private LinkedList<Goal> goals;
 	private String path = "src/images/";
 	private Grid grid;
+	private boolean findQRcode = true; //TODO: terug op false zetten
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();
@@ -124,7 +126,7 @@ public class ControlManager implements Runnable{
 	public void terminate(){
 		terminate = true;
 	}
-	public void run(){
+	public synchronized void run(){ //TODO: synchronised?
 		//Wachttijd nodig om connectie te initialiseren
 //		try {
 //			Thread.sleep(5000);
@@ -135,11 +137,13 @@ public class ControlManager implements Runnable{
 			nextGoal = goals.getFirst();
 		
 		NewShapeRecognition recog = new NewShapeRecognition(path + client.getNamePicture(), gui, grid, queue);
+		boolean analyseQR = false;
 		
 		while(!terminate){
 			Command c = null;
 			boolean analysePicture = false;
 			Thread analyserThread = null;
+			Thread qrThread = null;
 			//PositionAnalyser analyser = new PositionAnalyser();
 			
 			/*
@@ -149,10 +153,10 @@ public class ControlManager implements Runnable{
 			}
 			*/
 			while(!queue.isEmpty()){
-				c = queue.poll();
+				c = queue.poll();		
 				if(c instanceof TakePicture && !isThreadStillAlive(analyserThread)) {
-//					if (analyserThread != null)
-//						analyserThread.
+					if (findQRcode && !isThreadStillAlive(qrThread))
+						analyseQR = true;
 					analysePicture = true;
 					gui.updateLastCommand(c.getConsole());
 					client.executeCommand(c);
@@ -173,7 +177,11 @@ public class ControlManager implements Runnable{
 				}
 			}
 			
-			
+			if (analyseQR) {
+				qrThread = new Thread(new QRcode(this, queue, path + client.getNamePicture()));
+				qrThread.start();
+				analyseQR = false;
+			}
 			
 			if(analysePicture){
 				recog.setFile(path + client.getNamePicture());
@@ -208,6 +216,15 @@ public class ControlManager implements Runnable{
 				addNextGoal();
 			}
 		}
+	}
+	
+	public void foundQRCode() {
+		findQRcode = false;
+	}
+	
+	//TODO: ergens moet dit gebruikt worden in client (vanaf dat bericht binnen komt dat we voor Qr codes moeten kijken)
+	public void startFindingQRCode() {
+		findQRcode = true;
 	}
 	
 	private boolean isThreadStillAlive(Thread t) {
