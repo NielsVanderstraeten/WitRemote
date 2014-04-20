@@ -176,11 +176,8 @@ public class MapMaker extends JPanel {
 	private int timeToRedraw, drawThreshhold;
 	
 	public void moveOwnZeppelin(double realX, double realY){
-		double ownX = realX/400*widthPerPiece;
-		double ownY = realY/(400*Math.sqrt(3)/2)*heightPerPiece;
-		
-		ownX = ownX + widthPerPiece/2;
-		ownY = ownY + heightPerPiece/2;
+		double ownX = changeRealToPixel(realX, true);
+		double ownY = changeRealToPixel(realY, false);
 		
 		double diffX = ownX - ownZeppX;
 		double diffY = ownY - ownZeppY;
@@ -439,7 +436,7 @@ public class MapMaker extends JPanel {
 		}
 	}
 	
-	public int changePixelToReal(int pos, boolean horizontal){
+	public int changePixelToReal(double pos, boolean horizontal){
 		int direction;
 		if(horizontal)
 			direction = widthPerPiece;
@@ -449,6 +446,21 @@ public class MapMaker extends JPanel {
 		pos = pos * 400/direction;
 		if(!horizontal)
 			pos = (int) (pos/2*Math.sqrt(3));
-		return pos;
+		return (int) pos;
+	}
+	
+	public int changeRealToPixel(double pos, boolean horizontal){
+		int direction;
+		if(horizontal)
+			direction = widthPerPiece;
+		else
+			direction = heightPerPiece;
+		
+		pos = pos/400*direction;
+		if(!horizontal)
+			pos = pos/Math.sqrt(3)*2;
+		pos = pos + direction/2;
+		
+		return (int) pos;
 	}
 }
