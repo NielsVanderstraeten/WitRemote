@@ -44,7 +44,6 @@ public class QRcode implements Runnable {
 	 * @param queue
 	 * 			Het object van de CommandsQueue-klasse waar alle commando's verzameld zullen worden
 	 */
-	//public QRcode(ControlManager cm, LinkedList<Command> queue, PiState pistate, String imagePath, int vereistVolgnummer) {
 	public QRcode(ControlManager cm, LinkedList<Command> queue, String imagePath) {
 		this.cm = cm;
 		this.queue = queue;

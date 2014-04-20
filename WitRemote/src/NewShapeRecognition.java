@@ -1,5 +1,4 @@
 //import static com.googlecode.javacv.cpp.opencv_core.CV_AA;
-import static com.googlecode.javacv.cpp.opencv_core.cvCreateImage;
 import static com.googlecode.javacv.cpp.opencv_core.cvDrawCircle;
 //import static com.googlecode.javacv.cpp.opencv_core.cvDrawContours;
 import static com.googlecode.javacv.cpp.opencv_core.cvFont;
@@ -320,7 +319,12 @@ public class NewShapeRecognition implements Runnable {
 						cvPutText(imgOrg, imageTxt, cvPoint((int)centerX, (int)centerY), 
 								cvFont(2, 3), CvScalar.BLACK);
 
-						System.out.println("FOUND COLOR & SHAPE: " + colors.get(colors.size()-1)+ " " + shapes.get(shapes.size()-1) +" --- CENTER:("+centerX+", " + centerY+")" + " --- AREA = " + area);
+						String printString = "";
+						printString += "FOUND COLOR & SHAPE: " + colors.get(colors.size()-1) + " " + shapes.get(shapes.size()-1);
+						printString += " --- CENTER:("+centerX+", " + centerY+")";
+						printString += " --- AREA = " + area; 
+						printString += " --- " + foundColorCodesRGB.get(foundColorCodesRGB.size()-1);
+						System.out.println(printString);
 						//System.out.println("AREAHULL = " + areaHull + " --- AreaHull/Area = " + areaHull/area);
 						//System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 					}
