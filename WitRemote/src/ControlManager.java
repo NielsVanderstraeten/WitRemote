@@ -89,7 +89,7 @@ public class ControlManager implements Runnable{
 	private Grid grid;
 	private boolean findQRcode = false; //TODO: op true zetten indien we willen testen zonder server
 	private int analysedQRPictures;
-	private final static int QR_PICTURES_TO_ANALYSE = 5;
+	private final static int QR_PICTURES_TO_ANALYSE = 1000; //Getal voorlopig hoog genoeg zodat we QR-code altijd vinden.
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();

@@ -154,7 +154,7 @@ public class QRcode implements Runnable {
 		
 		if (foundCorrectQRCode){
 			//TODO boodschap decrypten
-			//TODO: nieuwe doellocatie toevoegen aan queue (queue.add(command))
+			//TODO: nieuwe doellocatie toevoegen aan goals (goals.add(...))
 
 			cm.foundQRCode();
 			//cm.increaseVolgnummer();
