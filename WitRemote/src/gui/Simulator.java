@@ -163,7 +163,6 @@ public class Simulator implements Runnable{
 	private double heightSpeed = 0;
 	private static double maxSpeedHeight = 0.1;
 	private static double accelHeight = 0.00003;
-	private boolean fancy = true; //TODO veranderen
 	
 	/**
 	 * Calculates the next height.

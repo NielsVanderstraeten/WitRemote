@@ -81,32 +81,43 @@ public class ControlManager implements Runnable{
 	}
 	
 	private KirovAirship gui;
-	private Client client;
+	private Client photoClient;
+	private RabbitClient client;
+	private RabbitRecv rabbitRecv;
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
 	private String path = "src/images/";
+	private final String host = "tabor";
+	private final String exchangeName = "server";
 	private Grid grid;
 	private boolean findQRcode = true; //TODO: terug op false zetten
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();
-		client = new Client(serverName, port, path);
 		goals = new LinkedList<Goal>();
 		//-500 zodat er direct wordt gevraagd naar hoogte.
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
-		queue.add(new SetDimensions(REAL_WIDTH,REAL_HEIGHT));
+		//Client voor dingen door te sturen.
+		client = new RabbitClient(host, exchangeName);
+		//photoClient voor foto's te ontvangen.
+		photoClient = new Client(serverName, port, path);
+		(new Thread(photoClient)).run();
+		//rabbitRecv om de hoogte die de Pi doorstuurt, te ontvangen.
+		rabbitRecv = new RabbitRecv(host, exchangeName, gui);
+		(new Thread(rabbitRecv)).run();
+	//	queue.add(new SetDimensions(REAL_WIDTH,REAL_HEIGHT));
 		grid = new Grid("plaats van CSV-bestand");
 	}
 	
 	public ControlManager(){
-		this("192.168.43.233", 6066);
+		this("192.168.43.233", 5672);
 	}
 	
 	public void setUpGui(){
-		gui = new KirovAirship(1280, 780, REAL_WIDTH, REAL_HEIGHT, queue, goals);
+		gui = new KirovAirship(1200, 650, REAL_WIDTH, REAL_HEIGHT, queue, goals);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gui.setTitle("Zeppelin Group White");
 		gui.setSize(gui.getWidth(), gui.getHeight());

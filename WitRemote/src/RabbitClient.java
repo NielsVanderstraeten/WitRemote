@@ -27,12 +27,9 @@ public class RabbitClient implements Runnable{
 	private Channel channel;
 	private QueueingConsumer consumer;
 	private int port;
-	private String server, path;
+	private String server;
 	private String namePicture = "recv";
 	private int numberOfPicture = 0;
-	
-	private InputStream inFromServer;
-	private Socket socket;
 	
 	public RabbitClient(String host, String exchangeName){
 		setUpConnection(host, exchangeName);
@@ -59,7 +56,8 @@ public class RabbitClient implements Runnable{
 			connection = factory.newConnection();	
 			channel = connection.createChannel();
 			channel.exchangeDeclare(exchangeName, "topic"); //todo server en variabele maken
-//			//Setting up reply
+//			//Setting up reply 
+			//Reply niet nodig, want daarvoor hebben we RabitRecv!
 //			replyQueueName = channel.queueDeclare().getQueue();
 //			consumer = new QueueingConsumer(channel);
 //			channel.basicConsume(replyQueueName, true, consumer);

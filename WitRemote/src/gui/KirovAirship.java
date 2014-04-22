@@ -1,11 +1,13 @@
 package gui;
 
-import goals.*;
+import goals.Goal;
+import goals.GoalPosition;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +37,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
 
 import Rooster.Shape;
+
 import commands.Command;
 
 public class KirovAirship extends JFrame {
@@ -89,6 +93,7 @@ public class KirovAirship extends JFrame {
 		setUpMission();
 		setUpInformation();
 		setUpPhoto();
+		setUpHeightGraph();
 		
 		//Map moet laatste
 		setUpMap();
@@ -254,7 +259,7 @@ public class KirovAirship extends JFrame {
 		mapPane.setBackground(new Color(153, 153, 204));
 		mapPane.setOpaque(true);
 		mapPane.setBorder(new LineBorder(new Color(0, 0, 0), 3));
-		mapPane.setBounds(320, 11, 864, 600);
+		mapPane.setBounds(324, 11, 830, 600);
 		totalPane.add(mapPane);
 		
 		//TODO Dit wegdoen
@@ -380,6 +385,34 @@ public class KirovAirship extends JFrame {
 		photoPane.add(recognShapeLabel);
 	}
 
+	private JLayeredPane heightGraphPanel;
+	private JLabel targetGraphHeightLabel, currentGraphHeightLabel, heightColorLabel;
+	private Area heightPositionArea;
+	
+	private void setUpHeightGraph(){
+		heightGraphPanel = new JLayeredPane();
+		heightGraphPanel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		heightGraphPanel.setBounds(1160, 10, 30, 601);
+		heightGraphPanel.setOpaque(true);
+		heightGraphPanel.setBackground(new Color(135, 206, 235));
+		totalPane.add(heightGraphPanel);
+		heightGraphPanel.setLayout(null);
+		
+		targetGraphHeightLabel = new JLabel();
+		targetGraphHeightLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		heightGraphPanel.add(targetGraphHeightLabel);
+		
+		currentGraphHeightLabel  = new JLabel();
+		currentGraphHeightLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		currentGraphHeightLabel.setBounds(0, heightGraphPanel.getHeight() - 20, heightGraphPanel.getWidth(), 20);
+		heightGraphPanel.add(currentGraphHeightLabel);
+		
+		heightColorLabel = new JLabel();
+		heightColorLabel.setOpaque(true);
+		heightGraphPanel.add(heightColorLabel);
+		
+	}
+	
 	/**
 	 * Beweegt de zeppelins naar de coordinaten die in de gui zitten.
 	 */
@@ -482,8 +515,10 @@ public class KirovAirship extends JFrame {
 	}
 	
 	public void updateZeppHeightMM(int newheight){
-		zeppHeight = newheight/10;
+		zeppHeight = newheight;
 		currentHeightLabel.setText(newheight + "mm");
+		currentGraphHeightLabel.setText(newheight + "");
+		updateHeightGraph();
 	}
 	
 	/**
@@ -518,6 +553,10 @@ public class KirovAirship extends JFrame {
 	 * @return
 	 */
 	public int getZeppHeight(){
+		return (int) zeppHeight/10;
+	}
+	
+	public int getZeppHeightMM(){
 		return zeppHeight;
 	}
 	
@@ -530,6 +569,26 @@ public class KirovAirship extends JFrame {
 		targetheight = height;
 		targetHeightLabel.setText(height + "mm");
 		missionText.setText("Change height to: "+ height+"mm.");
+		targetGraphHeightLabel.setText(height + "");
+		
+		updateHeightGraph();
+	}
+	
+	private void updateHeightGraph(){
+		int highest = Math.max(getZeppHeightMM(), getTargetHeight());
+		highest  = Math.min((int) (highest*1.3), highest+300);
+		
+		double currPos = getZeppHeightMM()*heightGraphPanel.getHeight()/highest;
+		heightColorLabel.setBounds(1,heightGraphPanel.getHeight() - (int) currPos, heightGraphPanel.getWidth() - 2,(int) currPos - 1);
+		if(Math.abs(getZeppHeightMM() - getTargetHeight()) > 400)
+			heightColorLabel.setBackground(Color.RED);
+		else if(Math.abs(getZeppHeightMM() - getTargetHeight()) > 200)
+			heightColorLabel.setBackground(Color.ORANGE);
+		else 
+			heightColorLabel.setBackground(Color.GREEN);
+		
+		double tarPos = getTargetHeight()*heightGraphPanel.getHeight()/highest;
+		targetGraphHeightLabel.setBounds(0,heightGraphPanel.getHeight() - (int) tarPos - 10, heightGraphPanel.getWidth(),20);
 	}
 	
 	public int getTargetHeight(){
@@ -537,6 +596,7 @@ public class KirovAirship extends JFrame {
 	}
 	
 	int goalX, goalY;
+	private JLabel label;
 	/**
 	 * Zet een nieuwe doelhoogte. In mm
 	 * @param x
@@ -546,6 +606,7 @@ public class KirovAirship extends JFrame {
 		missionText.setText("We have to go to: " + x + "mm, " + y +"mm");
 		goalX = x;
 		goalY = y;
+		mapMaker.setTarget(x, y);
 	}
 	
 	/**
@@ -679,5 +740,4 @@ public class KirovAirship extends JFrame {
 		}
 		
 	}
-	
 }

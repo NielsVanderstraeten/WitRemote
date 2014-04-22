@@ -8,7 +8,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.QueueingConsumer;
 
-public class RabbitRecv {
+public class RabbitRecv implements Runnable{
 
 	private QueueingConsumer consumer;
 	private Channel channel;

@@ -11,6 +11,8 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
+import java.awt.geom.Ellipse2D.Double;
 import java.io.FileReader;
 import java.util.ArrayList;
 
@@ -27,6 +29,7 @@ public class MapMaker extends JPanel {
 	private static final double standardTotalScale = 20;
 	private double scaleX, scaleY;
 	private final double zeppScale = 1.2;	
+	private final double targetScale = 3;
 	private int tempwidth, tempheight;
 	
 	public MapMaker(int width, int height, int colums, int rows, String[] code){
@@ -85,6 +88,12 @@ public class MapMaker extends JPanel {
 			g2.setColor(toPaint.getColor());
 			g2.draw(toPaintArea);
 			g2.fill(toPaintArea);
+		}
+		
+		if(displayTarget){
+			g2.setColor(Color.RED);
+			g2.draw(target);
+			g2.fill(target);
 		}
 	}
 	
@@ -172,7 +181,7 @@ public class MapMaker extends JPanel {
 	}
 	
 	private Area ownZepp, oppZepp, firstZepp;
-	private double ownZeppX, ownZeppY, oppZeppX, oppZeppY;
+	private double ownZeppX, ownZeppY, oppZeppX, oppZeppY, targetX, targetY;
 	private int timeToRedraw, drawThreshhold;
 	
 	public void moveOwnZeppelin(double realX, double realY){
@@ -209,6 +218,28 @@ public class MapMaker extends JPanel {
 		AffineTransform at = new AffineTransform();
 		at.translate(diffX, diffY);
 		oppZepp.transform(at);
+	}
+	
+	private boolean displayTarget;
+	
+	public void setTarget(int realX, int realY){
+		double newX = changeRealToPixel(realX, true);
+		double newY = changeRealToPixel(realY, false);
+		
+		double diffX = newX - targetX;
+		double diffY = newY - targetY;
+		targetX = newX;
+		targetY = newY;
+
+		AffineTransform at = new AffineTransform();
+		at.translate(diffX, diffY);
+		target.transform(at);
+		
+		displayTarget = true;
+	}
+	
+	public void removeTarget(){
+		displayTarget = false;
 	}
 	
 	private ArrayList<Integer> foundFigures;
@@ -274,7 +305,7 @@ public class MapMaker extends JPanel {
 		return newRetard;
 	}
 	
-	private Area square, circle, star, heart;
+	private Area square, circle, star, heart, target, innerTarget;
 	
 	private void createShapes(){
 		//Scource http://www.cs.bham.ac.uk/~szh/teaching/graphics/sourcecode/DrawHeart.java
@@ -314,14 +345,38 @@ public class MapMaker extends JPanel {
 		Ellipse2D zeppelinShape = new Ellipse2D.Double(0, 0, 40*zeppScale, 60*zeppScale);
 		ownZepp = new Area(zeppelinShape);
 		oppZepp = new Area(zeppelinShape);
-		ownZeppX =(int) (20*zeppScale); ownZeppY =(int) (30*zeppScale);
-		oppZeppX =(int) (20*zeppScale); oppZeppY =(int) (30*zeppScale);
+		ownZeppX = 20*zeppScale; ownZeppY = 30*zeppScale;
+		oppZeppX = 20*zeppScale; oppZeppY = 30*zeppScale;
 		
 		Polygon one = new Polygon();
 		one.addPoint((int) (6*zeppScale), (int) (21*zeppScale)); one.addPoint((int) (16*zeppScale), (int) (8*zeppScale)); 
 		one.addPoint((int) (27*zeppScale), (int) (8*zeppScale)); one.addPoint((int) (27*zeppScale), (int) (53*zeppScale));
 		one.addPoint((int) (16*zeppScale), (int) (53*zeppScale)); one.addPoint((int) (16*zeppScale), (int) (21*zeppScale));
 		firstZepp = new Area(one);
+		
+		Ellipse2D outerCircle = new Ellipse2D.Double(5*targetScale,5*targetScale,30*targetScale,30*targetScale);
+		Ellipse2D innerCircle = new Ellipse2D.Double(10*targetScale, 10*targetScale, 20*targetScale, 20*targetScale);
+		RoundRectangle2D line = new RoundRectangle2D.Double(1*targetScale, 18*targetScale, 12*targetScale, 5*targetScale, 1*targetScale, 1*targetScale);
+		Area generalLine = new Area(line);
+		AffineTransform targetAT = new AffineTransform();
+		targetAT.rotate(Math.PI/2, 20*targetScale, 20*targetScale);
+		
+		target = new Area(outerCircle);
+		target.subtract(new Area(innerCircle));
+		//Left
+		target.add((Area) generalLine.clone());
+		//Top
+		generalLine.transform(targetAT);
+		target.add((Area) generalLine.clone());
+		//Right
+		generalLine.transform(targetAT);
+		target.add((Area) generalLine.clone());
+		//Bottom
+		generalLine.transform(targetAT);
+		target.add((Area) generalLine.clone());
+		
+		
+		targetX = 20*targetScale; targetY = 20*targetScale;
 	}
 	
 	private boolean simulator = false;
@@ -339,6 +394,8 @@ public class MapMaker extends JPanel {
 		JFrame f = new JFrame("Heart");
 		f.setBounds(4, 4, 816,  818);
 		f.getContentPane().add( heart, "Center" );
+		
+		heart.setTarget(1000, 1000);
 
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setTitle("Zeppelin Group White");
@@ -415,6 +472,9 @@ public class MapMaker extends JPanel {
 			y = changePixelToReal(y, false);
 			if(SwingUtilities.isLeftMouseButton(e) ){
 				moveOwnZeppelin(x, y);
+				repaint();
+			} else if(SwingUtilities.isRightMouseButton(e) ){
+				setTarget(x, y);
 				repaint();
 			}
 		}
