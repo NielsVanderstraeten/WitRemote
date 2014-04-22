@@ -88,6 +88,10 @@ public class QRcode implements Runnable {
 				List<String> strings = Arrays.asList(QRcode.split("\\s*;\\s*"));
 
 				toAddToQueue = new ArrayList<Command>();
+				
+				//TODO: veranderen naar nieuwe QR-code die nieuwe doelpositie bevat
+				// (en dus ook nieuwe doelpositie toevoegen aan queue)
+				// -> addnewgoal
 
 				for (String s : strings) {
 					Matcher m;
