@@ -26,8 +26,10 @@ public class RabbitRecv implements Runnable{
 		try {
 			this.exchangeName = exchangeName;
 			ConnectionFactory factory = new ConnectionFactory();
+			factory.setUsername("wit");
+			factory.setPassword("wit");
 			factory.setHost(host);
-			
+			factory.setPort(5673);
 			connection = factory.newConnection();
 			channel = connection.createChannel();
 			
@@ -58,10 +60,10 @@ public class RabbitRecv implements Runnable{
 				message = new String(delivery.getBody(),"UTF-8");
 				topic = delivery.getEnvelope().getRoutingKey();
 				
-				if(topic.equals("white.info.height"))
+				if(topic.equals("wit.info.height"))
 					gui.updateZeppHeightMM(Integer.parseInt(message));
 				
-				else if(topic.equals("white.private.terminate")){
+				else if(topic.equals("wit.private.terminate")){
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))
 						terminated = true;
@@ -77,8 +79,8 @@ public class RabbitRecv implements Runnable{
 	private ArrayList<String> topics;
 	private void setUpTopics(){
 		topics = new ArrayList<String>();
-		topics.add("white.info.height");
-		topics.add("white.private.#");
+		topics.add("wit.info.height");
+		topics.add("wit.private.#");
 	}
 	
 	private void declareTopicBinds() throws IOException{
@@ -87,7 +89,7 @@ public class RabbitRecv implements Runnable{
 	}
 	
 	public static void main(String[] args){
-		RabbitRecv recv = new RabbitRecv("localhost", "server", null);
+		RabbitRecv recv = new RabbitRecv("localhost", "tobar", new KirovAirship());
 		recv.run();
 	}
 

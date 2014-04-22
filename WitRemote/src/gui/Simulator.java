@@ -65,7 +65,7 @@ public class Simulator implements Runnable{
 		goalX = gui.getGoalX(); goalY = gui.getGoalY();
 		targetHeight = gui.getTargetHeight();
 	}
-	
+
 	private double rotation = 0;
 	private long lastCalc = 0;
 	

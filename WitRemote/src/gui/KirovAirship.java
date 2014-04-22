@@ -577,6 +577,8 @@ public class KirovAirship extends JFrame {
 	private void updateHeightGraph(){
 		int highest = Math.max(getZeppHeightMM(), getTargetHeight());
 		highest  = Math.min((int) (highest*1.3), highest+300);
+		if(highest == 0)
+			highest = 1;
 		
 		double currPos = getZeppHeightMM()*heightGraphPanel.getHeight()/highest;
 		heightColorLabel.setBounds(1,heightGraphPanel.getHeight() - (int) currPos, heightGraphPanel.getWidth() - 2,(int) currPos - 1);

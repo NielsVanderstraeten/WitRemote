@@ -52,8 +52,11 @@ public class RabbitClient implements Runnable{
 		try{
 			//Setting up connection
 			ConnectionFactory factory = new ConnectionFactory();
+			factory.setUsername("wit");
+			factory.setPassword("wit");
 			factory.setHost(host);
-			connection = factory.newConnection();	
+			factory.setPort(5673);
+			connection = factory.newConnection();
 			channel = connection.createChannel();
 			channel.exchangeDeclare(exchangeName, "topic"); //todo server en variabele maken
 //			//Setting up reply 
@@ -87,7 +90,7 @@ public class RabbitClient implements Runnable{
 		String returnMessage = "";
 //		try{
 			String str = command.getPiCommand();
-			String topic = "white." + command.getTopic();
+			String topic = "wit." + command.getTopic();
 			
 			sendMessage(str, topic);
 			
@@ -127,10 +130,12 @@ public class RabbitClient implements Runnable{
 	}
 		
 	public static void main(String[] argvs) throws InterruptedException{
-		RabbitClient client = new RabbitClient("localhost", "server");
+		RabbitClient client = new RabbitClient("localhost", "tabor");
 		//client.sendMessage("1000", "white.info.height");
-		client.sendMessage("spam", "white.private.terminate");
-		client.sendMessage("true", "white.private.terminate");
+		client.sendMessage("2000 2000", "wit.hcommand.move");
+		client.sendMessage("5000", "wit.hcommand.elevate");
+		client.sendMessage("1000 1000", "wit.info.position");
+		client.sendMessage("true", "wit.private.terminate");
 		client.closeChannel();
 	}
 	
