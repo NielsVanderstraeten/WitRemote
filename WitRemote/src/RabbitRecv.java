@@ -14,6 +14,7 @@ public class RabbitRecv implements Runnable{
 	private Channel channel;
 	private String queueName, exchangeName;
 	private KirovAirship gui;
+	private final String enemy = "zwart";
 	
 	public RabbitRecv(String host, String exchangeName, KirovAirship gui) {
 		setUpTopics();
@@ -67,6 +68,9 @@ public class RabbitRecv implements Runnable{
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))
 						terminated = true;
+				} else if(topic.equals(enemy +".info.position")){
+					String[] words = message.split("[ ]+");
+					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
 				}
 				System.out.println("[.] " + topic + ": " + message);
 			}
@@ -81,6 +85,7 @@ public class RabbitRecv implements Runnable{
 		topics = new ArrayList<String>();
 		topics.add("wit.info.height");
 		topics.add("wit.private.#");
+		topics.add(enemy + ".info.position");
 	}
 	
 	private void declareTopicBinds() throws IOException{

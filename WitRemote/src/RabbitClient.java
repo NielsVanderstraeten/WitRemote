@@ -89,11 +89,17 @@ public class RabbitClient implements Runnable{
 	public String executeCommand(Command command){
 		String returnMessage = "";
 //		try{
+		
 			String str = command.getPiCommand();
 			String topic = "wit." + command.getTopic();
-			
 			sendMessage(str, topic);
 			
+			//FIRSTWORLDANARCHISTS
+			if(command instanceof SetPosition){
+				double rot = ((SetPosition) command).getRotation();
+				topic = "wit.private.rotation";
+				sendMessage(rot + "", topic);
+			}
 //			if(str.equals("takepicture")){
 //				sendMessage(str, false);
 //				numberOfPicture++;

@@ -1,22 +1,30 @@
-package gui;
+
+
+import goals.Goal;
+import goals.GoalHeight;
+import goals.GoalPosition;
+import gui.KirovAirship;
 
 import java.util.LinkedList;
 
 import javax.swing.JFrame;
 
-import commands.*;
-import goals.*;
+import commands.Command;
 
 public class Simulator implements Runnable{
 
 	private LinkedList<Command> queue;
 	private LinkedList<Goal> goals;
 	private Goal nextGoal = null;
+	private RabbitClient client;
+	private RabbitRecv rabbitRecv;
+	private final String host = "tabor";
+	private final String exchangeName = "server";
 	
 	public Simulator(String host){
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
-		
+		setUpConnection();
 		goals.addLast(new GoalHeight(100));
 		createGUI();
 		ownX = gui.getOwnX();
@@ -33,6 +41,12 @@ public class Simulator implements Runnable{
 		gui.setVisible(true);
 		gui.requestFocus();
 		gui.setSimulatorPhoto();
+	}
+	
+	private void setUpConnection(){
+		client = new RabbitClient(host, exchangeName);
+		rabbitRecv = new RabbitRecv(host, exchangeName, gui);
+		(new Thread(rabbitRecv)).run();
 	}
 	
 	public static void main(String[] argvs) throws InterruptedException{
@@ -68,6 +82,7 @@ public class Simulator implements Runnable{
 
 	private double rotation = 0;
 	private long lastCalc = 0;
+	private int i = 0;
 	
 	private void goToDestination(){
 		long newCalc = System.currentTimeMillis();
@@ -156,6 +171,7 @@ public class Simulator implements Runnable{
 			rotation += Math.PI;
 
 		gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
+		client.sendMessage(ownX + " " + ownY, "wit.info.position");
 	}
 	
 	private double height = 0;
@@ -196,6 +212,7 @@ public class Simulator implements Runnable{
 		}
 		height = height + heightSpeed*time;
 		gui.updateZeppHeightMM((int) (height));
+		client.sendMessage(height + " ", "wit.info.height");
 	}
 	
 	private boolean isSameDirection(double position, double speed){

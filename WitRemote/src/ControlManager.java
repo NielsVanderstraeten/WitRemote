@@ -3,7 +3,6 @@ import goals.GoalFindQRCode;
 import goals.GoalHeight;
 import goals.GoalPosition;
 import gui.KirovAirship;
-import gui.Simulator;
 
 import java.util.LinkedList;
 
@@ -14,6 +13,7 @@ import Rooster.Grid;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+
 import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;

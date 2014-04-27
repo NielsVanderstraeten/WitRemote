@@ -182,7 +182,6 @@ public class MapMaker extends JPanel {
 	
 	private Area ownZepp, oppZepp, firstZepp;
 	private double ownZeppX, ownZeppY, oppZeppX, oppZeppY, targetX, targetY;
-	private int timeToRedraw, drawThreshhold;
 	
 	public void moveOwnZeppelin(double realX, double realY){
 		double ownX = changeRealToPixel(realX, true);
@@ -210,7 +209,10 @@ public class MapMaker extends JPanel {
 		firstZepp.transform(at);
 	}
 	
-	public void moveOppZeppelin(int oppX, int oppY){
+	public void moveOppZeppelin(int realX, int realY){
+		double oppX = changeRealToPixel(realX, true);
+		double oppY = changeRealToPixel(realY, false);
+		
 		double diffX = oppX - oppZeppX;
 		double diffY = oppY - oppZeppY;
 		oppZeppX = oppX; oppZeppY = oppY;
@@ -305,7 +307,7 @@ public class MapMaker extends JPanel {
 		return newRetard;
 	}
 	
-	private Area square, circle, star, heart, target, innerTarget;
+	private Area square, circle, star, heart, target;
 	
 	private void createShapes(){
 		//Scource http://www.cs.bham.ac.uk/~szh/teaching/graphics/sourcecode/DrawHeart.java
@@ -384,6 +386,7 @@ public class MapMaker extends JPanel {
 	public void setSimulator(){
 		simulator = true;
 	}
+	
 	public static void main(String[] args) {
 		String[] code = MapMaker.testcode(7, 7);
 		code[41] = "XX";
@@ -474,7 +477,7 @@ public class MapMaker extends JPanel {
 				moveOwnZeppelin(x, y);
 				repaint();
 			} else if(SwingUtilities.isRightMouseButton(e) ){
-				setTarget(x, y);
+				moveOppZeppelin(x, y);
 				repaint();
 			}
 		}
