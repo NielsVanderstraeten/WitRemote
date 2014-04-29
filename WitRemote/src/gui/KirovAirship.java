@@ -387,7 +387,6 @@ public class KirovAirship extends JFrame {
 
 	private JLayeredPane heightGraphPanel;
 	private JLabel targetGraphHeightLabel, currentGraphHeightLabel, heightColorLabel;
-	private Area heightPositionArea;
 	
 	private void setUpHeightGraph(){
 		heightGraphPanel = new JLayeredPane();
@@ -535,6 +534,9 @@ public class KirovAirship extends JFrame {
 		ImageIcon photo = getImageIcon("src/gui/resources/simulator.jpg", photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setSize(photoPane.getWidth(), photoPane.getHeight());
 		photoLabel.setIcon(photo);
+//		ImageIcon photo = getImageIcon("src/images/analyse.jpg", photoLabel.getWidth(), photoLabel.getHeight());
+//		photoLabel.setIcon(photo);
+//		recognShapeLabel.setText("RR, GC, WC, BH, BH");
 	}
 	
 	public void updateRecognisedShapes(ArrayList<Shape> shapes){
@@ -599,7 +601,6 @@ public class KirovAirship extends JFrame {
 	}
 	
 	int goalX, goalY;
-	private JLabel label;
 	/**
 	 * Zet een nieuwe doelhoogte. In mm
 	 * @param x
