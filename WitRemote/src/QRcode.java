@@ -5,7 +5,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
@@ -89,7 +88,6 @@ public class QRcode implements Runnable {
 	 */
 	public synchronized void run() {
 		boolean foundCorrectQRCode = false;
-		ArrayList<Command> toAddToQueue = new ArrayList<Command>();
 
 		if (QRcode != null) {
 			String QRcodeString = decrypt(QRcode.getText());
@@ -98,8 +96,8 @@ public class QRcode implements Runnable {
 			//geval position
 			m = Pattern.compile("position:(\\d+),(\\d+)").matcher(QRcodeString);
 			if (m.find()) {
-				//TODO: landen na deze positie bereikt te hebben
 				queue.add(new SetGoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+				cm.setTabletNumber(-1); //-1 betekent landen
 				cm.foundQRCode();
 				foundCorrectQRCode = true;
 			}
@@ -108,6 +106,7 @@ public class QRcode implements Runnable {
 			if (!foundCorrectQRCode && m.find()) {
 				Vector targetPosition = grid.getTabletPosition(Integer.parseInt(m.group(1)));
 				queue.add(new SetGoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
+				cm.setTabletNumber(Integer.parseInt(m.group(1)));
 				cm.foundQRCode();
 				foundCorrectQRCode = true;				
 			}
@@ -138,7 +137,7 @@ public class QRcode implements Runnable {
 		privateKey = key.getPrivate();
 	}
 	
-	public String getPublicKey() {
+	public static String getPublicKey() {
 		return Base64.encodeBase64String(publicKey.getEncoded());
 	}
 

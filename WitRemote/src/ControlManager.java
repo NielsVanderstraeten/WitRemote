@@ -13,7 +13,6 @@ import Rooster.Grid;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-
 import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
@@ -26,6 +25,8 @@ public class ControlManager implements Runnable{
 	private final static int rowReal = 14;
 	private final static int REAL_WIDTH = 400*columnReal;
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
+	
+	private int tabletNumber = 1; //-1 indien zeppelin moet landen
 	
 	public static void main(String[] args){
 		Simulator simulator;
@@ -227,6 +228,11 @@ public class ControlManager implements Runnable{
 	private void startFindingQRCode() {
 		findQRcode = true;
 		analysedQRPictures = 0;
+		client.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
+	}
+	
+	public void setTabletNumber(int number) {
+		tabletNumber = number;
 	}
 	
 	private boolean isThreadStillAlive(Thread t) {
@@ -239,14 +245,17 @@ public class ControlManager implements Runnable{
 		if(nextGoal instanceof GoalHeight){
 			double height = gui.getZeppHeight();
 			double target = ((GoalHeight) nextGoal).getTargetHeight();
-				if (target == 0)
-					System.exit(0);
 			return closeEnough(height, target);
 		}
 		else if(nextGoal instanceof GoalPosition){
 			int ownX = gui.getOwnX(); int ownY = gui.getOwnY();
 			int targetX = ((GoalPosition) nextGoal).getX(); int targetY = ((GoalPosition) nextGoal).getY();
-			return closeEnough(ownX, targetX) && closeEnough(ownY, targetY);
+			boolean result = closeEnough(ownX, targetX) && closeEnough(ownY, targetY);
+			if (tabletNumber == -1) { //Landen als doel bereikt is en er geen volgende tablet meer is
+				client.sendMessage("true", "wit.private.terminate");
+				System.exit(0);
+			}
+			return result;
 		} else if (nextGoal instanceof GoalFindQRCode) {
 			return findQRcode == false;
 		}
