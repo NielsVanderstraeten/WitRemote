@@ -17,6 +17,8 @@ public class Grid {
 	private ArrayList<Integer> lastFoundFigures;
 	private boolean startLeft = true;
 	private Vector pictureSize = new Vector(750,562);
+	private final int numberOfTablets = 3;
+	private ArrayList<Vector> tablets;
 //	private double pictureDistance;
 	
 	//toegelaten afwijking in percenten bij afstandsverglijking
@@ -27,6 +29,7 @@ public class Grid {
 	 * DIT IS DE GOEDE CONSTRUCTOR!!!
 	 */
 	public Grid(String plaatsVanCSV) {
+		tablets = new ArrayList<Vector>();
 		parseCSV(plaatsVanCSV);
 		myCalculator = new PositionCalculator(width, height, startLeft, pictureSize);
 		lastFoundZepPosition = new Vector(-1,-1);
@@ -67,8 +70,15 @@ public class Grid {
 			e.printStackTrace();
 		}
 		if(myEntries != null){
-			height = myEntries.size();
+			height = myEntries.size()-numberOfTablets;			
 			width = myEntries.get(0).length;
+			
+			//parse position of tablets.
+			for (int i = 0; i < numberOfTablets; i++) {
+				tablets.add(new Vector(Double.parseDouble(myEntries.get(height)[0]),Double.parseDouble(myEntries.get(height)[1])));
+				myEntries.remove(height);
+			}
+			
 			myMap = new ArrayList<String>();
 			for(String[] array: myEntries){
 				for(String something: array){
@@ -417,6 +427,10 @@ public class Grid {
 			}
 		}
 		return new ArrayList<Integer>();		
+	}
+	
+	public Vector getTabletPosition(int i) {
+		return tablets.get(i-1);
 	}
 	
 	@Deprecated

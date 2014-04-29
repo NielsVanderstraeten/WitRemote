@@ -22,8 +22,8 @@ import commands.SetPosition;
 
 public class ControlManager implements Runnable{
 
-	private final static int columnReal = 7;
-	private final static int rowReal = 7;
+	private final static int columnReal = 12;
+	private final static int rowReal = 14;
 	private final static int REAL_WIDTH = 400*columnReal;
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
 	

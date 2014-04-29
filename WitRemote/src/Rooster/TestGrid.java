@@ -76,7 +76,10 @@ public class TestGrid {
 //		double myAngle = myGrid.getRotation(myList);
 //		System.out.println("de rotatie = " + myAngle);
 //	}
-	
+	@Test
+	public void testParse() {
+		Grid test = new Grid("haha");
+	}
 	@Test
 	public void TestCombination() {
 		int z = 5;
@@ -202,5 +205,6 @@ public class TestGrid {
 		System.out.println(test.getAngle(vec));
 		System.out.println(test2.getAngle(vec));
 	}
+	
 
 }
