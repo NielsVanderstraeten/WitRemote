@@ -19,11 +19,13 @@ public class Client implements Runnable {
 	private int numberOfPicture = 0;
 	private int port, bufferSize;
 	private String previousCommand = "";
+	private ControlManager cm;
 
-	public Client(String serverName, int port, String path){
+	public Client(String serverName, int port, String path, ControlManager cm){
 		this.serverName = serverName;
 		this.port = port;
 		this.path = path; //Path waar foto's opgeslagen moeten worden
+		
 		setUpSocket(port);
 	}
 
@@ -138,7 +140,7 @@ public class Client implements Runnable {
 					copy(dis, outFile, fileSize);
 					outFile.close();
 					System.out.println("-> Picture saved at " + path+namePicture);
-					//TODO do nen analyse Picture.
+					cm.analysePicture();
 					outToClient.writeBytes("done\r\n");
 					System.out.println("Picture saved");
 				}

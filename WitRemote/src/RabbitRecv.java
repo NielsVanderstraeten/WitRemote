@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.ConsumerCancelledException;
 import com.rabbitmq.client.QueueingConsumer;
+import com.rabbitmq.client.ShutdownSignalException;
 
 public class RabbitRecv implements Runnable{
 
@@ -15,11 +17,20 @@ public class RabbitRecv implements Runnable{
 	private String queueName, exchangeName;
 	private KirovAirship gui;
 	private final String enemy = "zwart";
+	private boolean simulator;
 	
 	public RabbitRecv(String host, String exchangeName, KirovAirship gui) {
 		setUpTopics();
 		setUpConnection(host, exchangeName);
 		this.gui = gui;
+		simulator = false;
+	}
+	
+	public RabbitRecv(String host, String exchangeName, KirovAirship gui, boolean sim) {
+		setUpTopics();
+		setUpConnection(host, exchangeName);
+		this.gui = gui;
+		simulator = sim;
 	}
 	
 	private void setUpConnection(String host, String exchangeName){
@@ -45,7 +56,7 @@ public class RabbitRecv implements Runnable{
 			System.out.println("[x] Awaiting RPC requests");
 		}
 		catch(Exception e){
-			System.err.println("Error in TestServer constructor");
+			System.err.println("Error in RabbitRecv setUpConnection");
 		}
 	}
 	
@@ -61,9 +72,8 @@ public class RabbitRecv implements Runnable{
 				message = new String(delivery.getBody(),"UTF-8");
 				topic = delivery.getEnvelope().getRoutingKey();
 				
-				if(topic.equals("wit.info.height"))
+				if(topic.equals("wit.info.height") && !simulator)
 					gui.updateZeppHeightMM(Integer.parseInt(message));
-				
 				else if(topic.equals("wit.private.terminate")){
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))
@@ -75,10 +85,17 @@ public class RabbitRecv implements Runnable{
 				System.out.println("[.] " + topic + ": " + message);
 			}
 		}
-		catch(Exception e){
+		catch(IOException e){
+			e.printStackTrace();
+		} catch (ShutdownSignalException e) {
+			e.printStackTrace();
+		} catch (ConsumerCancelledException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		System.out.println("terminate");
+		System.exit(0);
 	}
 	private ArrayList<String> topics;
 	private void setUpTopics(){

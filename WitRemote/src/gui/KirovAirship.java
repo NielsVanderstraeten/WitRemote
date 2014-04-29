@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -262,21 +260,11 @@ public class KirovAirship extends JFrame {
 		mapPane.setBounds(324, 11, 830, 600);
 		totalPane.add(mapPane);
 		
-		//TODO Dit wegdoen
-		int colums = 9; int rows = 9;
-		String[] code = testcode(rows, colums);
-		
 		mapMaker = new MapMaker(mapPane.getWidth() - 18, mapPane.getHeight() - 18);
-		//mapMaker = new MapMaker(mapPane.getWidth() - 8, mapPane.getHeight() - 8, 9, 9, code);
 		mapMaker.setBounds(9, 9, mapMaker.getWidth(), mapPane.getHeight());
 		mapPane.add(mapMaker);
-		mapMaker.addMouseListener(new ZeppelinMouse());
+		//mapMaker.addMouseListener(new ZeppelinMouse());
 		
-//		JLabel background = new JLabel(getImageIcon("src/gui/resources/startphoto.jpg", mapPane.getWidth(), mapPane.getHeight()));
-//		background.setSize(mapPane.getWidth(), mapPane.getHeight());
-//		mapPane.add(background);
-		
-		//TODO wegdoen
 		updateOwnPosition((int) (widthMeters*0.1), 	(int) (heightMeters*0.1), 0);
 		updateOpponentPosition((int) (widthMeters*0.9), (int) (heightMeters*0.9));
 		updateGui();
@@ -387,7 +375,6 @@ public class KirovAirship extends JFrame {
 
 	private JLayeredPane heightGraphPanel;
 	private JLabel targetGraphHeightLabel, currentGraphHeightLabel, heightColorLabel;
-	private Area heightPositionArea;
 	
 	private void setUpHeightGraph(){
 		heightGraphPanel = new JLayeredPane();
@@ -535,6 +522,9 @@ public class KirovAirship extends JFrame {
 		ImageIcon photo = getImageIcon("src/gui/resources/simulator.jpg", photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setSize(photoPane.getWidth(), photoPane.getHeight());
 		photoLabel.setIcon(photo);
+//		ImageIcon photo = getImageIcon("src/images/analyse.jpg", photoLabel.getWidth(), photoLabel.getHeight());
+//		photoLabel.setIcon(photo);
+//		recognShapeLabel.setText("RR, GC, WC, BH, BH");
 	}
 	
 	public void updateRecognisedShapes(ArrayList<Shape> shapes){
@@ -599,7 +589,6 @@ public class KirovAirship extends JFrame {
 	}
 	
 	int goalX, goalY;
-	private JLabel label;
 	/**
 	 * Zet een nieuwe doelhoogte. In mm
 	 * @param x
@@ -636,7 +625,7 @@ public class KirovAirship extends JFrame {
 		
 	}
 	
-	//TODO Testcode: wegdoen uiteindelijk
+	@Deprecated
 	private String[] testcode(int rows, int colums){
 		String[] code = new String[rows*colums];
 		int random;
@@ -678,7 +667,7 @@ public class KirovAirship extends JFrame {
 		return code;
 	}
 	
-	//TODO dit weghalen, of toch alleen doel bijhouden.
+	@Deprecated
 	private class ZeppelinMouse implements MouseListener{
 		int mouseX, mouseY;
 		@Override

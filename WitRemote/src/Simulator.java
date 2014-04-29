@@ -18,19 +18,18 @@ public class Simulator implements Runnable{
 	private Goal nextGoal = null;
 	private RabbitClient client;
 	private RabbitRecv rabbitRecv;
-	private final String host = "tabor";
-	private final String exchangeName = "server";
+	private final String host = "localhost";
+	private final String exchangeName = "tobar";
 	
 	public Simulator(String host){
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
+		createGUI();
 		setUpConnection();
 		goals.addLast(new GoalHeight(100));
-		createGUI();
 		ownX = gui.getOwnX();
 		ownY = gui.getOwnY();
 	}
-	
 	private KirovAirship gui;
 	
 	private void createGUI(){
@@ -45,8 +44,9 @@ public class Simulator implements Runnable{
 	
 	private void setUpConnection(){
 		client = new RabbitClient(host, exchangeName);
-		rabbitRecv = new RabbitRecv(host, exchangeName, gui);
-		(new Thread(rabbitRecv)).run();
+		rabbitRecv = new RabbitRecv(host, exchangeName, gui, true);
+		Thread recv = new Thread(rabbitRecv);
+		recv.start();
 	}
 	
 	public static void main(String[] argvs) throws InterruptedException{
@@ -61,7 +61,7 @@ public class Simulator implements Runnable{
 		setNextGoal();
 		while(true){
 			try {
-				Thread.sleep(50); 
+				Thread.sleep(250); 
 			} catch(Exception e){
 				System.err.println("Da werkt ni..... stoeme thread sleep");
 			}
@@ -106,10 +106,10 @@ public class Simulator implements Runnable{
 	}
 	
 	private double speedX, speedY;
-	private static double accelX = 0.0003; //  mm*(ms)^-2
-	private static double accelY = 0.0003; //  mm*(ms)^-2
-	private static double maxSpeedX = 0.5; // mm/ms
-	private static double maxSpeedY = 0.5; // mm/ms
+	private static double accelX = 0.00002; //  mm*(ms)^-2
+	private static double accelY = 0.00002; //  mm*(ms)^-2
+	private static double maxSpeedX = 0.02; // mm/ms
+	private static double maxSpeedY = 0.02; // mm/ms
 	
 	private void calcNextPosition(long time){
 		double diffX = goalX - ownX;
@@ -163,22 +163,23 @@ public class Simulator implements Runnable{
 					speedY = maxSpeedY * directionY;
 			}
 		}
-		
-		ownX = ownX + speedX * time;
-		ownY = ownY + speedY * time;
-		rotation = Math.atan((goalY - ownY)/(goalX - ownX)) + Math.PI/2;
-		if(goalX < ownX)
-			rotation += Math.PI;
-
-		gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
-		client.sendMessage(ownX + " " + ownY, "wit.info.position");
+		if(speedX != 0 || speedY != 0){
+			ownX = ownX + speedX * time;
+			ownY = ownY + speedY * time;
+			rotation = Math.atan((goalY - ownY)/(goalX - ownX)) + Math.PI/2;
+			if(goalX < ownX)
+				rotation += Math.PI;
+			
+			gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
+			client.sendMessage(ownX + " " + ownY, "wit.info.position");
+		}
 	}
 	
 	private double height = 0;
 	private double targetHeight;
 	private double heightSpeed = 0;
-	private static double maxSpeedHeight = 0.1;
-	private static double accelHeight = 0.00003;
+	private static double maxSpeedHeight = 0.05;
+	private static double accelHeight = 0.00002;
 	
 	/**
 	 * Calculates the next height.
@@ -189,7 +190,7 @@ public class Simulator implements Runnable{
 		int direction = (int) Math.signum(diff);
 		int accel = 0;
 		
-		if(fuzzyEquals(height, targetHeight)){ //If almost there
+		if(fuzzyEqualsParam(height, targetHeight, 10)){ //If almost there
 			if(heightSpeed == 0)
 				;//Do nothing
 			else if(fuzzyEqualsParam(heightSpeed, 0, accelHeight*time)) //If speed is almost 0, we set to 0
@@ -210,9 +211,11 @@ public class Simulator implements Runnable{
 					heightSpeed = maxSpeedHeight * direction;
 			}
 		}
-		height = height + heightSpeed*time;
-		gui.updateZeppHeightMM((int) (height));
-		client.sendMessage(height + " ", "wit.info.height");
+		if(heightSpeed != 0){
+			height = height + heightSpeed*time;
+			gui.updateZeppHeightMM((int) (height));
+			client.sendMessage((int) height + "", "wit.info.height");
+		}
 	}
 	
 	private boolean isSameDirection(double position, double speed){

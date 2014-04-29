@@ -4,6 +4,7 @@ package gui;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Polygon;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -12,14 +13,17 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
-import java.awt.geom.Ellipse2D.Double;
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import Rooster.Vector;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class MapMaker extends JPanel {
@@ -28,9 +32,9 @@ public class MapMaker extends JPanel {
 	private static final double standardScale = 10;
 	private static final double standardTotalScale = 20;
 	private double scaleX, scaleY;
-	private final double zeppScale = 1.2;	
-	private final double targetScale = 3;
-	private int tempwidth, tempheight;
+	private final double zeppScale = 0.7;	
+	private final double targetScale = 2;
+	private final double tabletScale = 1.5;
 	
 	public MapMaker(int width, int height, int colums, int rows, String[] code){
 		this.columns = colums;
@@ -39,21 +43,25 @@ public class MapMaker extends JPanel {
 		this.width = width;
 		this.code = code;
 		createShapes();
-		setTemps();
 		setUpMap();
+		createAndroid();
 	}
 	
 	public MapMaker(int width, int height){
 		this.height = height;
 		this.width = width;
 		parseCSV();
-		setTemps();
 		createShapes();
 		setUpMap();
+		createAndroid();
 	}
 	
 	private void setTemps(){		
 		foundFigures = new ArrayList<Integer>();
+		widthPerPiece = (int) (width/(columns + 0.5));
+		heightPerPiece = (int) (height/rows);
+		scaleX = widthPerPiece/standardTotalScale;
+		scaleY = heightPerPiece/standardTotalScale;
 	}
 	
 	@Override
@@ -69,6 +77,11 @@ public class MapMaker extends JPanel {
 	@Override
 	public void paintComponent (Graphics g){
 		Graphics2D g2 = (Graphics2D)g;
+		Image resizedImg = tabletPhoto.getScaledInstance(100, 100, Image.SCALE_DEFAULT);
+		for(Vector pos: tablets){
+			g2.drawImage(resizedImg, (int) pos.getX(), (int) pos.getY(), (int) (30*tabletScale), (int) (30*tabletScale), null);
+		}
+		
 		for(PaintComp toPaint: toPaintAreas){
 			int position = toPaint.getPosition();
 			Area toPaintArea = (Area) toPaint.getArea().clone();
@@ -88,7 +101,9 @@ public class MapMaker extends JPanel {
 			g2.setColor(toPaint.getColor());
 			g2.draw(toPaintArea);
 			g2.fill(toPaintArea);
+			
 		}
+		
 		
 		if(displayTarget){
 			g2.setColor(Color.RED);
@@ -98,6 +113,7 @@ public class MapMaker extends JPanel {
 	}
 	
 	private ArrayList<PaintComp> toPaintAreas = new ArrayList<PaintComp>();
+	private ArrayList<Vector> tablets = new ArrayList<Vector>();
 	private boolean startsWithIndent = false;
 	private int widthPerPiece, heightPerPiece;
 	
@@ -152,7 +168,7 @@ public class MapMaker extends JPanel {
 					else if(letters[1].equals("S"))
 						toPaint = drawStar(x,y);
 					else
-						toPaint = drawRetard(x,y);
+						toPaint = drawError(x,y);
 					
 					toPaintAreas.add(new PaintComp(toPaint, color, position));
 				}
@@ -295,19 +311,19 @@ public class MapMaker extends JPanel {
 		return newStar;
 	}
 	
-	private Area drawRetard(int x, int y){
+	private Area drawError(int x, int y){
 		AffineTransform at = new AffineTransform();
 		at.scale(scaleX, scaleY);
 		at.translate(x/scaleX, y/scaleY);
 		at.rotate(Math.PI/4);
 
-		Area newRetard = (Area) square.clone();
-		newRetard.transform(at);
+		Area newError = (Area) square.clone();
+		newError.transform(at);
 		
-		return newRetard;
+		return newError;
 	}
 	
-	private Area square, circle, star, heart, target;
+	private Area square, circle, star, heart, target, tablet;
 	
 	private void createShapes(){
 		//Scource http://www.cs.bham.ac.uk/~szh/teaching/graphics/sourcecode/DrawHeart.java
@@ -357,8 +373,8 @@ public class MapMaker extends JPanel {
 		firstZepp = new Area(one);
 		
 		Ellipse2D outerCircle = new Ellipse2D.Double(5*targetScale,5*targetScale,30*targetScale,30*targetScale);
-		Ellipse2D innerCircle = new Ellipse2D.Double(10*targetScale, 10*targetScale, 20*targetScale, 20*targetScale);
-		RoundRectangle2D line = new RoundRectangle2D.Double(1*targetScale, 18*targetScale, 12*targetScale, 5*targetScale, 1*targetScale, 1*targetScale);
+		Ellipse2D innerCircle = new Ellipse2D.Double(7.5*targetScale, 7.5*targetScale, 25*targetScale, 25*targetScale);
+		RoundRectangle2D line = new RoundRectangle2D.Double(1*targetScale, 19*targetScale, 12*targetScale, 2*targetScale, 1*targetScale, 1*targetScale);
 		Area generalLine = new Area(line);
 		AffineTransform targetAT = new AffineTransform();
 		targetAT.rotate(Math.PI/2, 20*targetScale, 20*targetScale);
@@ -387,6 +403,18 @@ public class MapMaker extends JPanel {
 		simulator = true;
 	}
 	
+	private Image tabletPhoto;
+	
+	public void createAndroid(){
+		 tabletPhoto = null;
+		try{
+			tabletPhoto = ImageIO.read(new File("src/gui/resources/android1.png"));
+		}
+		catch(IOException e){
+			e.printStackTrace();
+			System.out.println("Cannot find image or invalid resource type.");
+		}
+	}
 	public static void main(String[] args) {
 		String[] code = MapMaker.testcode(7, 7);
 		code[41] = "XX";
@@ -437,6 +465,8 @@ public class MapMaker extends JPanel {
 		return code;
 	}
 	
+	private int numberoftablets = 3;
+	
 	//Gebruikt OpenCSV: http://opencsv.sourceforge.net/
 	public void parseCSV() {
 		CSVReader reader;
@@ -448,16 +478,26 @@ public class MapMaker extends JPanel {
 			e.printStackTrace();
 		}
 		if(myEntries != null){
-			rows = myEntries.size();
+			rows = myEntries.size() - numberoftablets;
 			columns = myEntries.get(0).length;
 			code = new String[rows*columns];
 			int i = 0;
-			for(String[] array: myEntries){
+			for(int r = 0; r < rows; r++){
+				String[] array = myEntries.get(r);
 				for(String something: array){
 					something = something.replaceAll("\\s","");
 					code[i] = something;
 					i++;
 				}
+			}
+			setTemps();
+			for(int t = 0; t < numberoftablets; t++){
+				String[] array = myEntries.get(rows + t);
+				int tabX = Integer.parseInt(array[0]);
+				tabX = changeRealToPixel(tabX, true);
+				int tabY = Integer.parseInt(array[1]);
+				tabY = changeRealToPixel(tabY, false);
+				tablets.add(new Vector(tabX, tabY));
 			}
 		}
 	}

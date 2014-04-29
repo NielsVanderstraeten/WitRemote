@@ -1,31 +1,18 @@
 
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.UUID;
 
-import commands.*;
-
-import com.rabbitmq.client.AMQP.BasicProperties;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.rabbitmq.client.QueueingConsumer;
+import commands.Command;
+import commands.SetPosition;
 
 public class RabbitClient implements Runnable{
 
-	//Naam van het kanaal waaar we een 1 op 1 verbinding met de server krijgen.
-	private String replyQueueName;
-	//Naam van de verbinding waar we naartoe moeten.
-	private String requestQueueName = "server";
 	private String exchangeName;
 	private Connection connection;
 	private Channel channel;
-	private QueueingConsumer consumer;
 	private int port;
 	private String server;
 	private String namePicture = "recv";
@@ -58,12 +45,7 @@ public class RabbitClient implements Runnable{
 			factory.setPort(5673);
 			connection = factory.newConnection();
 			channel = connection.createChannel();
-			channel.exchangeDeclare(exchangeName, "topic"); //todo server en variabele maken
-//			//Setting up reply 
-			//Reply niet nodig, want daarvoor hebben we RabitRecv!
-//			replyQueueName = channel.queueDeclare().getQueue();
-//			consumer = new QueueingConsumer(channel);
-//			channel.basicConsume(replyQueueName, true, consumer);
+			channel.exchangeDeclare(exchangeName, "topic"); 
 		} catch(IOException ex){
 			System.out.println("Error in setUpConnection");
 		}
@@ -74,7 +56,7 @@ public class RabbitClient implements Runnable{
 		try{
 			//Sending the message
 			channel.basicPublish(exchangeName, topic, null, message.getBytes());
-			System.out.println("We have a lift-off: Sent '" + message+"'. Topic: " + topic);
+			System.out.println("[X] Sent '" + message+"'. Topic: " + topic);
 			
 		} catch(Exception ex){
 			ex.printStackTrace();
