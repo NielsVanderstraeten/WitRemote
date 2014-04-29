@@ -89,7 +89,7 @@ public class ControlManager implements Runnable{
 	private Grid grid;
 	private boolean findQRcode = false; //TODO: op true zetten indien we willen testen zonder server
 	private int analysedQRPictures;
-	private final static int QR_PICTURES_TO_ANALYSE = 1000; //Getal voorlopig hoog genoeg zodat we QR-code altijd vinden.
+	private final static int QR_PICTURES_TO_ANALYSE = 20;
 	
 	public ControlManager(String serverName, int port){
 		queue = new LinkedList<Command>();
@@ -141,6 +141,8 @@ public class ControlManager implements Runnable{
 		
 		if(!goals.isEmpty())
 			nextGoal = goals.getFirst();
+		
+		QRcode.initialiseKeys(); //Nodig om public en private key voor QR-codes te genereren
 			
 		while(!terminate){
 			//PositionAnalyser analyser = new PositionAnalyser();
@@ -205,7 +207,7 @@ public class ControlManager implements Runnable{
 					findQRcode = false;
 					goals.add(new GoalPosition(gui.getGoalX(), gui.getGoalY()));
 				} else {
-					qrThread = new Thread(new QRcode(this, queue, path + client.getNamePicture()));
+					qrThread = new Thread(new QRcode(this, queue, grid, path + client.getNamePicture()));
 					qrThread.start();
 				}
 				analyseNextPictureForQR = false;

@@ -1,23 +1,32 @@
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 
+import javax.crypto.Cipher;
 import javax.imageio.ImageIO;
-import commands.*;
+
+import org.apache.commons.codec.binary.Base64;
+
+import Rooster.Grid;
+import Rooster.Vector;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
-import com.google.zxing.multi.qrcode.*;
+import com.google.zxing.qrcode.QRCodeReader;
+import commands.Command;
+import commands.SetGoalPosition;
 
 /**
  * Klasse die een QR-code inleest uit een opgegeven pad, die verwerkt en opsplitst in verschillende
@@ -28,13 +37,15 @@ import com.google.zxing.multi.qrcode.*;
  */
 
 public class QRcode implements Runnable {
-	
-	private boolean foundCorrectQRCode;
-	
-	private Result[] QRcodes;
-	private String CorrectQRCode;
+
+	private static PublicKey publicKey;
+	private static PrivateKey privateKey;
+
+	private Result QRcode;
+	private String QRcodeString;
 	private LinkedList<Command> queue;
 	private ControlManager cm;
+	private Grid grid;
 
 	/**
 	 * Constructor die eveneens onmiddellijk de in te lezen afbeelding verwerkt naar tekst.
@@ -44,129 +55,68 @@ public class QRcode implements Runnable {
 	 * @param queue
 	 * 			Het object van de CommandsQueue-klasse waar alle commando's verzameld zullen worden
 	 */
-	public QRcode(ControlManager cm, LinkedList<Command> queue, String imagePath) {
+	public QRcode(ControlManager cm, LinkedList<Command> queue, Grid grid, String imagePath) {
 		this.cm = cm;
 		this.queue = queue;
-		
+		this.grid = grid;
+
 		try {
 			File file = new File(imagePath);
-			
+
 			BufferedImage in = ImageIO.read(file);
-			
-			QRCodeMultiReader reader = new QRCodeMultiReader();
+
+//			QRCodeMultiReader reader = new QRCodeMultiReader();
+			QRCodeReader reader = new QRCodeReader();
 
 			BinaryBitmap image = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(
 					in)));
-			
+
 			//Toegevoegd om analyse van QR-code te verbeteren
-		    Hashtable<DecodeHintType, Object> hint = new Hashtable<DecodeHintType, Object>();
-		    hint.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-		    
-			QRcodes = reader.decodeMultiple(image, hint);
-			System.out.println("-> "+QRcodes.length+" QRcodes found.");
+			Hashtable<DecodeHintType, Object> hint = new Hashtable<DecodeHintType, Object>();
+			hint.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+
+//			QRcode = reader.decodeMultiple(image, hint);
+			QRcode = reader.decode(image, hint);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("-> No QRcode found.");
-			CorrectQRCode = "No QRcode found.";
+			QRcodeString = "No QRcode found.";
 		}
 	}
-	
+
 	/**
 	 * Methode die de ingelezen QR-code opsplitst in commando's en die toevoegt aan de queue
 	 */
-	public synchronized void run() {		//TODO: synchronised?
-		
-		foundCorrectQRCode = false;
+	public synchronized void run() {
+		boolean foundCorrectQRCode = false;
 		ArrayList<Command> toAddToQueue = new ArrayList<Command>();
 
-		if (!(QRcodes == null)) {
-
-			for (int i = 0; i < QRcodes.length && foundCorrectQRCode == false; i++) {
-
-				String QRcode = QRcodes[i].getText();
-
-				List<String> strings = Arrays.asList(QRcode.split("\\s*;\\s*"));
-
-				toAddToQueue = new ArrayList<Command>();
-				
-				//TODO: veranderen naar nieuwe QR-code die nieuwe doelpositie bevat
-				// (en dus ook nieuwe doelpositie toevoegen aan queue)
-				// -> addnewgoal
-
-				for (String s : strings) {
-					Matcher m;
-//					Command c;
-					boolean found = false;
-
-					m = Pattern.compile("S:(\\d*)").matcher(s);
-					if (m.find()) {
-//						c = new Climb(Integer.parseInt(m.group(1))); //Groep 1 = getal x in "S:x"
-//						toAddToQueue.add(c);
-						found = true;
-					}
-
-					m = Pattern.compile("D:(\\d*)").matcher(s);
-					if (!found && m.find()) {
-//						c = new Descend(Integer.parseInt(m.group(1)));
-//						toAddToQueue.add(c);
-						found = true;
-					}
-
-					m = Pattern.compile("V:(\\d*)").matcher(s);
-					if (!found && m.find()) {
-//						c = new Forward((long) (TIJD_PER_CM_VOORUIT * Integer.parseInt(m.group(1))));
-//						toAddToQueue.add(c);
-						found = true;
-					}
-
-					m = Pattern.compile("A:(\\d*)").matcher(s);
-					if (!found && m.find()) {
-//						c = new Backward((long) (TIJD_PER_CM_ACHTERUIT * Integer.parseInt(m.group(1))));
-//						toAddToQueue.add(c);
-						found = true;
-					}
-
-					m = Pattern.compile("L:(\\d*)").matcher(s);
-					if (!found && m.find()) {
-//						c = new TurnLeft((int) (TIJD_PER_GRADEN_LINKS * Integer.parseInt(m.group(1))));
-//						toAddToQueue.add(c);
-						found = true;
-					}
-
-					m = Pattern.compile("R:(\\d*)").matcher(s);
-					if (!found && m.find()) {
-//						c = new TurnRight((int) (TIJD_PER_GRADEN_RECHTS * Integer.parseInt(m.group(1))));
-//						toAddToQueue.add(c);
-						found = true;
-					}		
-
-					//Volgnummer
-					m = Pattern.compile("N:(\\d*)").matcher(s);
-					if (!found && m.find()) {
-						CorrectQRCode = QRcode;
-						foundCorrectQRCode = true;
-						found = true;
-					}	
-				}
+		if (QRcode != null) {
+			String QRcodeString = decrypt(QRcode.getText());
+			Matcher m;
+			
+			//geval position
+			m = Pattern.compile("position:(\\d+),(\\d+)").matcher(QRcodeString);
+			if (m.find()) {
+				//TODO: landen na deze positie bereikt te hebben
+				queue.add(new SetGoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+				cm.foundQRCode();
+				foundCorrectQRCode = true;
 			}
-		} else
-			CorrectQRCode = null;
+			//geval tablet
+			m = Pattern.compile("tablet:(\\d+)").matcher(QRcodeString);
+			if (!foundCorrectQRCode && m.find()) {
+				Vector targetPosition = grid.getTabletPosition(Integer.parseInt(m.group(1)));
+				queue.add(new SetGoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
+				cm.foundQRCode();
+				foundCorrectQRCode = true;				
+			}
 		
-		if (foundCorrectQRCode){
-			//TODO boodschap decrypten
-			//TODO: nieuwe doellocatie toevoegen aan goals (goals.add(...))
+		} else
+			QRcodeString = null;
+		System.out.println("---> Gevonden QRcode: " +QRcodeString);
+	}
 
-			cm.foundQRCode();
-			//cm.increaseVolgnummer();
-			//System.out.println("-> Volgnummer wordt verhoogd naar " + (vereistVolgnummer + 1));
-		} 
-		System.out.println("---> Gevonden QRcode: " +CorrectQRCode);
-	}
-	
-	public boolean foundCorrectQRCode() {
-		return foundCorrectQRCode;
-	}
-	
 	public String getCommandString(){
 		String returnString = "";
 		for(Command c: queue)
@@ -174,4 +124,40 @@ public class QRcode implements Runnable {
 		return returnString;
 	}
 	
+	public static void initialiseKeys() {
+		KeyPairGenerator keyGen = null;
+		try {
+			keyGen = KeyPairGenerator.getInstance("RSA");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		keyGen.initialize(1024);
+		final KeyPair key = keyGen.generateKeyPair();
+
+		publicKey = key.getPublic();
+		privateKey = key.getPrivate();
+	}
+	
+	public String getPublicKey() {
+		return Base64.encodeBase64String(publicKey.getEncoded());
+	}
+
+	private String decrypt(String text) {
+	    byte[] decryptedText = null;
+	    try {
+	      // get an RSA cipher object and print the provider
+	      final Cipher cipher = Cipher.getInstance("RSA");
+
+	      // decrypt the text using the private key
+	      cipher.init(Cipher.DECRYPT_MODE, privateKey);
+	      decryptedText = cipher.doFinal(text.getBytes());
+
+	    } catch (Exception ex) {
+	      ex.printStackTrace();
+	    }
+
+	    return new String(decryptedText);
+	  }
+
+
 }

@@ -16,5 +16,8 @@
 	<classpathentry kind="lib" path="C:/Users/Niels Vanderstraeten/Dropbox/P&amp;O WIT/RabbitMQ/junit.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Niels Vanderstraeten/Dropbox/P&amp;O WIT/RabbitMQ/rabbitmq-client.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Niels Vanderstraeten/Dropbox/P&amp;O WIT/RabbitMQ/rabbitmq-client-tests.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Niels Vanderstraeten/Dropbox/P&amp;O WIT/Apache commons/commons-codec-1.9.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Niels Vanderstraeten/Dropbox/P&amp;O WIT/Apache commons/commons-codec-1.9-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Niels Vanderstraeten/Dropbox/P&amp;O WIT/Apache commons/commons-codec-1.9-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
