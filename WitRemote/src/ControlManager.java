@@ -102,7 +102,7 @@ public class ControlManager implements Runnable{
 		//Client voor dingen door te sturen.
 		client = new RabbitClient(host, exchangeName);
 		//photoClient voor foto's te ontvangen.
-		photoClient = new Client(serverName, port, path);
+		photoClient = new Client(serverName, port, path, this);
 		(new Thread(photoClient)).start();
 		//rabbitRecv om de hoogte die de Pi doorstuurt, te ontvangen.
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui);
