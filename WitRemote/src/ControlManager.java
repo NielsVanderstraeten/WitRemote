@@ -89,7 +89,7 @@ public class ControlManager implements Runnable{
 	private final String host = "tabor";
 	private final String exchangeName = "server";
 	private Grid grid;
-	private boolean findQRcode = false; //TODO: op true zetten indien we willen testen zonder server
+	private boolean findQRcode = false;
 	private int analysedQRPictures;
 	private final static int QR_PICTURES_TO_ANALYSE = 20;
 	

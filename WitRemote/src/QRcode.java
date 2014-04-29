@@ -77,8 +77,7 @@ public class QRcode implements Runnable {
 			QRcode = reader.decode(image, hint);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("-> No QRcode found.");
-			QRcodeString = "No QRcode found.";
+			QRcodeString = "None.";
 		}
 	}
 
@@ -110,8 +109,7 @@ public class QRcode implements Runnable {
 				foundCorrectQRCode = true;				
 			}
 		
-		} else
-			QRcodeString = null;
+		}
 		
 		System.out.println("---> Gevonden QRcode: " + QRcodeString);
 	}

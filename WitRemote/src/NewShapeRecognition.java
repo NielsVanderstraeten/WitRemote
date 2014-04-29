@@ -30,9 +30,6 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvGetSpatialMoment;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvMoments;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvPointPolygonTest;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
-
-
-
 import gui.KirovAirship;
 
 import java.awt.Color;
@@ -42,27 +39,21 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.opencv.core.Core;
-import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
-import org.opencv.highgui.Highgui;
 
 import Rooster.Grid;
 import Rooster.Shape;
 import Rooster.Vector;
 
 import com.googlecode.javacpp.Loader;
-import com.googlecode.javacv.cpp.opencv_core;
 import com.googlecode.javacv.cpp.opencv_core.CvContour;
-import com.googlecode.javacv.cpp.opencv_core.CvMat;
 import com.googlecode.javacv.cpp.opencv_core.CvMemStorage;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint;
 import com.googlecode.javacv.cpp.opencv_core.CvPoint2D32f;
 import com.googlecode.javacv.cpp.opencv_core.CvScalar;
 import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
-import com.googlecode.javacv.cpp.opencv_core.IplImageArray;
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
-
 import commands.Command;
 import commands.SetPosition;
 
