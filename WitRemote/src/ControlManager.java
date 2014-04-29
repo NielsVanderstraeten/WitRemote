@@ -5,6 +5,7 @@ import goals.GoalPosition;
 import gui.KirovAirship;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -208,7 +209,7 @@ public class ControlManager implements Runnable{
 					findQRcode = false;
 					goals.add(new GoalPosition(gui.getGoalX(), gui.getGoalY()));
 				} else {
-					qrThread = new Thread(new QRcode(this, queue, grid, path + client.getNamePicture()));
+					qrThread = new Thread(new QRcode(this, path + client.getNamePicture()));
 					qrThread.start();
 				}
 				analyseNextPictureForQR = false;
@@ -228,7 +229,7 @@ public class ControlManager implements Runnable{
 	private void startFindingQRCode() {
 		findQRcode = true;
 		analysedQRPictures = 0;
-		client.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
+		client.sendMessage(QRcode.getPublicKeyString(), "wit.tablet.tablet" + tabletNumber);
 	}
 	
 	public void setTabletNumber(int number) {
@@ -292,5 +293,13 @@ public class ControlManager implements Runnable{
 		if(Math.abs(current - target) < absoluteMarge)
 			return true;
 		return false;
+	}
+	
+	public List<Command> getQueue() {
+		return queue;
+	}
+	
+	public Grid getGrid() {
+		return grid;
 	}
 }

@@ -6,7 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Hashtable;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -42,7 +42,7 @@ public class QRcode implements Runnable {
 
 	private Result QRcode;
 	private String QRcodeString;
-	private LinkedList<Command> queue;
+	private List<Command> queue;
 	private ControlManager cm;
 	private Grid grid;
 
@@ -54,17 +54,16 @@ public class QRcode implements Runnable {
 	 * @param queue
 	 * 			Het object van de CommandsQueue-klasse waar alle commando's verzameld zullen worden
 	 */
-	public QRcode(ControlManager cm, LinkedList<Command> queue, Grid grid, String imagePath) {
+	public QRcode(ControlManager cm, String imagePath) {
 		this.cm = cm;
-		this.queue = queue;
-		this.grid = grid;
+		this.queue = cm.getQueue();
+		this.grid = cm.getGrid();
 
 		try {
 			File file = new File(imagePath);
 
 			BufferedImage in = ImageIO.read(file);
 
-//			QRCodeMultiReader reader = new QRCodeMultiReader();
 			QRCodeReader reader = new QRCodeReader();
 
 			BinaryBitmap image = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(
@@ -90,7 +89,7 @@ public class QRcode implements Runnable {
 		boolean foundCorrectQRCode = false;
 
 		if (QRcode != null) {
-			String QRcodeString = decrypt(QRcode.getText());
+			QRcodeString = decrypt(QRcode.getText());		
 			Matcher m;
 			
 			//geval position
@@ -113,17 +112,21 @@ public class QRcode implements Runnable {
 		
 		} else
 			QRcodeString = null;
-		System.out.println("---> Gevonden QRcode: " +QRcodeString);
+		
+		System.out.println("---> Gevonden QRcode: " + QRcodeString);
 	}
 
-	public String getCommandString(){
-		String returnString = "";
-		for(Command c: queue)
-			returnString += c.getConsole();
-		return returnString;
-	}
+//	public String getCommandString(){
+//		String returnString = "";
+//		for(Command c: queue)
+//			returnString += c.getConsole();
+//		return returnString;
+//	}
 	
 	public static void initialiseKeys() {
+		if (privateKey != null && publicKey != null)
+			return;
+		
 		KeyPairGenerator keyGen = null;
 		try {
 			keyGen = KeyPairGenerator.getInstance("RSA");
@@ -137,26 +140,45 @@ public class QRcode implements Runnable {
 		privateKey = key.getPrivate();
 	}
 	
-	public static String getPublicKey() {
+	public static String getPublicKeyString() {
+		if (publicKey == null && privateKey == null)
+			initialiseKeys();
+		
 		return Base64.encodeBase64String(publicKey.getEncoded());
 	}
+	
+	//Gebruikt voor test
+	static PublicKey getPublicKey() {
+		if (publicKey == null && privateKey == null)
+			initialiseKeys();
+		
+		return publicKey;
+	}
+	
+	//Gebruikt voor test
+	static PrivateKey getPrivateKey() {
+		if (publicKey == null && privateKey == null)
+			initialiseKeys();
+		
+		return privateKey;
+	}
 
-	private String decrypt(String text) {
-	    byte[] decryptedText = null;
-	    try {
-	      // get an RSA cipher object and print the provider
-	      final Cipher cipher = Cipher.getInstance("RSA");
+	private String decrypt(String text64) {
+		//TODO: kijken welke String-codering de scheidsrechtercommissie beslist
+		byte[] text = Base64.decodeBase64(text64);		
+		byte[] decryptedText = null;
+		try {
+			// get an RSA cipher object and print the provider
+			final Cipher cipher = Cipher.getInstance("RSA");
+			// decrypt the text using the private key
+			cipher.init(Cipher.DECRYPT_MODE, privateKey);	      
+			decryptedText = cipher.doFinal(text);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
-	      // decrypt the text using the private key
-	      cipher.init(Cipher.DECRYPT_MODE, privateKey);
-	      decryptedText = cipher.doFinal(text.getBytes());
-
-	    } catch (Exception ex) {
-	      ex.printStackTrace();
-	    }
-
-	    return new String(decryptedText);
-	  }
+		return new String(decryptedText);
+	}
 
 
 }
