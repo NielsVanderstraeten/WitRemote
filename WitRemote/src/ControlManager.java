@@ -189,10 +189,10 @@ public class ControlManager implements Runnable{
 	}
 	
 	//RabbitRecv moet dit oproepen wanneer een foto ontvangen wordt
-	public void analysePicture() {
+	public void analysePicture(String realPath) {
 		boolean analyseNextPictureForQR = false;
 		boolean analyseNextPictureForShapes = false;
-		NewShapeRecognition recog = new NewShapeRecognition(path + client.getNamePicture(), gui, grid, queue);
+		NewShapeRecognition recog = new NewShapeRecognition(realPath, gui, grid, queue);
 		
 		if(!isThreadStillAlive(analyserThread) && !isThreadStillAlive(qrThread)) {
 			if (findQRcode) {
@@ -209,12 +209,12 @@ public class ControlManager implements Runnable{
 					findQRcode = false;
 					goals.add(new GoalPosition(gui.getGoalX(), gui.getGoalY()));
 				} else {
-					qrThread = new Thread(new QRcode(this, path + client.getNamePicture()));
+					qrThread = new Thread(new QRcode(this, realPath));
 					qrThread.start();
 				}
 				analyseNextPictureForQR = false;
 			} else if(analyseNextPictureForShapes){
-				recog.setFile(path + client.getNamePicture());
+				recog.setFile(realPath);
 				analyserThread = new Thread(recog);
 				analyserThread.start();
 				analyseNextPictureForShapes = false;

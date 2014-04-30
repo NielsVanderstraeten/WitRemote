@@ -140,7 +140,7 @@ public class Client implements Runnable {
 					copy(dis, outFile, fileSize);
 					outFile.close();
 					System.out.println("-> Picture saved at " + path+namePicture);
-					cm.analysePicture();
+					cm.analysePicture(path+namePicture);
 					outToClient.writeBytes("done\r\n");
 					System.out.println("Picture saved");
 				}

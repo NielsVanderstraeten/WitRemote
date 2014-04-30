@@ -82,7 +82,6 @@ public class Simulator implements Runnable{
 
 	private double rotation = 0;
 	private long lastCalc = 0;
-	private int i = 0;
 	
 	private void goToDestination(){
 		long newCalc = System.currentTimeMillis();
