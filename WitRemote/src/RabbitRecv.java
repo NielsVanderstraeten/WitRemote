@@ -23,7 +23,7 @@ public class RabbitRecv implements Runnable{
 		setUpTopics();
 		setUpConnection(host, exchangeName);
 		this.gui = gui;
-		simulator = false;
+		simulator = false; 
 	}
 	
 	public RabbitRecv(String host, String exchangeName, KirovAirship gui, boolean sim) {

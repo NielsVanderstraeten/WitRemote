@@ -14,6 +14,7 @@ import Rooster.Grid;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+
 import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
@@ -87,19 +88,28 @@ public class ControlManager implements Runnable{
 	private LinkedList<Goal> goals;
 	private String path = "src/images/";
 	private final String host = "localhost";
-	private final String exchangeName = "tobar";
+	private final String exchangeName = "tabor";
 	private Grid grid;
 	private boolean findQRcode = false;
 	private int analysedQRPictures;
 	private final static int QR_PICTURES_TO_ANALYSE = 20;
 	
 	public ControlManager(String serverName, int port){
+		setUpFirstConnection(serverName);
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
 		//-500 zodat er direct wordt gevraagd naar hoogte.
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		//Client voor dingen door te sturen.
 		client = new RabbitClient(host, exchangeName);
 		//photoClient voor foto's te ontvangen.
@@ -181,7 +191,7 @@ public class ControlManager implements Runnable{
 //				if (queue.isEmpty())
 //					stillEmpty = true;
 				
-				nextGoal.print();
+//				nextGoal.print();
 //				Command nextCommand = queue.getFirst();
 //				System.out.println(nextCommand.getConsole());
 			}
