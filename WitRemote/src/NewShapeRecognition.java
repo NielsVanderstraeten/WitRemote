@@ -131,7 +131,7 @@ public class NewShapeRecognition implements Runnable {
 
 		Grid grid = new Grid("");
 		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/A13.jpg", null, grid, null);
+				"C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/A14.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
@@ -323,7 +323,7 @@ public class NewShapeRecognition implements Runnable {
 							imageTxt = "U";
 							isUnidentified = true;
 						}
-						else if(areaHull/area > 1.2  && areaCircle/area < 5){
+						else if(areaHull/area > 1.2  && areaCircle/area < 3){
 							//System.out.println("Star AREAHULL/AREA == " + areaHull/area);
 							shapes.add("Star");
 							stars++;;
@@ -331,10 +331,10 @@ public class NewShapeRecognition implements Runnable {
 							averageArea+= area;
 							medianArea.add(area);
 						}
-//						else if(areaCircle/area > 1.6  && areaCircle/area < 5){
+//						else if(areaCircle/area > 1.6  && areaCircle/area < 3){
 						else if(((areaCircle/area > 1.64) 
 								|| (areaHull/area < 1.038 && areaCircle/area > 1.4))
-								&& (areaCircle/area < 5)){
+								&& (areaCircle/area < 3)){
 							//System.out.println("Rectangle AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Rectangle AreaHull/area == " + areaHull/area);
 							shapes.add("Rectangle");
@@ -343,8 +343,8 @@ public class NewShapeRecognition implements Runnable {
 							averageArea+= area;
 							medianArea.add(area);
 						}
-//						else if(areaCircle/area > 1.3  && areaCircle/area < 5){
-						else if(areaHull/area > 1.038  && areaCircle/area < 5){
+//						else if(areaCircle/area > 1.3  && areaCircle/area < 3){
+						else if(areaHull/area > 1.038  && areaCircle/area < 3){
 							//System.out.println("Heart AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Heart AreaHull/area == " + areaHull/area);
 							shapes.add("Heart");
@@ -353,7 +353,7 @@ public class NewShapeRecognition implements Runnable {
 							averageArea+= area;
 							medianArea.add(area);
 						}
-						else if(areaCircle/area >= 1  && areaCircle/area < 5){
+						else if(areaCircle/area >= 1  && areaCircle/area < 3){
 							shapes.add("Circle");
 							circles++;
 							imageTxt = "C";
