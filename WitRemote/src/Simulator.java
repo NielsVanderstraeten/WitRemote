@@ -20,7 +20,7 @@ public class Simulator implements Runnable{
 	private RabbitClient client;
 	private RabbitRecv rabbitRecv;
 	private final String host = "localhost";
-	private final String exchangeName = "tobar";
+	private final String exchangeName = "tabor";
 	private final static String qrservername = "192.168.2.115";
 	private final static int qrportnumber = 5000;
 	private final static String qrsimpath = "src/images/qrimsulator.jpg";
@@ -282,7 +282,7 @@ public class Simulator implements Runnable{
 		else if(nextGoal instanceof GoalPosition)
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
 		else if(nextGoal == null && lastTablet != -1){
-			qrdl.getPhoto(lastTablet);
+			//qrdl.getPhoto(lastTablet);
 		} else if(nextGoal != null)
 			System.err.println("Error bij addnextgoal");
 	}

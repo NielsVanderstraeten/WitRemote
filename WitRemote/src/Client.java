@@ -13,6 +13,7 @@ import java.net.UnknownHostException;
 
 import commands.Command;
 
+@Deprecated
 public class Client implements Runnable {
 	private String serverName, path;
 	private String namePicture = "recv";
@@ -144,7 +145,6 @@ public class Client implements Runnable {
 					System.out.println("Picture saved");
 				}
 			}
-			serverSocket.close();
 		}
 		catch (IOException e) {
 			e.printStackTrace();
