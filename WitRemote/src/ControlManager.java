@@ -123,7 +123,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public ControlManager(){
-		this("192.168.2.124", 5672);
+		this("192.168.2.136", 5672);
 	}
 	
 	public void setUpGui(){
@@ -186,6 +186,7 @@ public class ControlManager implements Runnable{
 			
 			if(System.currentTimeMillis() - lastCheck > 2000){
 				lastCheck = System.currentTimeMillis();
+				client.sendMessage("true", "wit.private.sendPicture");
 				
 //				boolean stillEmpty = false;
 //				if (queue.isEmpty())
@@ -204,6 +205,7 @@ public class ControlManager implements Runnable{
 	
 	//RabbitRecv moet dit oproepen wanneer een foto ontvangen wordt
 	public void analysePicture(String realPath) {
+		System.out.println("Analysing picture...");
 		boolean analyseNextPictureForQR = false;
 		boolean analyseNextPictureForShapes = false;
 		NewShapeRecognition recog = new NewShapeRecognition(realPath, gui, grid, queue);
