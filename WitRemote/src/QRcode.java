@@ -95,7 +95,7 @@ public class QRcode implements Runnable {
 			decoder.decodeCommand();
 		}
 		
-		cm.getGUI().printToConsole();
+		cm.getGUI().printToConsole(command);
 	}
 	
 	
