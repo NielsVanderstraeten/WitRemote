@@ -123,7 +123,7 @@ public class NewShapeRecognition implements Runnable {
 
 	private CvScalar minWhite = cvScalar(170, 170, 170, 0);
 	private CvScalar maxWhite = cvScalar(255, 255, 255, 0);	 
-	private CvScalar minHSV = cvScalar(0, 50, 50, 0); //TODO mss aanpassen
+	private CvScalar minHSV = cvScalar(0, 50, 50, 0);
 	private CvScalar maxHSV = cvScalar(255, 255, 255, 0);
 	private CvScalar colorScalar;
 
@@ -131,7 +131,7 @@ public class NewShapeRecognition implements Runnable {
 
 		Grid grid = new Grid("");
 		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/A14.jpg", null, grid, null);
+				"C:/Users/Jeroen/Dropbox/P&O WIT/VormHerkenning/A14.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
@@ -154,7 +154,11 @@ public class NewShapeRecognition implements Runnable {
 		createImagesAndFindContours();
 		System.out.println();
 		System.out.println("Time: " + (System.currentTimeMillis() - start));
-		gui.updatePhoto();
+		//gui.updatePhoto(); //TODO TERUG AANZETTEN
+		//TODO
+		//TODO
+		//TODO
+		
 
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
 		System.out.println("Number of shapes found: " + shapes.size());
@@ -167,7 +171,8 @@ public class NewShapeRecognition implements Runnable {
 
 		Vector position = grid.getPositionNew(shapeList);
 		double rotation = grid.getRotationNew(shapeList);
-
+		System.out.println("Position: " + position.getX() + ", " + position.getY());
+		System.out.println("Rotation: " + rotation);
 		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 			gui.updateRecognisedShapes(shapeList);
@@ -228,7 +233,7 @@ public class NewShapeRecognition implements Runnable {
 //		else
 //			median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
 //		System.out.println("Median area = " + median);
-		cvSaveImage("C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/Analysed.jpg", imgSmooth);
+		cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
 		cvSaveImage("src/images/analyse.jpg", imgSmooth);
 
 		imgThresholdBlack.release();
