@@ -57,6 +57,7 @@ public class RabbitRecv implements Runnable{
 		}
 		catch(Exception e){
 			System.err.println("Error in RabbitRecv setUpConnection");
+			e.printStackTrace();
 		}
 	}
 	

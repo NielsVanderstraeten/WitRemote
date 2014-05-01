@@ -48,6 +48,7 @@ public class RabbitClient implements Runnable{
 			channel.exchangeDeclare(exchangeName, "topic"); 
 		} catch(IOException ex){
 			System.out.println("Error in setUpConnection");
+			ex.printStackTrace();
 		}
 	}
 	

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 
 import javax.swing.JFrame;
 
+import Rooster.Grid;
 import commands.Command;
 
 public class Simulator implements Runnable{
@@ -20,16 +21,25 @@ public class Simulator implements Runnable{
 	private RabbitRecv rabbitRecv;
 	private final String host = "localhost";
 	private final String exchangeName = "tobar";
+	private final static String qrservername = "192.168.2.115";
+	private final static int qrportnumber = 5000;
+	private final static String qrsimpath = "src/images/qrimsulator.jpg";
+	private int lastTablet;
+	private Grid grid;
+	private QRDownloader qrdl;
 	
 	public Simulator(String host){
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
+		grid = new Grid("test");
 		createGUI();
 		setUpConnection();
 		goals.addLast(new GoalHeight(100));
 		ownX = gui.getOwnX();
 		ownY = gui.getOwnY();
+		qrdl = new QRDownloader(qrservername, qrportnumber, qrsimpath, goals, grid);
 	}
+	
 	private KirovAirship gui;
 	
 	private void createGUI(){
@@ -250,6 +260,7 @@ public class Simulator implements Runnable{
 		if(nextGoal instanceof GoalPosition){
 			if(fuzzyEquals(ownX, goalX) && fuzzyEquals(ownY, goalY) && speedX == 0 && speedY == 0){
 				gui.updateLastCommand("We reached our goal position; x:" + goalX + ", y:" + goalY + ".");
+				lastTablet = grid.getTabletNumber(goalX, goalY);
 				return true;
 			}
 		} else if(nextGoal instanceof GoalHeight){
@@ -270,7 +281,9 @@ public class Simulator implements Runnable{
 			gui.setTargetHeight(((GoalHeight) nextGoal).getTargetHeight());
 		else if(nextGoal instanceof GoalPosition)
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
-		else if(nextGoal != null)
+		else if(nextGoal == null && lastTablet != -1){
+			qrdl.getPhoto(lastTablet);
+		} else if(nextGoal != null)
 			System.err.println("Error bij addnextgoal");
 	}
 	

@@ -152,6 +152,9 @@ public class KirovAirship extends JFrame {
 		return new ImageIcon(resizedImg);
 	}
 	
+	public void printToConsole(String text){
+		outputConsole.append(text + "\n");
+	}
 	
 	private TextParser parser;
 	/**
@@ -162,7 +165,7 @@ public class KirovAirship extends JFrame {
 	private void textEntered(String text){
 		if(text != null && !text.isEmpty()){
 			String printer = parser.parse(text);
-			outputConsole.append(printer + "\n");
+			printToConsole(printer);
 			inputConsole.setText("");
 			outputConsole.setCaretPosition(outputConsole.getDocument().getLength());
 		}

@@ -35,7 +35,6 @@ public class ControlManager implements Runnable{
 		Thread t = null;
 		if(args.length == 0){
 			cm = new ControlManager();
-			cm.setUpFirstConnection();
 			t = new Thread(cm);
 		}
 		else if(args[0].equals("-simulate")){
@@ -48,7 +47,6 @@ public class ControlManager implements Runnable{
 		}
 		else if(args.length >= 2){
 			cm = new ControlManager(args[0], Integer.parseInt(args[1]));
-			cm.setUpFirstConnection();
 			t = new Thread(cm);
 		}
 		else 
@@ -56,10 +54,10 @@ public class ControlManager implements Runnable{
 		t.start();
 	}
 	
-	public void setUpFirstConnection(){
+	public void setUpFirstConnection(String serverName){
 		try{
 			JSch jsch=new JSch();
-			Session session=jsch.getSession("pi", "192.168.43.233", 22);
+			Session session=jsch.getSession("pi",serverName, 22);
 			session.setPassword("raspberry");
 			java.util.Properties config = new java.util.Properties(); 
 			config.put("StrictHostKeyChecking", "no");
@@ -74,8 +72,10 @@ public class ControlManager implements Runnable{
 //			InputStream in = channel2.getInputStream();
 			channel2.connect();
 		}
-		catch (Exception e){ }
-		
+		catch (Exception e){ 
+			System.out.println("Fout bij SSH conn met Pi");
+			e.printStackTrace();
+		}		
 	}
 	
 	private KirovAirship gui;
@@ -86,8 +86,8 @@ public class ControlManager implements Runnable{
 	private long lastCheck;
 	private LinkedList<Goal> goals;
 	private String path = "src/images/";
-	private final String host = "tabor";
-	private final String exchangeName = "server";
+	private final String host = "localhost";
+	private final String exchangeName = "tobar";
 	private Grid grid;
 	private boolean findQRcode = false;
 	private int analysedQRPictures;
@@ -113,7 +113,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public ControlManager(){
-		this("192.168.43.233", 5672);
+		this("192.168.2.124", 5672);
 	}
 	
 	public void setUpGui(){

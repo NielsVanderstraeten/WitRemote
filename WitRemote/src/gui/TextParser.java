@@ -1,21 +1,31 @@
 package gui;
 
-import goals.*;
+import goals.Goal;
+import goals.GoalHeight;
+import goals.GoalPosition;
 
 import java.util.LinkedList;
 
-import commands.*;
+import Rooster.Grid;
+import Rooster.Vector;
+
+import commands.Command;
+import commands.GetHeight;
+import commands.SetPosition;
+import commands.Terminate;
 
 public class TextParser {
 
 	private LinkedList<Command> queue;
 	private LinkedList<Goal> goals;
 	private LinkedList<String> commands;
+	private Grid grid;
 	
 	public TextParser(LinkedList<Command> queue, LinkedList<Goal> goals){
 		this.goals = goals;
 		this.queue = queue;
 		populateCommands();
+		grid = new Grid("test");
 	}
 	
 	private void populateCommands(){
@@ -27,6 +37,7 @@ public class TextParser {
 		commands.add("getheight");
 		commands.add("help");
 		commands.add("text");
+		commands.add("gototablet");
 	}
 	
 	public String parse(String command){
@@ -53,6 +64,8 @@ public class TextParser {
 			returnString = text(commandWords);
 		else if(commandWords[0].equalsIgnoreCase("terminate"))
 			returnString = terminate();
+		else if(commandWords[0].equalsIgnoreCase("gototablet"))
+			returnString = gotoTablet(commandWords);
 		else
 			returnString = "Command not found. Please try again.\nYou entered: " + command;
 
@@ -156,6 +169,31 @@ public class TextParser {
 		for(int i = 1; i < command.length; i++)
 			returnString += command[i] + " ";
 		return returnString;
+	}
+	
+	private String gotoTablet(String[] command){
+		if(command.length == 2){
+			int number;
+			try{
+				number = Integer.parseInt(command[1]); }
+			catch(NumberFormatException ne){
+				return "Please enter a valid number as tabletnumber. Only positive integers are allowed.";
+			}
+			if(number < 0)
+				return "Please enter a strictly positive number.";
+			else{
+				Vector position = grid.getTabletPosition(number);
+				int x = (int) position.getX();
+				int y = (int) position.getY();
+				if(x == -1 || y == -1)
+					return "This tablet is not available. Please enter a tablet number that exists.";
+				goals.add(new GoalPosition(x, y));
+				return "Adding a new goalposition at tablet " + number + ".\n"
+						+ "This is located at: x=" + x + ", y=" + y + ".";
+			}
+		} else
+			return "Please enter exactly 2 words. First the command then the number of the tablet.\n"
+					+ "For example: gototablet 3";	
 	}
 	
 	private String terminate(){

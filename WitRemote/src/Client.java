@@ -26,7 +26,7 @@ public class Client implements Runnable {
 		this.port = port;
 		this.path = path; //Path waar foto's opgeslagen moeten worden
 		
-		setUpSocket(port);
+		setUpSocket(serverName, port);
 	}
 
 	public int getPort(){
@@ -105,10 +105,9 @@ public class Client implements Runnable {
 	private ServerSocket serverSocket;
 	private DataOutputStream outToClient;
 	
-	private void setUpSocket(int port){
+	private void setUpSocket(String host, int port){
 		try{
-			serverSocket = new ServerSocket(port);
-			socket = serverSocket.accept();
+			socket = new Socket(host, port);
 			bufferSize = socket.getReceiveBufferSize();
 			dis = new DataInputStream(socket.getInputStream());
 			outToClient = new DataOutputStream(socket.getOutputStream());
