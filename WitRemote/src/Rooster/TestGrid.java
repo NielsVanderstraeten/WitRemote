@@ -76,21 +76,21 @@ public class TestGrid {
 //		double myAngle = myGrid.getRotation(myList);
 //		System.out.println("de rotatie = " + myAngle);
 //	}
-	@Test
-	public void testParse() {
-		Grid test = new Grid("haha");
-	}
-	@Test
-	public void TestCombination() {
-		int z = 5;
-		for (int i=0;i<z-2;i++) {
-			for (int j = (i+1); j<z-1;j++) {
-				for(int k = (j+1); k<z;k++) {
-					//System.out.println(i + "," + j + "," + k);
-				}
-			}
-		}
-	}
+//	@Test
+//	public void testParse() {
+//		Grid test = new Grid("haha");
+//	}
+//	@Test
+//	public void TestCombination() {
+//		int z = 5;
+//		for (int i=0;i<z-2;i++) {
+//			for (int j = (i+1); j<z-1;j++) {
+//				for(int k = (j+1); k<z;k++) {
+//					//System.out.println(i + "," + j + "," + k);
+//				}
+//			}
+//		}
+//	}
 	
 //	@Test
 //	public void TestGetAngle() {
@@ -153,11 +153,12 @@ public class TestGrid {
 //		myList.add(new Shape(405,330,"YS"));
 //		myList.add(new Shape(465,330,"WR"));
 		
-		myList.add(new Shape(323,281,"GC"));
-		myList.add(new Shape(427,281,"BH"));
-		myList.add(new Shape(375,251,"BC"));
-		myList.add(new Shape(375,311,"BH"));
-		
+		myList.add(new Shape(331,236,"RH"));
+		myList.add(new Shape(393,236,"BR"));
+		myList.add(new Shape(363,183,"GR"));
+		myList.add(new Shape(456,236,"BC"));
+		myList.add(new Shape(425,183,"BH"));
+		myList.add(new Shape(394,129,"YS"));
 		
 //		ArrayList<Integer> result = grid.getPoints(myList);
 //		System.out.println("de gevonden punten op het rooster zijn:");
@@ -177,7 +178,9 @@ public class TestGrid {
 //		}
 		
 		System.out.println("-------------------------------");
+		long start = System.currentTimeMillis();
 		Vector uitkomst = grid.getPositionNew(myList);
+		System.out.println("Running time: " +  (System.currentTimeMillis() - start) + "ms");
 		System.out.println(uitkomst.toString());
 		System.out.println("rotation:");
 		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
@@ -194,17 +197,17 @@ public class TestGrid {
 //		System.out.println(grid.getPositionCalculator().getVector(20).toString());
 	}
 	
-	@Test
-	public void VectorTest() {
-		System.out.println("vector angle test");
-		Vector vec = new Vector(0,0);
-		Vector test = new Vector(1,1);
-		Vector test2 = new Vector(1,-1);
-		System.out.println(vec.getAngle(test));
-		System.out.println(vec.getAngle(test2));
-		System.out.println(test.getAngle(vec));
-		System.out.println(test2.getAngle(vec));
-	}
-	
+//	@Test
+//	public void VectorTest() {
+//		System.out.println("vector angle test");
+//		Vector vec = new Vector(0,0);
+//		Vector test = new Vector(1,1);
+//		Vector test2 = new Vector(1,-1);
+//		System.out.println(vec.getAngle(test));
+//		System.out.println(vec.getAngle(test2));
+//		System.out.println(test.getAngle(vec));
+//		System.out.println(test2.getAngle(vec));
+//	}
+//	
 
 }
