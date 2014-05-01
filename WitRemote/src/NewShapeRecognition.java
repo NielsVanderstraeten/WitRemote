@@ -107,7 +107,7 @@ public class NewShapeRecognition implements Runnable {
 	 * iplimages
 	 */
 	private IplImage imgOrg, imgHSV, imgSmooth, imgThresholdWhite, 
-	imgThresholdWhiteCanny, imgThresholdHSVDarkColors;
+	imgThresholdWhiteCanny, imgThresholdHSVDarkColors, imgThresholdBlack;
 	
 	@SuppressWarnings("unused")
 	private int stars,rectangles,hearts,circles,unidentifiedShapes,unidentifiedColors;
@@ -131,7 +131,7 @@ public class NewShapeRecognition implements Runnable {
 		
 		Grid grid = new Grid("");
 		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Jeroen/Desktop/Pics/TestB11.jpg", null, grid, null);
+				"C:/Users/Jeroen/Desktop/Pics/A14.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
@@ -198,7 +198,7 @@ public class NewShapeRecognition implements Runnable {
 //	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
         cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
         //TODO cvSaveImage van hieronder commenten
-       // cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
+        cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
         //TODO wit dmv hsv
 
 	    // HSV => DONKEREKLEUREN
@@ -208,22 +208,40 @@ public class NewShapeRecognition implements Runnable {
 //	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 //	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
 	    //TODO cvSaveImage van hieronder commenten
-	    //cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
+	    cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 	    
+	    imgThresholdBlack = IplImage.create(cvGetSize(imgOrg), 8, 1);
+	    CvScalar minBlack = cvScalar(0, 0, 0, 0); //TODO mss aanpassen
+	    CvScalar maxBlack = cvScalar(90, 50, 90, 0);
+	    cvInRangeS(imgSmooth, minBlack, maxBlack, imgThresholdBlack);
+	    cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
+	    
+	    System.out.println("###############");
+	   // findContoursAndHull(imgSmooth, imgThresholdBlack);
+	    System.out.println("###############");
 	    findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
 	    findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
-	    
-	   // cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
+	    System.out.println("Average area = " + averageArea/(stars+hearts+rectangles+circles));
+	    double median;
+	    if (medianArea.size()%2 != 0)
+	    	median = medianArea.get(medianArea.size()/2);
+	    else
+	    	median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
+	    System.out.println("Median area = " + median);
+	    cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
 	    cvSaveImage("src/images/analyse.jpg", imgSmooth);
 	    
+	    imgThresholdBlack.release();
 	    imgHSV.release();
 	    imgThresholdHSVDarkColors.release();
 	    imgThresholdWhite.release();
 	    imgOrg.release();
 	    imgSmooth.release();
 	    imgThresholdWhiteCanny.release();
+	    
 	}
-
+private int averageArea = 0;
+private List<Double> medianArea = new ArrayList<Double>();
 	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
 		CvMemStorage memory = CvMemStorage.create();
 		CvSeq contour = CvSeq.create(0, Loader.sizeof(CvSeq.class), 
@@ -307,6 +325,8 @@ public class NewShapeRecognition implements Runnable {
 							shapes.add("Star");
 							stars++;;
 							imageTxt = "S";
+							averageArea+= area;
+							medianArea.add(area);
 						}
 						else if(areaCircle/area > 1.6){
 							//System.out.println("Rectangle AreaCircle/area == " + areaCircle/area);
@@ -314,6 +334,8 @@ public class NewShapeRecognition implements Runnable {
 							shapes.add("Rectangle");
 							rectangles++;
 							imageTxt = "R";
+							averageArea+= area;
+							medianArea.add(area);
 						}
 						else if(areaCircle/area > 1.3){
 							//System.out.println("Heart AreaCircle/area == " + areaCircle/area);
@@ -321,11 +343,15 @@ public class NewShapeRecognition implements Runnable {
 							shapes.add("Heart");
 							hearts++;
 							imageTxt = "H";
+							averageArea+= area;
+							medianArea.add(area);
 						}
 						else if(areaCircle/area >= 1){
 							shapes.add("Circle");
 							circles++;
 							imageTxt = "C";
+							averageArea+= area;
+							medianArea.add(area);
 						}
 						else {
 							shapes.add("Unidentified");
