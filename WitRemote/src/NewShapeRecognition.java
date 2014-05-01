@@ -72,12 +72,12 @@ import commands.SetPosition;
  */
 
 public class NewShapeRecognition implements Runnable {
-	
+
 	/**
 	 * Lijst met alle vormen. 
 	 */
 	private ArrayList<String> shapes = new ArrayList<String>();
-	
+
 	/**
 	 * Lijst met de kleuren. Indexen komen overeen met shapes.
 	 */
@@ -97,41 +97,41 @@ public class NewShapeRecognition implements Runnable {
 	 * Gevonden RGB codes. Indexen komen overeen met shapes.
 	 */
 	private ArrayList<String> foundColorCodesRGB = new ArrayList<String>();
-	
+
 	/**
 	 * list van shapes
 	 */
 	private ArrayList<Shape> shapeList = new ArrayList<Shape>();
-	
+
 	/**
 	 * iplimages
 	 */
 	private IplImage imgOrg, imgHSV, imgSmooth, imgThresholdWhite, 
 	imgThresholdWhiteCanny, imgThresholdHSVDarkColors, imgThresholdBlack;
-	
+
 	@SuppressWarnings("unused")
 	private int stars,rectangles,hearts,circles,unidentifiedShapes,unidentifiedColors;
-	
-	
+
+
 	private String originalImagePath;
 
 	private List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-	
+
 	private KirovAirship gui;
 	private Grid grid;
 	private LinkedList<Command> queue;
-	
+
 	private CvScalar minWhite = cvScalar(170, 170, 170, 0);
-    private CvScalar maxWhite = cvScalar(255, 255, 255, 0);	 
-    private CvScalar minHSV = cvScalar(0, 50, 50, 0); //TODO mss aanpassen
-    private CvScalar maxHSV = cvScalar(255, 255, 255, 0);
-    private CvScalar colorScalar;
-	
+	private CvScalar maxWhite = cvScalar(255, 255, 255, 0);	 
+	private CvScalar minHSV = cvScalar(0, 50, 50, 0); //TODO mss aanpassen
+	private CvScalar maxHSV = cvScalar(255, 255, 255, 0);
+	private CvScalar colorScalar;
+
 	public static void main(String args[]){
-		
+
 		Grid grid = new Grid("");
 		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Jeroen/Desktop/Pics/A14.jpg", null, grid, null);
+				"C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/A13.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
@@ -144,126 +144,129 @@ public class NewShapeRecognition implements Runnable {
 
 		originalImagePath = path;
 	}
-	
+
 	public synchronized void run(){ //TODO: synchronised?
 		Long start = System.currentTimeMillis();
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		
+
 		emptyAllParameters();
 
 		createImagesAndFindContours();
 		System.out.println();
 		System.out.println("Time: " + (System.currentTimeMillis() - start));
 		gui.updatePhoto();
-		
+
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
 		System.out.println("Number of shapes found: " + shapes.size());
 		for(int i = 0; i <= shapes.size() - 1; i++){
 			System.out.println((i+1) + ") "  + colors.get(i) + " " + shapes.get(i) + " - Center: ("+ centers.get(i) +") "
 					+ foundColorCodesRGB.get(i));
 		}*/
-		
+
 		shapeList = makeShapeList();
-		
+
 		Vector position = grid.getPositionNew(shapeList);
 		double rotation = grid.getRotationNew(shapeList);
-	    
+
 		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 			gui.updateRecognisedShapes(shapeList);
 			gui.updateOwnPosition((int) position.getX(), (int) position.getY(), rotation);
 		}
 	}
-	
+
 	private void createImagesAndFindContours() {
 		imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
-		
+
 		imgHSV = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
-//	    imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
-//		imgHSV = null;
-	    cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
-	    //cvSaveImage("C:/Users/Jeroen/Desktop/Original.jpg", imgOrg);
-	    //cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
-	    
-	    imgSmooth = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
-//	    imgSmooth = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
-	    cvSmooth(imgOrg, imgSmooth, CV_GAUSSIAN, 5);
-	    //cvSaveImage("C:/Users/Jeroen/Desktop/WhiteGaussian.jpg", imgSmooth);
+		//	    imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+		//		imgHSV = null;
+		cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
+		//cvSaveImage("C:/Users/Jeroen/Desktop/Original.jpg", imgOrg);
+		//cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
 
-	    // WIT   
-	    imgThresholdWhite = IplImage.create(cvGetSize(imgOrg), 8, 1);
-//	    imgThresholdWhite = cvCreateImage(cvGetSize(imgOrg), 8, 1);
-	    cvInRangeS(imgSmooth, minWhite, maxWhite, imgThresholdWhite);
-	    imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
-//	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
-        cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
-        //TODO cvSaveImage van hieronder commenten
-        cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
-        //TODO wit dmv hsv
+		imgSmooth = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+		//	    imgSmooth = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
+		cvSmooth(imgOrg, imgSmooth, CV_GAUSSIAN, 5);
+		//cvSaveImage("C:/Users/Jeroen/Desktop/WhiteGaussian.jpg", imgSmooth);
 
-	    // HSV => DONKEREKLEUREN
-        imgThresholdHSVDarkColors = IplImage.create(cvGetSize(imgOrg), 8, 1);
-//	    imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
-	    cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
-//	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
-//	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
-	    //TODO cvSaveImage van hieronder commenten
-	    cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
-	    
-	    imgThresholdBlack = IplImage.create(cvGetSize(imgOrg), 8, 1);
-	    CvScalar minBlack = cvScalar(0, 0, 0, 0); //TODO mss aanpassen
-	    CvScalar maxBlack = cvScalar(90, 50, 90, 0);
-	    cvInRangeS(imgSmooth, minBlack, maxBlack, imgThresholdBlack);
-	    cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
-	    
-	    System.out.println("###############");
-	   // findContoursAndHull(imgSmooth, imgThresholdBlack);
-	    System.out.println("###############");
-	    findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
-	    findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
-	    System.out.println("Average area = " + averageArea/(stars+hearts+rectangles+circles));
-	    double median;
-	    if (medianArea.size()%2 != 0)
-	    	median = medianArea.get(medianArea.size()/2);
-	    else
-	    	median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
-	    System.out.println("Median area = " + median);
-	    cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
-	    cvSaveImage("src/images/analyse.jpg", imgSmooth);
-	    
-	    imgThresholdBlack.release();
-	    imgHSV.release();
-	    imgThresholdHSVDarkColors.release();
-	    imgThresholdWhite.release();
-	    imgOrg.release();
-	    imgSmooth.release();
-	    imgThresholdWhiteCanny.release();
-	    
+		// WIT   
+		imgThresholdWhite = IplImage.create(cvGetSize(imgOrg), 8, 1);
+		//	    imgThresholdWhite = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+		cvInRangeS(imgSmooth, minWhite, maxWhite, imgThresholdWhite);
+		imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
+		//	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
+		cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
+		//TODO cvSaveImage van hieronder commenten
+		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
+		//TODO wit dmv hsv
+
+		// HSV => DONKEREKLEUREN
+		imgThresholdHSVDarkColors = IplImage.create(cvGetSize(imgOrg), 8, 1);
+		//	    imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
+		cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
+		//	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
+		//	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
+		//TODO cvSaveImage van hieronder commenten
+		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
+
+		imgThresholdBlack = IplImage.create(cvGetSize(imgOrg), 8, 1);
+		CvScalar minBlack = cvScalar(0, 0, 0, 0); //TODO mss aanpassen
+		CvScalar maxBlack = cvScalar(90, 50, 90, 0);
+		cvInRangeS(imgSmooth, minBlack, maxBlack, imgThresholdBlack);
+		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
+
+//		System.out.println("###############");
+//		// findContoursAndHull(imgSmooth, imgThresholdBlack);
+//		System.out.println("###############");
+		findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
+		findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
+//		System.out.println("Average area = " + averageArea/(stars+hearts+rectangles+circles));
+//		double median;
+//		if (medianArea.size()%2 != 0)
+//			median = medianArea.get(medianArea.size()/2);
+//		else
+//			median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
+//		System.out.println("Median area = " + median);
+		cvSaveImage("C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/Analysed.jpg", imgSmooth);
+		cvSaveImage("src/images/analyse.jpg", imgSmooth);
+
+		imgThresholdBlack.release();
+		imgHSV.release();
+		imgThresholdHSVDarkColors.release();
+		imgThresholdWhite.release();
+		imgOrg.release();
+		imgSmooth.release();
+		imgThresholdWhiteCanny.release();
+
 	}
-private int averageArea = 0;
-private List<Double> medianArea = new ArrayList<Double>();
+	private int averageArea = 0;
+	private List<Double> medianArea = new ArrayList<Double>();
+
 	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
 		CvMemStorage memory = CvMemStorage.create();
 		CvSeq contour = CvSeq.create(0, Loader.sizeof(CvSeq.class), 
-		          Loader.sizeof(CvPoint.class), memory);
+				Loader.sizeof(CvPoint.class), memory);
 		cvFindContours(imgThreshold, memory, contour, Loader.sizeof(CvContour.class), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+		
+		//Median area berekenen
 
 		CvMemStorage storage = CvMemStorage.create();    
 		while (contour != null && !contour.isNull()) {
 			if (contour.elem_size() > 0) {
-				
+
 				cvApproxPoly(contour, Loader.sizeof(CvContour.class),
 						storage, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
 				int centerX = 0;
 				int centerY = 0;        
 				CvMoments moments = new CvMoments();
 				cvMoments(contour, moments, 1);
+				double area = cvGetCentralMoment(moments, 0, 0);
 				double momX10 = cvGetSpatialMoment(moments, 1, 0);
 				double momY01 = cvGetSpatialMoment(moments, 0, 1);
-				double area = cvGetCentralMoment(moments, 0, 0);
 				centerX = (int) (momX10 / area);
 				centerY = (int) (momY01 / area);
-				if(area > 500){
+				if(area > 500 && area < 5000){
 					ArrayList<CvPoint2D32f> punten = new ArrayList<CvPoint2D32f>();
 					boolean onEdge = false;
 
@@ -290,13 +293,7 @@ private List<Double> medianArea = new ArrayList<Double>();
 						CvSeq convexContour = cvConvexHull2(contour, storage, CV_CLOCKWISE, 1);
 						cvMoments(convexContour, moments, 1);
 						double areaHull = cvGetCentralMoment(moments, 0, 0);
-						
-						//draw points
-						for(int i = 0; i < contour.total(); i++){
-							CvPoint v = new CvPoint(cvGetSeqElem(contour, i));
-							cvDrawCircle(imgOrg, v, 1, CvScalar.WHITE, -1, 8, 0);
-						}
-						
+
 						Vector vectorCenter = new Vector(centerX, centerY);
 
 						ArrayList<Double> list = new ArrayList<Double>();
@@ -311,6 +308,11 @@ private List<Double> medianArea = new ArrayList<Double>();
 						String imageTxt = "";
 						System.out.println("AreaHull/area == " + areaHull/area);
 						System.out.println("AreaCircle/area == " + areaCircle/area);
+						
+						boolean isUnidentified = false;
+						
+						//TODO: toegevoegd door niels: checken op absurde verhoudingen van andere parameter
+						//(vb omhullende klopt, maar circle-verhouding is absurd)
 						if(areaHull/area > 1.9){ //TODO 1.9 testen en aanpassen
 							//TODO
 							//TODO
@@ -319,8 +321,9 @@ private List<Double> medianArea = new ArrayList<Double>();
 							shapes.add("Unidentified");
 							unidentifiedShapes++;
 							imageTxt = "U";
+							isUnidentified = true;
 						}
-						else if(areaHull/area > 1.2){
+						else if(areaHull/area > 1.2  && areaCircle/area < 5){
 							//System.out.println("Star AREAHULL/AREA == " + areaHull/area);
 							shapes.add("Star");
 							stars++;;
@@ -328,7 +331,10 @@ private List<Double> medianArea = new ArrayList<Double>();
 							averageArea+= area;
 							medianArea.add(area);
 						}
-						else if(areaCircle/area > 1.6){
+//						else if(areaCircle/area > 1.6  && areaCircle/area < 5){
+						else if(((areaCircle/area > 1.64) 
+								|| (areaHull/area < 1.038 && areaCircle/area > 1.4))
+								&& (areaCircle/area < 5)){
 							//System.out.println("Rectangle AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Rectangle AreaHull/area == " + areaHull/area);
 							shapes.add("Rectangle");
@@ -337,7 +343,8 @@ private List<Double> medianArea = new ArrayList<Double>();
 							averageArea+= area;
 							medianArea.add(area);
 						}
-						else if(areaCircle/area > 1.3){
+//						else if(areaCircle/area > 1.3  && areaCircle/area < 5){
+						else if(areaHull/area > 1.038  && areaCircle/area < 5){
 							//System.out.println("Heart AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Heart AreaHull/area == " + areaHull/area);
 							shapes.add("Heart");
@@ -346,7 +353,7 @@ private List<Double> medianArea = new ArrayList<Double>();
 							averageArea+= area;
 							medianArea.add(area);
 						}
-						else if(areaCircle/area >= 1){
+						else if(areaCircle/area >= 1  && areaCircle/area < 5){
 							shapes.add("Circle");
 							circles++;
 							imageTxt = "C";
@@ -357,6 +364,7 @@ private List<Double> medianArea = new ArrayList<Double>();
 							shapes.add("Unidentified");
 							unidentifiedShapes++;
 							imageTxt = "U";
+							isUnidentified = true;
 						}
 
 						colorScalar = cvGet2D(imgOrg, centerY, centerX);   
@@ -367,8 +375,17 @@ private List<Double> medianArea = new ArrayList<Double>();
 						foundColorCodesRGB.add("RGB: [" + colorScalar.val(2) + ", " + colorScalar.val(1) + ", "+ colorScalar.val(0) + "]");
 
 						centers.add(new Vector(centerX, centerY));
-						cvPutText(imgOrg, imageTxt, cvPoint((int)centerX, (int)centerY), 
+						
+						if (! isUnidentified) {
+							//draw points
+							for(int i = 0; i < contour.total(); i++){
+								CvPoint v = new CvPoint(cvGetSeqElem(contour, i));
+								cvDrawCircle(imgOrg, v, 1, CvScalar.WHITE, -1, 8, 0);
+							}
+							//draw text
+							cvPutText(imgOrg, imageTxt, cvPoint((int)centerX, (int)centerY), 
 								cvFont(2, 3), CvScalar.BLACK);
+						}
 
 						String printString = "";
 						printString += "FOUND COLOR & SHAPE: " + colors.get(colors.size()-1) + " " + shapes.get(shapes.size()-1);
@@ -381,12 +398,12 @@ private List<Double> medianArea = new ArrayList<Double>();
 						//System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 					}
 				}
-            }
-            contour = contour.h_next();
-        }
+			}
+			contour = contour.h_next();
+		}
 		memory.release();
 	}
-	
+
 	private String colorToString(Color figureColor) {
 		if(figureColor == Color.blue){
 			return "Blue";
@@ -414,7 +431,7 @@ private List<Double> medianArea = new ArrayList<Double>();
 			return "Unidentified";
 		}
 	}
-	
+
 	/**
 	 * Finds the color blue, white, red, yellow or green. If it is an other color this returns cyan.
 	 * 
@@ -451,7 +468,7 @@ private List<Double> medianArea = new ArrayList<Double>();
 			return Color.cyan;
 		}
 	}
-	
+
 	private void emptyAllParameters() {
 		shapes.clear();
 		colors.clear();
@@ -476,15 +493,15 @@ private List<Double> medianArea = new ArrayList<Double>();
 		}
 		return shapeList;
 	}
-	
+
 	public List<MatOfPoint> getContours(){
 		return contours;
 	}
-	
+
 	public ArrayList<String> getShapes(){
 		return shapes;
 	}
-	
+
 	public ArrayList<String> getColors(){
 		return colors;
 	}
