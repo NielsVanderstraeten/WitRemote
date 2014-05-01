@@ -229,7 +229,7 @@ public class ControlManager implements Runnable{
 	private void startFindingQRCode() {
 		findQRcode = true;
 		analysedQRPictures = 0;
-		client.sendMessage(QRcode.getPublicKeyString(), "wit.tablet.tablet" + tabletNumber);
+		client.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
 	}
 	
 	public void setTabletNumber(int number) {
