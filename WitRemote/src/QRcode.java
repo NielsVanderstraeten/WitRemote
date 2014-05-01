@@ -1,3 +1,5 @@
+import goals.Goal;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,8 +9,11 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
+import java.util.List;
 
 import javax.imageio.ImageIO;
+
+import Rooster.Grid;
 
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.ChecksumException;
@@ -22,11 +27,19 @@ import com.google.zxing.qrcode.QRCodeReader;
 public class QRcode implements Runnable {
 	
 	private ControlManager cm;
+	private Grid grid;
+	private List<Goal> goals;
 	private String imagePath;
 	private static boolean initialisedKeys = false;
 	
 	public QRcode(ControlManager cm, String imagePath) {
 		this.cm = cm;
+		this.imagePath = imagePath;
+	}
+	
+	public QRcode(List<Goal> goals, Grid grid, String imagePath) {
+		this.goals = goals;
+		this.grid = grid;
 		this.imagePath = imagePath;
 	}
 	
@@ -72,8 +85,15 @@ public class QRcode implements Runnable {
 		}
 		
 		String command = read("result");
-		CommandDecoder decoder = new CommandDecoder(cm, command);
-		decoder.decodeCommand();
+		
+		if (cm != null) {
+			CommandDecoder decoder = new CommandDecoder(cm, command);
+			decoder.decodeCommand();
+		}
+		if (goals != null && grid != null) {
+			CommandDecoder decoder = new CommandDecoder(goals, grid, command);
+			decoder.decodeCommand();
+		}
 	}
 	
 	

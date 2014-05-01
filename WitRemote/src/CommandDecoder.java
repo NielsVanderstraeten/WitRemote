@@ -1,3 +1,6 @@
+import goals.Goal;
+import goals.GoalPosition;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,6 +22,7 @@ import commands.SetGoalPosition;
 public class CommandDecoder {
 
 	private List<Command> queue;
+	private List<Goal> goals;
 	private ControlManager cm;
 	private Grid grid;
 	private String command;
@@ -37,6 +41,12 @@ public class CommandDecoder {
 		this.grid = cm.getGrid();
 		this.command = command;
 	}
+	
+	public CommandDecoder(List<Goal> goals, Grid grid, String command) {
+		this.goals = goals;
+		this.command = command;
+		this.grid = grid;
+	}
 
 	/**
 	 * Methode die de ingelezen QR-code opsplitst in commando's en die toevoegt aan de queue
@@ -50,18 +60,28 @@ public class CommandDecoder {
 			//geval position
 			m = Pattern.compile("position:(\\d+),(\\d+)").matcher(command);
 			if (m.find()) {
-				queue.add(new SetGoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
-				cm.setTabletNumber(-1); //-1 betekent landen
-				cm.foundQRCode();
+				if (cm != null) {
+					queue.add(new SetGoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+					cm.setTabletNumber(-1); //-1 betekent landen
+					cm.foundQRCode();
+				}
+				if (goals != null) {
+					goals.add(new GoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+				}
 				foundCorrectQRCode = true;
 			}
 			//geval tablet
 			m = Pattern.compile("tablet:(\\d+)").matcher(command);
 			if (!foundCorrectQRCode && m.find()) {
 				Vector targetPosition = grid.getTabletPosition(Integer.parseInt(m.group(1)));
-				queue.add(new SetGoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
-				cm.setTabletNumber(Integer.parseInt(m.group(1)));
-				cm.foundQRCode();
+				if (cm != null) {
+					queue.add(new SetGoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
+					cm.setTabletNumber(Integer.parseInt(m.group(1)));
+					cm.foundQRCode();
+				}
+				if (goals != null) {
+					goals.add(new GoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
+				}
 				foundCorrectQRCode = true;				
 			}
 		
