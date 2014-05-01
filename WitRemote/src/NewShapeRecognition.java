@@ -114,14 +114,15 @@ public class NewShapeRecognition implements Runnable {
 	
 	private CvScalar minWhite = cvScalar(170, 170, 170, 0);
     private CvScalar maxWhite = cvScalar(255, 255, 255, 0);	 
-    private CvScalar minHSV = cvScalar(0, 50, 50, 0);
+    private CvScalar minHSV = cvScalar(0, 50, 50, 0); //TODO mss aanpassen
     private CvScalar maxHSV = cvScalar(255, 255, 255, 0);
     private CvScalar colorScalar;
 	
 	public static void main(String args[]){
 		
 		Grid grid = new Grid("");
-		NewShapeRecognition shapeRecog = new NewShapeRecognition("C:/Users/Jeroen/Desktop/Pics/TestA2.jpg", null, grid, null);
+		NewShapeRecognition shapeRecog = new NewShapeRecognition(
+				"C:/Users/Jeroen/Desktop/Pics/TestB11.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
@@ -156,7 +157,7 @@ public class NewShapeRecognition implements Runnable {
 		
 		Vector position = grid.getPositionNew(shapeList);
 		double rotation = grid.getRotationNew(shapeList);
-		
+	    
 		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 			gui.updateRecognisedShapes(shapeList);
@@ -167,15 +168,17 @@ public class NewShapeRecognition implements Runnable {
 	private void createImagesAndFindContours() {
 		imgOrg = cvLoadImage(originalImagePath, CV_LOAD_IMAGE_UNCHANGED);
 		
-		//TODO TODO TODO
 		imgHSV = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 //	    imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 //		imgHSV = null;
 	    cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
+	    //cvSaveImage("C:/Users/Jeroen/Desktop/Original.jpg", imgOrg);
+	    //cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
 	    
 	    imgSmooth = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 //	    imgSmooth = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 	    cvSmooth(imgOrg, imgSmooth, CV_GAUSSIAN, 5);
+	    //cvSaveImage("C:/Users/Jeroen/Desktop/WhiteGaussian.jpg", imgSmooth);
 
 	    // WIT   
 	    imgThresholdWhite = IplImage.create(cvGetSize(imgOrg), 8, 1);
@@ -184,6 +187,8 @@ public class NewShapeRecognition implements Runnable {
 	    imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
 //	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
         cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
+        //TODO cvSaveImage van hieronder commenten
+       // cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
         //TODO wit dmv hsv
 
 	    // HSV => DONKEREKLEUREN
@@ -192,13 +197,15 @@ public class NewShapeRecognition implements Runnable {
 	    cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
 //	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 //	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
+	    //TODO cvSaveImage van hieronder commenten
+	    //cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 	    
 	    findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
 	    findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
-
+	    
+	   // cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
 	    cvSaveImage("src/images/analyse.jpg", imgSmooth);
 	    
-	    //opencv_core.cvReleaseImage(imgHSV);
 	    imgHSV.release();
 	    imgThresholdHSVDarkColors.release();
 	    imgThresholdWhite.release();
@@ -216,6 +223,7 @@ public class NewShapeRecognition implements Runnable {
 		CvMemStorage storage = CvMemStorage.create();    
 		while (contour != null && !contour.isNull()) {
 			if (contour.elem_size() > 0) {
+				
 				cvApproxPoly(contour, Loader.sizeof(CvContour.class),
 						storage, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
 				int centerX = 0;
@@ -273,17 +281,33 @@ public class NewShapeRecognition implements Runnable {
 						double radius = list.get(list.size()-1);
 						double areaCircle = Math.PI*radius*radius;
 						String imageTxt = "";
-						if(areaHull/area > 1.2){
+						System.out.println("AreaHull/area == " + areaHull/area);
+						System.out.println("AreaCircle/area == " + areaCircle/area);
+						if(areaHull/area > 1.9){ //TODO 1.9 testen en aanpassen
+							//TODO
+							//TODO
+							//TODO
+							//System.out.println("Unidentified AREAHULL/AREA == " + areaHull/area);
+							shapes.add("Unidentified");
+							unidentifiedShapes++;
+							imageTxt = "U";
+						}
+						else if(areaHull/area > 1.2){
+							//System.out.println("Star AREAHULL/AREA == " + areaHull/area);
 							shapes.add("Star");
 							stars++;;
 							imageTxt = "S";
 						}
 						else if(areaCircle/area > 1.6){
+							//System.out.println("Rectangle AreaCircle/area == " + areaCircle/area);
+							//System.out.println("Rectangle AreaHull/area == " + areaHull/area);
 							shapes.add("Rectangle");
 							rectangles++;
 							imageTxt = "R";
 						}
 						else if(areaCircle/area > 1.3){
+							//System.out.println("Heart AreaCircle/area == " + areaCircle/area);
+							//System.out.println("Heart AreaHull/area == " + areaHull/area);
 							shapes.add("Heart");
 							hearts++;
 							imageTxt = "H";
@@ -316,6 +340,7 @@ public class NewShapeRecognition implements Runnable {
 						printString += " --- AREA = " + area; 
 						printString += " --- " + foundColorCodesRGB.get(foundColorCodesRGB.size()-1);
 						System.out.println(printString);
+						System.out.println();
 						//System.out.println("AREAHULL = " + areaHull + " --- AreaHull/Area = " + areaHull/area);
 						//System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 					}
