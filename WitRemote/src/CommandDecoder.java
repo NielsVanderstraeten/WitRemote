@@ -87,6 +87,6 @@ public class CommandDecoder {
 		
 		}
 		
-		System.out.println("---> Decoded QRcode: " + command);
+		System.out.println("---> Decoded QRcode: " + command);		
 	}
 }

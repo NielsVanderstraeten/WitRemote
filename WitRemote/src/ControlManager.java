@@ -131,6 +131,10 @@ public class ControlManager implements Runnable{
 		gui.updateZeppHeight(1500);
 	}
 	
+	public KirovAirship getGUI() {
+		return gui;
+	}
+	
 	private boolean terminate = false;
 	public void terminate(){
 		terminate = true;
