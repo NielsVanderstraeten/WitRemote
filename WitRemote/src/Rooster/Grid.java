@@ -430,7 +430,21 @@ public class Grid {
 	}
 	
 	public Vector getTabletPosition(int i) {
-		return tablets.get(i-1);
+		if (i > 0 && i <= tablets.size()) {
+			return tablets.get(i-1);
+		} else {
+			return new Vector(-1,-1);
+		}
+	}
+	
+	public int getTabletNumber(int x, int y) {
+		int tablet = -1;
+		for (int i = 0; i<tablets.size();i++) {
+			if ((int)tablets.get(i).getX() == x && (int)tablets.get(i).getY() == y) {
+				tablet = i + 1;
+			}
+		}
+		return tablet;
 	}
 	
 	@Deprecated
