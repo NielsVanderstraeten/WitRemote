@@ -46,31 +46,29 @@ public class ControlManager implements Runnable{
 			cm = new ControlManager();
 			t = new Thread(cm);
 		}
-		else if(args.length >= 2){
-			cm = new ControlManager(args[0], Integer.parseInt(args[1]));
+		else {
+			cm = new ControlManager(args[0]);
 			t = new Thread(cm);
 		}
-		else 
-			throw new IllegalArgumentException("Cannot start main method in Control Manager");
+//		else 
+//			throw new IllegalArgumentException("Cannot start main method in Control Manager");
 		t.start();
 	}
 	
-	public void setUpFirstConnection(String serverName){
+	public void setUpFirstConnection(String IPadressPi){
 		try{
-			JSch jsch=new JSch();
-			Session session=jsch.getSession("pi",serverName, 22);
+			JSch jsch = new JSch();
+			Session session=jsch.getSession("pi", IPadressPi, 22); //TODO: poort 22?
 			session.setPassword("raspberry");
 			java.util.Properties config = new java.util.Properties(); 
 			config.put("StrictHostKeyChecking", "no");
 			session.setConfig(config);
 			session.connect(30000000);
 			
-			ChannelExec channel2= (ChannelExec)session.openChannel("exec");
-			
+			ChannelExec channel2= (ChannelExec) session.openChannel("exec");			
 			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -classpath pi4j-0.0.5/lib/pi4j-core.jar:rabbitmq-client.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
-//			InputStream in = channel2.getInputStream();
 			channel2.connect();
 		}
 		catch (Exception e){ 
@@ -86,7 +84,7 @@ public class ControlManager implements Runnable{
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
-	private String path = "src/images/";
+//	private String path = "src/images/";
 	private final String host = "localhost";
 	private final String exchangeName = "server";
 	private Grid grid;
@@ -94,8 +92,8 @@ public class ControlManager implements Runnable{
 	private int analysedQRPictures;
 	private final static int QR_PICTURES_TO_ANALYSE = 20;
 	
-	public ControlManager(String serverName, int port){
-		setUpFirstConnection(serverName);
+	public ControlManager(String IPadressPi){
+		setUpFirstConnection(IPadressPi);
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
 		//-500 zodat er direct wordt gevraagd naar hoogte.
@@ -106,7 +104,6 @@ public class ControlManager implements Runnable{
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -123,7 +120,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public ControlManager(){
-		this("192.168.2.100", 5672);
+		this("192.168.2.100");
 	}
 	
 	public void setUpGui(){
