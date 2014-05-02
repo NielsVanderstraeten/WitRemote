@@ -67,7 +67,7 @@ public class ControlManager implements Runnable{
 			
 			ChannelExec channel2= (ChannelExec)session.openChannel("exec");
 			
-			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -cp pi4j-0.0.5/lib/pi4j-core.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
+			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -classpath pi4j-0.0.5/lib/pi4j-core.jar:rabbitmq-client.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
 //			InputStream in = channel2.getInputStream();
@@ -80,7 +80,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	private KirovAirship gui;
-	private Client photoClient;
+//	private Client photoClient;
 	private RabbitClient client;
 	private RabbitRecv rabbitRecv;
 	private LinkedList<Command> queue;
@@ -88,7 +88,7 @@ public class ControlManager implements Runnable{
 	private LinkedList<Goal> goals;
 	private String path = "src/images/";
 	private final String host = "localhost";
-	private final String exchangeName = "tabor";
+	private final String exchangeName = "server";
 	private Grid grid;
 	private boolean findQRcode = false;
 	private int analysedQRPictures;
@@ -113,8 +113,8 @@ public class ControlManager implements Runnable{
 		//Client voor dingen door te sturen.
 		client = new RabbitClient(host, exchangeName);
 		//photoClient voor foto's te ontvangen.
-		photoClient = new Client(serverName, port, path, this);
-		(new Thread(photoClient)).start();
+//		photoClient = new Client(serverName, port, path, this);
+//		(new Thread(photoClient)).start();
 		//rabbitRecv om de hoogte die de Pi doorstuurt, te ontvangen.
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui);
 		(new Thread(rabbitRecv)).start();
@@ -123,7 +123,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public ControlManager(){
-		this("192.168.2.136", 5672);
+		this("192.168.2.102", 5672);
 	}
 	
 	public void setUpGui(){

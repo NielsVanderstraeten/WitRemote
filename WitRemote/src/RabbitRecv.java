@@ -112,7 +112,7 @@ public class RabbitRecv implements Runnable{
 	}
 	
 	public static void main(String[] args){
-		RabbitRecv recv = new RabbitRecv("localhost", "tabor", new KirovAirship());
+		RabbitRecv recv = new RabbitRecv("localhost", "server", new KirovAirship());
 		recv.run();
 	}
 

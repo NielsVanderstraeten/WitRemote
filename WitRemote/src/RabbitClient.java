@@ -119,7 +119,7 @@ public class RabbitClient implements Runnable{
 	}
 		
 	public static void main(String[] argvs) throws InterruptedException{
-		RabbitClient client = new RabbitClient("localhost", "tabor");
+		RabbitClient client = new RabbitClient("localhost", "server");
 		//client.sendMessage("1000", "white.info.height");
 		client.sendMessage("2000 2000", "wit.hcommand.move");
 		client.sendMessage("5000", "wit.hcommand.elevate");
