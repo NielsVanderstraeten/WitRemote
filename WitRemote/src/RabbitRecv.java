@@ -49,7 +49,7 @@ public class RabbitRecv implements Runnable{
 			factory.setUsername("wit");
 			factory.setPassword("wit");
 			factory.setHost(host);
-			factory.setPort(5673);
+			factory.setPort(5672);
 			connection = factory.newConnection();
 			channel = connection.createChannel();
 			
@@ -142,7 +142,7 @@ public class RabbitRecv implements Runnable{
 	}
 	
 	public static void main(String[] args){
-		RabbitRecv recv = new RabbitRecv("localhost", "tabor", new KirovAirship(), null);
+		RabbitRecv recv = new RabbitRecv("localhost", "server", new KirovAirship(), null);
 		recv.run();
 	}
 

@@ -42,7 +42,7 @@ public class RabbitClient implements Runnable{
 			factory.setUsername("wit");
 			factory.setPassword("wit");
 			factory.setHost(host);
-			factory.setPort(5673);
+			factory.setPort(5672);
 			connection = factory.newConnection();
 			channel = connection.createChannel();
 			channel.exchangeDeclare(exchangeName, "topic"); 

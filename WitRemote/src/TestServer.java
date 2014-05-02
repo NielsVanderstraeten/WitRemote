@@ -41,6 +41,7 @@ public class TestServer implements Runnable{
 		}
 		catch(Exception e){
 			System.err.println("Error in TestServer constructor");
+			e.printStackTrace();
 		}
 	}
 	
@@ -61,7 +62,7 @@ public class TestServer implements Runnable{
 	private ArrayList<String> topics;
 	private void setUpTopics(){
 		topics = new ArrayList<String>();
-		topics.add("white.#");
+		topics.add("wit.#");
 	}
 	
 	private void declareTopicBinds() throws IOException{

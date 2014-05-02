@@ -123,7 +123,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	public ControlManager(){
-		this("192.168.2.102", 5672);
+		this("192.168.2.100", 5672);
 	}
 	
 	public void setUpGui(){
