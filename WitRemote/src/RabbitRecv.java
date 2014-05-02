@@ -1,6 +1,9 @@
 import gui.KirovAirship;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 import com.rabbitmq.client.Channel;
@@ -18,12 +21,17 @@ public class RabbitRecv implements Runnable{
 	private KirovAirship gui;
 	private final String enemy = "zwart";
 	private boolean simulator;
+	private int numberOfPicture = 0;
+	private ControlManager cm;
+	private String path = "src/images/";
+	private String namePicture;
 	
-	public RabbitRecv(String host, String exchangeName, KirovAirship gui) {
+	public RabbitRecv(String host, String exchangeName, KirovAirship gui, ControlManager cm) {
 		setUpTopics();
 		setUpConnection(host, exchangeName);
 		this.gui = gui;
-		simulator = false; 
+		simulator = false;
+		this.cm = cm;
 	}
 	
 	public RabbitRecv(String host, String exchangeName, KirovAirship gui, boolean sim) {
@@ -82,8 +90,29 @@ public class RabbitRecv implements Runnable{
 				} else if(topic.equals(enemy +".info.position")){
 					String[] words = message.split("[ ]+");
 					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
+				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){
+					numberOfPicture++;
+					if(numberOfPicture > 9){
+						numberOfPicture = 1;
+					}
+					long size = Long.parseLong(message);
+					namePicture = "recv" + numberOfPicture + ".jpg";
+					File file = new File(path+namePicture);
+					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
+					long done = 0;
+					System.out.println(size +"");
+					while(done < size){
+						delivery = consumer.nextDelivery();
+						byte[] data = delivery.getBody();
+						outFile.write(data);
+						done = done + data.length;
+					}
+					outFile.close();
+					System.out.println("[.] New picture downloaded: " + path+namePicture);
+					cm.analysePicture(path+namePicture);
 				}
-				System.out.println("[.] " + topic + ": " + message);
+				if(topics.contains(topic) && !topic.equals("wit.private.recvPicture"))
+					System.out.println("[.] " + topic + ": " + message);
 			}
 		}
 		catch(IOException e){
@@ -104,6 +133,7 @@ public class RabbitRecv implements Runnable{
 		topics.add("wit.info.height");
 		topics.add("wit.private.#");
 		topics.add(enemy + ".info.position");
+		topics.add("wit.private.recvPicture");
 	}
 	
 	private void declareTopicBinds() throws IOException{
@@ -112,7 +142,7 @@ public class RabbitRecv implements Runnable{
 	}
 	
 	public static void main(String[] args){
-		RabbitRecv recv = new RabbitRecv("localhost", "server", new KirovAirship());
+		RabbitRecv recv = new RabbitRecv("localhost", "tabor", new KirovAirship(), null);
 		recv.run();
 	}
 
