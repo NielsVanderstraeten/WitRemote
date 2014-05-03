@@ -14,15 +14,14 @@ import java.net.UnknownHostException;
 import commands.Command;
 
 
-public class Client implements Runnable {
+public class PhotoClient implements Runnable {
 	private String serverName, path;
 	private String namePicture = "recv";
 	private static int numberOfPicture = 0;
 	private int port, bufferSize;
-	private String previousCommand = "";
 	private ControlManager cm;
 
-	public Client(String serverName, int port, ControlManager cm){
+	public PhotoClient(String serverName, int port, ControlManager cm){
 		this.serverName = serverName;
 		this.port = port;
 		this.cm = cm;
@@ -61,6 +60,7 @@ public class Client implements Runnable {
 			outFile.close();
 			inFromServer.close();
 			System.out.println("-> Picture saved at " + path + namePicture + numberOfPicture + ".jpg");
+			cm.analysePicture(path + namePicture + numberOfPicture + ".jpg");
 
 
 			client.close();
