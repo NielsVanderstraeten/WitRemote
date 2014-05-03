@@ -82,7 +82,7 @@ public class RabbitRecv implements Runnable{
 				topic = delivery.getEnvelope().getRoutingKey();
 				
 				if(topic.equals("wit.info.height") && !simulator)
-					gui.updateZeppHeightMM(Integer.parseInt(message));
+					gui.updateZeppHeightMM((int) Double.parseDouble(message));
 				else if(topic.equals("wit.private.terminate")){
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))

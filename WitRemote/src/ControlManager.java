@@ -34,17 +34,13 @@ public class ControlManager implements Runnable{
 		Simulator simulator;
 		ControlManager cm ;
 		Thread t = null;
-		if(args.length == 0){
+		if(args.length == 0 || args[0].equals("-lazymode")){
 			cm = new ControlManager();
 			t = new Thread(cm);
 		}
 		else if(args[0].equals("-simulate")){
 			simulator = new Simulator("localhost");
 			t = new Thread(simulator);
-		}
-		else if(args[0].equals("-lazymode")){
-			cm = new ControlManager();
-			t = new Thread(cm);
 		}
 		else {
 			cm = new ControlManager(args[0]);
@@ -58,7 +54,7 @@ public class ControlManager implements Runnable{
 	public void setUpFirstConnection(String IPadressPi){
 		try{
 			JSch jsch = new JSch();
-			Session session=jsch.getSession("pi", IPadressPi, 22); //TODO: poort 22?
+			Session session = jsch.getSession("pi", IPadressPi, 22); //TODO: poort 22?
 			session.setPassword("raspberry");
 			java.util.Properties config = new java.util.Properties(); 
 			config.put("StrictHostKeyChecking", "no");
@@ -72,7 +68,7 @@ public class ControlManager implements Runnable{
 			channel2.connect();
 		}
 		catch (Exception e){ 
-			System.out.println("Fout bij SSH conn met Pi");
+			System.out.println("Fout bij SSH connectie met Pi");
 			e.printStackTrace();
 		}		
 	}
@@ -109,9 +105,6 @@ public class ControlManager implements Runnable{
 		
 		//Client voor dingen door te sturen.
 		client = new RabbitClient(host, exchangeName);
-		//photoClient voor foto's te ontvangen.
-//		photoClient = new Client(serverName, port, path, this);
-//		(new Thread(photoClient)).start();
 		//rabbitRecv om de hoogte die de Pi doorstuurt, te ontvangen.
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui, this);
 		(new Thread(rabbitRecv)).start();
