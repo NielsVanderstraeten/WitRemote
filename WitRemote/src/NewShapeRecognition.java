@@ -131,7 +131,7 @@ public class NewShapeRecognition implements Runnable {
 
 		Grid grid = new Grid("");
 		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Jeroen/Dropbox/P&O WIT/VormHerkenning/A14.jpg", null, grid, null);
+				"C:/Users/Jeroen/Desktop/Pics/A11.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
