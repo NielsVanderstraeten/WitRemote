@@ -42,6 +42,8 @@ public class CommandDecoder {
 		this.command = command;
 	}
 	
+	//Voor tests, wordt niet gebruikt
+	@Deprecated
 	public CommandDecoder(List<Goal> goals, Grid grid, String command) {
 		this.goals = goals;
 		this.command = command;

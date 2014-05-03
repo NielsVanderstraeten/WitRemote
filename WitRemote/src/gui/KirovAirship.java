@@ -268,7 +268,7 @@ public class KirovAirship extends JFrame {
 		mapPane.add(mapMaker);
 		//mapMaker.addMouseListener(new ZeppelinMouse());
 		
-		updateOwnPosition((int) (widthMeters*0.1), 	(int) (heightMeters*0.1), 0);
+		updateOwnPosition((int) (widthMeters*0.5), 	(int) (heightMeters*0.5), 0);
 		updateOpponentPosition((int) (widthMeters*0.9), (int) (heightMeters*0.9));
 		updateGui();
 	}

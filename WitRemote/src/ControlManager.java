@@ -138,7 +138,7 @@ public class ControlManager implements Runnable{
 		//nextGoal = new GoalHeight(800);
 		goals.add(new GoalFindQRCode());
 		gui.setTargetHeight(800);
-		
+
 		//TODO: commando om QR te lezen op bepaald moment & oude goal negeert
 	}
 
@@ -178,6 +178,17 @@ public class ControlManager implements Runnable{
 					client.executeCommand(c);
 					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastFigures());
+				} else if (c instanceof SetGoalHeight) {
+					client.executeCommand(c);
+					int height = ((SetGoalHeight)c).getHeight();
+					goals.add(new GoalHeight(height));
+					gui.setTargetHeight(height);
+				} else if (c instanceof SetGoalPosition) {
+					client.executeCommand(c);
+					int x = ((SetGoalPosition)c).getX();
+					int y = ((SetGoalPosition)c).getY();
+					goals.add(new GoalPosition(x, y));
+					gui.setGoalPosition(x, y);
 				}
 				else if (c instanceof Terminate) {
 					client.executeCommand(c);
@@ -202,18 +213,18 @@ public class ControlManager implements Runnable{
 			}
 		}
 	}
+	
+	//TODO: analysing pictures gaat nog traag?
 
 	//RabbitRecv moet dit oproepen wanneer een foto ontvangen wordt
 	public void analysePicture(String realPath) {		
 		if (isThreadStillAlive(analyserThread) || isThreadStillAlive(qrThread))
 			return;
-		
-		System.out.println(goals.toString()); //TODO debug
-		
+
 		boolean analyseNextPictureForQR = false;
 		boolean analyseNextPictureForShapes = false;
 		NewShapeRecognition recog = new NewShapeRecognition(realPath, gui, grid, queue);
-		
+
 		System.out.println("Analysing picture...");
 		if (findQRcode) {
 			analyseNextPictureForQR = true;
@@ -242,11 +253,8 @@ public class ControlManager implements Runnable{
 	}
 
 	public void foundQRCode() {
-		System.out.println("-"+goals.toString()); //TODO debug
 		findQRcode = false;
 		addNextGoal();
-		System.out.println("*"+goals.toString()); //TODO debug
-		System.out.println("**"+nextGoal);
 	}
 
 	private void startFindingQRCode() {
@@ -275,9 +283,11 @@ public class ControlManager implements Runnable{
 			int ownX = gui.getOwnX(); int ownY = gui.getOwnY();
 			int targetX = ((GoalPosition) nextGoal).getX(); int targetY = ((GoalPosition) nextGoal).getY();
 			boolean result = closeEnough(ownX, targetX) && closeEnough(ownY, targetY);
-			if (tabletNumber == -1) { //Landen als doel bereikt is en er geen volgende tablet meer is
-				client.sendMessage("true", "wit.private.terminate");
-				System.exit(0);
+			if (tabletNumber == -1 && result) { //Landen als doel bereikt is en er geen volgende tablet meer is
+				//TODO: niet terminaten, maar blijven vliegen over positie
+				gui.printToConsole("TARGET POSITION REACHED!");
+//				client.sendMessage("true", "wit.private.terminate");
+//				System.exit(0);
 			}
 			return result;
 		} else if (nextGoal instanceof GoalFindQRCode) {
@@ -286,7 +296,7 @@ public class ControlManager implements Runnable{
 		return false;
 	}
 
-	
+
 
 	private void addNextGoal(){
 		if(!goals.isEmpty()){
@@ -313,6 +323,8 @@ public class ControlManager implements Runnable{
 			startFindingQRCode();
 		}
 	}
+	
+	//TODO anton: richting +45 graden?
 
 	private boolean closeEnough(double current, double target){
 		//We werken in mm ok? - NEIN
