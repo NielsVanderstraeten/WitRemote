@@ -136,6 +136,7 @@ public class ControlManager implements Runnable{
 	public void setUpGoals(){
 		//Standaard hoogte van 1m invoeren als targethoogte.
 		//nextGoal = new GoalHeight(800);
+		goals.add(new GoalFindQRCode());
 		gui.setTargetHeight(800);
 		
 		//TODO: commando om QR te lezen op bepaald moment & oude goal negeert
@@ -207,6 +208,8 @@ public class ControlManager implements Runnable{
 		if (isThreadStillAlive(analyserThread) || isThreadStillAlive(qrThread))
 			return;
 		
+		System.out.println(goals.toString()); //TODO debug
+		
 		boolean analyseNextPictureForQR = false;
 		boolean analyseNextPictureForShapes = false;
 		NewShapeRecognition recog = new NewShapeRecognition(realPath, gui, grid, queue);
@@ -239,7 +242,11 @@ public class ControlManager implements Runnable{
 	}
 
 	public void foundQRCode() {
+		System.out.println("-"+goals.toString()); //TODO debug
 		findQRcode = false;
+		addNextGoal();
+		System.out.println("*"+goals.toString()); //TODO debug
+		System.out.println("**"+nextGoal);
 	}
 
 	private void startFindingQRCode() {
@@ -278,6 +285,8 @@ public class ControlManager implements Runnable{
 		}
 		return false;
 	}
+
+	
 
 	private void addNextGoal(){
 		if(!goals.isEmpty()){

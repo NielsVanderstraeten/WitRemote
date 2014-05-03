@@ -96,6 +96,7 @@ public class QRcode implements Runnable {
 		}
 		
 		cm.getGUI().printToConsole(command);
+		cm.getGUI().updatePhoto(imagePath);
 	}
 	
 	

@@ -119,8 +119,10 @@ public class RabbitRecv implements Runnable{
 //					System.out.println("[.] New picture downloaded: " + path+namePicture);
 //					cm.analysePicture(path+namePicture);
 				}
-				if(topics.contains(topic) && !topic.equals("wit.private.recvPicture"))
-					System.out.println("[.] " + topic + ": " + message);
+				
+				//Hoogte receiven afgezet //TODO
+//				if(topics.contains(topic) && !topic.equals("wit.private.recvPicture"))
+//					System.out.println("[.] " + topic + ": " + message);
 			}
 		}
 		catch(IOException e){

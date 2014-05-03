@@ -516,7 +516,11 @@ public class KirovAirship extends JFrame {
 	 * Zorgt voor de uitbeelding van de geanalyseerde foto in de gui.
 	 */
 	public void updatePhoto(){
-		ImageIcon photo = getImageIcon("src/images/analyse.jpg", photoLabel.getWidth(), photoLabel.getHeight());
+		updatePhoto("src/images/analyse.jpg");
+	}
+	
+	public void updatePhoto(String path){
+		ImageIcon photo = getImageIcon(path, photoLabel.getWidth(), photoLabel.getHeight());
 		photoLabel.setIcon(photo);
 	}
 	
