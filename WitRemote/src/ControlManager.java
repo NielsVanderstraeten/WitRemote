@@ -56,7 +56,7 @@ public class ControlManager implements Runnable{
 	public void setUpFirstConnection(String IPadressPi){
 		try{
 			JSch jsch = new JSch();
-			Session session = jsch.getSession("pi", IPadressPi, 22); //TODO: poort 22?
+			Session session = jsch.getSession("pi", IPadressPi, 22);
 			session.setPassword("raspberry");
 			java.util.Properties config = new java.util.Properties(); 
 			config.put("StrictHostKeyChecking", "no");
@@ -135,8 +135,10 @@ public class ControlManager implements Runnable{
 
 	public void setUpGoals(){
 		//Standaard hoogte van 1m invoeren als targethoogte.
-		nextGoal = new GoalHeight(1000);
-		gui.updateZeppHeight(1500);
+		//nextGoal = new GoalHeight(800);
+		gui.setTargetHeight(800);
+		
+		//TODO: commando om QR te lezen op bepaald moment & oude goal negeert
 	}
 
 	public KirovAirship getGUI() {
@@ -188,20 +190,10 @@ public class ControlManager implements Runnable{
 
 			gui.updateGui();
 
-			if(System.currentTimeMillis() - lastCheck > 3000 && (photoClient == null || ! photoClient.isAlive())){
+			if(System.currentTimeMillis() - lastCheck > 3000 && !isThreadStillAlive(photoClient)) {
 				lastCheck = System.currentTimeMillis();
-				//				client.sendMessage("true", "wit.private.sendPicture");
-				//TODO: via rabbitmq vervangen door listener:
 				photoClient = new Thread(new PhotoClient(IPadressPi, 6066, this));
 				photoClient.start();
-
-				//				boolean stillEmpty = false;
-				//				if (queue.isEmpty())
-				//					stillEmpty = true;
-
-				//				nextGoal.print();
-				//				Command nextCommand = queue.getFirst();
-				//				System.out.println(nextCommand.getConsole());
 			}
 
 			if(checkGoalReached()){
@@ -261,7 +253,7 @@ public class ControlManager implements Runnable{
 	}
 
 	private boolean isThreadStillAlive(Thread t) {
-		return (! ((t == null) || t.isAlive()) );
+		return (t != null && t.isAlive());
 	}	
 
 	//NextGoal is al uit de list verwijderd
@@ -290,6 +282,8 @@ public class ControlManager implements Runnable{
 	private void addNextGoal(){
 		if(!goals.isEmpty()){
 			nextGoal = goals.poll();
+			//TODO: GoalHeight verwijderen (anton weet hoe)
+			//TODO: cancelnextgoal bij commands toevoegen.
 			if(nextGoal instanceof GoalHeight){
 				int targetheight = ((GoalHeight) nextGoal).getTargetHeight();
 				gui.setTargetHeight(targetheight);
