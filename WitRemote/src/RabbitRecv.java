@@ -1,5 +1,6 @@
 import gui.KirovAirship;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -82,7 +83,7 @@ public class RabbitRecv implements Runnable{
 				topic = delivery.getEnvelope().getRoutingKey();
 				
 				if(topic.equals("wit.info.height") && !simulator)
-					gui.updateZeppHeightMM((int) Double.parseDouble(message));
+					gui.updateZeppHeightMM((int) (Double.parseDouble(message)*10));
 				else if(topic.equals("wit.private.terminate")){
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))
@@ -90,26 +91,33 @@ public class RabbitRecv implements Runnable{
 				} else if(topic.equals(enemy +".info.position")){
 					String[] words = message.split("[ ]+");
 					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
-				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){
-					numberOfPicture++;
-					if(numberOfPicture > 9){
-						numberOfPicture = 1;
-					}
-					long size = Long.parseLong(message);
-					namePicture = "recv" + numberOfPicture + ".jpg";
-					File file = new File(path+namePicture);
-					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
-					long done = 0;
-					System.out.println(size +"");
-					while(done < size){
-						delivery = consumer.nextDelivery();
-						byte[] data = delivery.getBody();
-						outFile.write(data);
-						done = done + data.length;
-					}
-					outFile.close();
-					System.out.println("[.] New picture downloaded: " + path+namePicture);
-					cm.analysePicture(path+namePicture);
+//				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){
+//					numberOfPicture++;
+//					if(numberOfPicture > 9){
+//						numberOfPicture = 1;
+//					}
+//					namePicture = "recv" + numberOfPicture + ".jpg";
+//					File file = new File(path+namePicture);
+//					
+//					byte[] data = delivery.getBody();
+//					
+//					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
+//					BufferedOutputStream bout = new BufferedOutputStream(outFile);
+//					long done = 0;
+////					System.out.println(size +"");
+//					
+//					String test = new String(data, "UTF-8");
+//					while(! test.equals("end")){
+//						bout.write(data);
+//						done = done + data.length;
+//						delivery = consumer.nextDelivery();
+//						data = delivery.getBody();
+//						test = new String(data, "UTF-8");
+//					}
+//					outFile.close();
+					
+//					System.out.println("[.] New picture downloaded: " + path+namePicture);
+//					cm.analysePicture(path+namePicture);
 				}
 				if(topics.contains(topic) && !topic.equals("wit.private.recvPicture"))
 					System.out.println("[.] " + topic + ": " + message);

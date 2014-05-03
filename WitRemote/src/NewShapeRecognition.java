@@ -131,7 +131,7 @@ public class NewShapeRecognition implements Runnable {
 
 		Grid grid = new Grid("");
 		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Jeroen/Dropbox/P&O WIT/VormHerkenning/A14.jpg", null, grid, null);
+				"C:/Users/Jeroen/Desktop/Pics/A11.jpg", null, grid, null);
 		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 		Thread t = new Thread(shapeRecog);
 		t.start();
@@ -145,7 +145,7 @@ public class NewShapeRecognition implements Runnable {
 		originalImagePath = path;
 	}
 
-	public synchronized void run(){ //TODO: synchronised?
+	public synchronized void run(){
 		Long start = System.currentTimeMillis();
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -154,10 +154,7 @@ public class NewShapeRecognition implements Runnable {
 		createImagesAndFindContours();
 		System.out.println();
 		System.out.println("Time: " + (System.currentTimeMillis() - start));
-		//gui.updatePhoto(); //TODO TERUG AANZETTEN
-		//TODO
-		//TODO
-		//TODO
+		gui.updatePhoto();
 		
 
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
@@ -202,9 +199,7 @@ public class NewShapeRecognition implements Runnable {
 		imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
 		//	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 		cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
-		//TODO cvSaveImage van hieronder commenten
-		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
-		//TODO wit dmv hsv
+//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
 
 		// HSV => DONKEREKLEUREN
 		imgThresholdHSVDarkColors = IplImage.create(cvGetSize(imgOrg), 8, 1);
@@ -212,14 +207,13 @@ public class NewShapeRecognition implements Runnable {
 		cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
 		//	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 		//	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
-		//TODO cvSaveImage van hieronder commenten
-		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
+//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 
 		imgThresholdBlack = IplImage.create(cvGetSize(imgOrg), 8, 1);
-		CvScalar minBlack = cvScalar(0, 0, 0, 0); //TODO mss aanpassen
+		CvScalar minBlack = cvScalar(0, 0, 0, 0); 
 		CvScalar maxBlack = cvScalar(90, 50, 90, 0);
 		cvInRangeS(imgSmooth, minBlack, maxBlack, imgThresholdBlack);
-		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
+//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
 
 //		System.out.println("###############");
 //		// findContoursAndHull(imgSmooth, imgThresholdBlack);
@@ -233,7 +227,7 @@ public class NewShapeRecognition implements Runnable {
 //		else
 //			median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
 //		System.out.println("Median area = " + median);
-		cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
+//		cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
 		cvSaveImage("src/images/analyse.jpg", imgSmooth);
 
 		imgThresholdBlack.release();
@@ -316,12 +310,8 @@ public class NewShapeRecognition implements Runnable {
 						
 						boolean isUnidentified = false;
 						
-						//TODO: toegevoegd door niels: checken op absurde verhoudingen van andere parameter
 						//(vb omhullende klopt, maar circle-verhouding is absurd)
-						if(areaHull/area > 1.9){ //TODO 1.9 testen en aanpassen
-							//TODO
-							//TODO
-							//TODO
+						if(areaHull/area > 1.9){
 							//System.out.println("Unidentified AREAHULL/AREA == " + areaHull/area);
 							shapes.add("Unidentified");
 							unidentifiedShapes++;

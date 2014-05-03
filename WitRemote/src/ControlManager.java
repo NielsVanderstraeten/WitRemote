@@ -19,6 +19,8 @@ import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
 import commands.SetPosition;
+import commands.TakePicture;
+import commands.Terminate;
 
 
 public class ControlManager implements Runnable{
@@ -27,9 +29,9 @@ public class ControlManager implements Runnable{
 	private final static int rowReal = 14;
 	private final static int REAL_WIDTH = 400*columnReal;
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
-	
+
 	private int tabletNumber = 1; //-1 indien zeppelin moet landen
-	
+
 	public static void main(String[] args){
 		Simulator simulator;
 		ControlManager cm ;
@@ -46,11 +48,11 @@ public class ControlManager implements Runnable{
 			cm = new ControlManager(args[0]);
 			t = new Thread(cm);
 		}
-//		else 
-//			throw new IllegalArgumentException("Cannot start main method in Control Manager");
+		//		else 
+		//			throw new IllegalArgumentException("Cannot start main method in Control Manager");
 		t.start();
 	}
-	
+
 	public void setUpFirstConnection(String IPadressPi){
 		try{
 			JSch jsch = new JSch();
@@ -60,35 +62,41 @@ public class ControlManager implements Runnable{
 			config.put("StrictHostKeyChecking", "no");
 			session.setConfig(config);
 			session.connect(30000000);
-			
+
 			ChannelExec channel2= (ChannelExec) session.openChannel("exec");			
 			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -classpath pi4j-0.0.5/lib/pi4j-core.jar:rabbitmq-client.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
 			channel2.connect();
+
+
 		}
 		catch (Exception e){ 
 			System.out.println("Fout bij SSH connectie met Pi");
 			e.printStackTrace();
 		}		
 	}
-	
+
 	private KirovAirship gui;
-//	private Client photoClient;
+	//	private Client photoClient;
 	private RabbitClient client;
 	private RabbitRecv rabbitRecv;
 	private LinkedList<Command> queue;
 	private long lastCheck;
 	private LinkedList<Goal> goals;
-//	private String path = "src/images/";
+	//	private String path = "src/images/";
 	private final String host = "localhost";
 	private final String exchangeName = "server";
 	private Grid grid;
 	private boolean findQRcode = false;
 	private int analysedQRPictures;
 	private final static int QR_PICTURES_TO_ANALYSE = 20;
-	
+
+	private String IPadressPi = "";
+
+
 	public ControlManager(String IPadressPi){
+		this.IPadressPi = IPadressPi;
 		setUpFirstConnection(IPadressPi);
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
@@ -96,26 +104,26 @@ public class ControlManager implements Runnable{
 		lastCheck = System.currentTimeMillis()-500;
 		setUpGui();
 		setUpGoals();
-		
+
 		try {
 			Thread.sleep(5000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		//Client voor dingen door te sturen.
 		client = new RabbitClient(host, exchangeName);
 		//rabbitRecv om de hoogte die de Pi doorstuurt, te ontvangen.
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui, this);
 		(new Thread(rabbitRecv)).start();
-	//	queue.add(new SetDimensions(REAL_WIDTH,REAL_HEIGHT));
+		//	queue.add(new SetDimensions(REAL_WIDTH,REAL_HEIGHT));
 		grid = new Grid("plaats van CSV-bestand");
 	}
-	
+
 	public ControlManager(){
 		this("192.168.2.100");
 	}
-	
+
 	public void setUpGui(){
 		gui = new KirovAirship(1200, 650, REAL_WIDTH, REAL_HEIGHT, queue, goals);
 		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -124,41 +132,43 @@ public class ControlManager implements Runnable{
 		gui.setVisible(true);
 		gui.requestFocus();
 	}
-	
+
 	public void setUpGoals(){
 		//Standaard hoogte van 1m invoeren als targethoogte.
 		nextGoal = new GoalHeight(1000);
 		gui.updateZeppHeight(1500);
 	}
-	
+
 	public KirovAirship getGUI() {
 		return gui;
 	}
-	
+
 	private boolean terminate = false;
+
 	public void terminate(){
 		terminate = true;
 	}
-	
+
 	private Thread analyserThread = null;
 	private Thread qrThread = null;
-	
+	private Thread photoClient = null;
+
 	public synchronized void run(){
-		
+
 		if(!goals.isEmpty())
 			nextGoal = goals.getFirst();
-		
+
 		QRcode.initialiseKeys(); //Nodig om public en private key voor QR-codes te genereren
-			
+
 		while(!terminate){
 			//PositionAnalyser analyser = new PositionAnalyser();
-			
+
 			/*
 			if(analyser.isReady()){
 				gui.updateOwnPosition(analyser.getX(), analyser.getY());
 				analyserPicture = false;
 			}
-			*/
+			 */
 			while(!queue.isEmpty()){
 				Command c = queue.poll();		
 				if(c instanceof SetPosition){
@@ -166,82 +176,90 @@ public class ControlManager implements Runnable{
 					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastFigures());
 				}
+				else if (c instanceof Terminate) {
+					client.executeCommand(c);
+					terminate();
+				}
 				else{
 					client.executeCommand(c);
 				}
 				gui.updateLastCommand(c.getConsole());
 			}
-			
+
 			gui.updateGui();
-			
-			if(System.currentTimeMillis() - lastCheck > 2000){
+
+			if(System.currentTimeMillis() - lastCheck > 3000 && (photoClient == null || ! photoClient.isAlive())){
 				lastCheck = System.currentTimeMillis();
-				client.sendMessage("true", "wit.private.sendPicture");
-				
-//				boolean stillEmpty = false;
-//				if (queue.isEmpty())
-//					stillEmpty = true;
-				
-//				nextGoal.print();
-//				Command nextCommand = queue.getFirst();
-//				System.out.println(nextCommand.getConsole());
+				//				client.sendMessage("true", "wit.private.sendPicture");
+				//TODO: via rabbitmq vervangen door listener:
+				photoClient = new Thread(new PhotoClient(IPadressPi, 6066, this));
+				photoClient.start();
+
+				//				boolean stillEmpty = false;
+				//				if (queue.isEmpty())
+				//					stillEmpty = true;
+
+				//				nextGoal.print();
+				//				Command nextCommand = queue.getFirst();
+				//				System.out.println(nextCommand.getConsole());
 			}
-			
+
 			if(checkGoalReached()){
 				addNextGoal(); //Haal eerste goal uit goal-lijst en zet in programma
 			}
 		}
 	}
-	
+
 	//RabbitRecv moet dit oproepen wanneer een foto ontvangen wordt
-	public void analysePicture(String realPath) {
-		System.out.println("Analysing picture...");
+	public void analysePicture(String realPath) {		
+		if (isThreadStillAlive(analyserThread) || isThreadStillAlive(qrThread))
+			return;
+		
 		boolean analyseNextPictureForQR = false;
 		boolean analyseNextPictureForShapes = false;
 		NewShapeRecognition recog = new NewShapeRecognition(realPath, gui, grid, queue);
 		
-		if(!isThreadStillAlive(analyserThread) && !isThreadStillAlive(qrThread)) {
-			if (findQRcode) {
-				analyseNextPictureForQR = true;
-				analysedQRPictures++;
-				gui.updateLastCommand("Analysing picture for QR Code");
-			} else {
-				analyseNextPictureForShapes = true;
-				gui.updateLastCommand("Analysing picture for shapes");
-			}			
+		System.out.println("Analysing picture...");
+		if (findQRcode) {
+			analyseNextPictureForQR = true;
+			analysedQRPictures++;
+			gui.updateLastCommand("Analysing picture for QR Code");
+		} else {
+			analyseNextPictureForShapes = true;
+			gui.updateLastCommand("Analysing picture for shapes");
+		}			
 
-			if (analyseNextPictureForQR) {
-				if (analysedQRPictures > QR_PICTURES_TO_ANALYSE) {
-					findQRcode = false;
-					goals.add(new GoalPosition(gui.getGoalX(), gui.getGoalY()));
-				} else {
-					qrThread = new Thread(new QRcode(this, realPath));
-					qrThread.start();
-				}
-				analyseNextPictureForQR = false;
-			} else if(analyseNextPictureForShapes){
-				recog.setFile(realPath);
-				analyserThread = new Thread(recog);
-				analyserThread.start();
-				analyseNextPictureForShapes = false;
+		if (analyseNextPictureForQR) {
+			if (analysedQRPictures > QR_PICTURES_TO_ANALYSE) {
+				findQRcode = false;
+				goals.add(new GoalPosition(gui.getGoalX(), gui.getGoalY()));
+			} else {
+				qrThread = new Thread(new QRcode(this, realPath));
+				qrThread.start();
 			}
+			analyseNextPictureForQR = false;
+		} else if(analyseNextPictureForShapes){
+			recog.setFile(realPath);
+			analyserThread = new Thread(recog);
+			analyserThread.start();
+			analyseNextPictureForShapes = false;
 		}
 	}
-	
+
 	public void foundQRCode() {
 		findQRcode = false;
 	}
-	
+
 	private void startFindingQRCode() {
 		findQRcode = true;
 		analysedQRPictures = 0;
 		client.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
 	}
-	
+
 	public void setTabletNumber(int number) {
 		tabletNumber = number;
 	}
-	
+
 	private boolean isThreadStillAlive(Thread t) {
 		return (! ((t == null) || t.isAlive()) );
 	}	
@@ -268,7 +286,7 @@ public class ControlManager implements Runnable{
 		}
 		return false;
 	}
-	
+
 	private void addNextGoal(){
 		if(!goals.isEmpty()){
 			nextGoal = goals.poll();
@@ -292,7 +310,7 @@ public class ControlManager implements Runnable{
 			startFindingQRCode();
 		}
 	}
-	
+
 	private boolean closeEnough(double current, double target){
 		//We werken in mm ok? - NEIN
 		double absoluteMarge = 100;
@@ -300,11 +318,11 @@ public class ControlManager implements Runnable{
 			return true;
 		return false;
 	}
-	
+
 	public List<Command> getQueue() {
 		return queue;
 	}
-	
+
 	public Grid getGrid() {
 		return grid;
 	}
