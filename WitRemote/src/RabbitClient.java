@@ -15,8 +15,8 @@ public class RabbitClient implements Runnable{
 	private Channel channel;
 	private int port;
 	private String server;
-	private String namePicture = "recv";
-	private int numberOfPicture = 0;
+//	private String namePicture = "recv";
+//	private int numberOfPicture = 0;
 	
 	public RabbitClient(String host, String exchangeName){
 		setUpConnection(host, exchangeName);
@@ -31,9 +31,9 @@ public class RabbitClient implements Runnable{
 		return server;
 	}
 	
-	public String getNamePicture() {
-		return namePicture + numberOfPicture + ".jpg";
-	}
+//	public String getNamePicture() {
+//		return namePicture + numberOfPicture + ".jpg";
+//	}
 	
 	private void setUpConnection(String host, String exchangeName){
 		try{

@@ -13,21 +13,22 @@ import java.net.UnknownHostException;
 
 import commands.Command;
 
-@Deprecated
+
 public class Client implements Runnable {
 	private String serverName, path;
 	private String namePicture = "recv";
-	private int numberOfPicture = 0;
+	private static int numberOfPicture = 0;
 	private int port, bufferSize;
 	private String previousCommand = "";
 	private ControlManager cm;
 
-	public Client(String serverName, int port, String path, ControlManager cm){
+	public Client(String serverName, int port, ControlManager cm){
 		this.serverName = serverName;
 		this.port = port;
-		this.path = path; //Path waar foto's opgeslagen moeten worden
+		this.cm = cm;
+		this.path = "src/images/"; //Path waar foto's opgeslagen moeten worden
 		
-		setUpSocket(serverName, port);
+//		setUpSocket(serverName, port);
 	}
 
 	public int getPort(){
@@ -43,116 +44,85 @@ public class Client implements Runnable {
 	}
 
 	
-	/*
-	public void executeCommand(Command cmd){
-		executeCommand(cmd.toString());
-	}
-	*/
-	//De bedoeling is dat de socket connectie enkel de foto's ontvangt. Daarom zal de executeCommand vervangen worden door de executeCommand van RabbitClient
-	@Deprecated
-	public String executeCommand(Command c){
-		String str = c.getPiCommand();
-		String returnMsg = "";
-		try{
-			Socket client = new Socket(getServerName(), getPort());
-			DataOutputStream out = new DataOutputStream(client.getOutputStream());
-			out.writeUTF(str);
-			System.out.println("Sent commando: " + str); //Debug: print verstuurd commando af
+	public synchronized void run(){
+		try {
+			Socket client = new Socket(getServerName(), getPort());			
+			InputStream inFromServer = client.getInputStream();
+
+			numberOfPicture++;
 			
-			if(str.equals("takepicture")){
-				InputStream inFromServer = client.getInputStream();
-				
-				numberOfPicture++;
-				if(numberOfPicture > 9){
-					numberOfPicture = 1;
-				}
-				File file = new File(path+getNamePicture());
-				System.out.println("************"+path+getNamePicture());
-				OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
-				copy(inFromServer, outFile);
-				outFile.close();
-				inFromServer.close();
-				System.out.println("-> Picture saved at " + path+namePicture);
+			if(numberOfPicture > 9){
+				numberOfPicture = 1;
 			}
-			else if(str.equals("getheight")){
-				DataInputStream in = new DataInputStream(client.getInputStream());
-				returnMsg = in.readUTF();
-				System.out.println("-> PiState:" + returnMsg);
-			}
-			else
-				System.out.println("-> Sent."); //Voor debug
-			System.out.println("--------------------------");
-						
-			previousCommand = str;
-			client.close();	
-		}
-		catch (ConnectException e) {
-			System.out.println("Connectie nog niet aanvaard.");
-		}
-		catch(UnknownHostException e)
-		{
+
+			File file = new File(path + namePicture + numberOfPicture + ".jpg");
+			OutputStream outFile = new FileOutputStream(file, false);
+			copy(inFromServer, outFile);
+			outFile.close();
+			inFromServer.close();
+			System.out.println("-> Picture saved at " + path + namePicture + numberOfPicture + ".jpg");
+
+
+			client.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		catch(IOException e)
-		{
-			e.printStackTrace();
-		}
-		return returnMsg + 5;
+		}	
 	}
 	
-	//Vanaf hier is de nieuwe manier :D
-	private DataInputStream dis;
-	private Socket socket;
-	private ServerSocket serverSocket;
-	private DataOutputStream outToClient;
-	
-	private void setUpSocket(String host, int port){
-		try{
-			socket = new Socket(host, port);
-			bufferSize = socket.getReceiveBufferSize();
-			dis = new DataInputStream(socket.getInputStream());
-			outToClient = new DataOutputStream(socket.getOutputStream());
-		} catch(IOException ioe){
-			ioe.printStackTrace();
-		}
-	}
-	
-	public void run(){
-		try{ 
-			boolean listening = true;
-			while(listening){
-				String requestString = dis.readLine();
-				System.out.println(requestString);
-				if(requestString.equals("QUIT")){
-					System.out.println("quiting...");
-					listening = false;
-					socket.close();
-				}
-				else if(requestString.equals("IMG")){
-					long fileSize = Long.parseLong(dis.readLine());
-					numberOfPicture++;
-					if(numberOfPicture > 9){
-						numberOfPicture = 1;
-					}
-					File file = new File(path+getNamePicture());
-					System.out.println("************"+path+getNamePicture());
-					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
-					copy(dis, outFile, fileSize);
-					outFile.close();
-					System.out.println("-> Picture saved at " + path+namePicture);
-					cm.analysePicture(path+namePicture);
-					outToClient.writeBytes("done\r\n");
-					System.out.println("Picture saved");
-				}
-			}
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+//	//Vanaf hier is de nieuwe manier :D
+//	private DataInputStream dis;
+//	private Socket socket;
+//	private ServerSocket serverSocket;
+//	private DataOutputStream outToClient;
+//	
+//	private void setUpSocket(String host, int port){
+//		try{
+//			socket = new Socket(host, port);
+//			bufferSize = socket.getReceiveBufferSize();
+//			dis = new DataInputStream(socket.getInputStream());
+//			outToClient = new DataOutputStream(socket.getOutputStream());
+//		} catch(IOException ioe){
+//			ioe.printStackTrace();
+//		}
+//	}
+//	
+//	public void run(){
+//		try{ 
+//			boolean listening = true;
+//			while(listening){
+//				String requestString = dis.readLine();
+//				System.out.println(requestString);
+//				if(requestString.equals("QUIT")){
+//					System.out.println("quiting...");
+//					listening = false;
+//					socket.close();
+//				}
+//				else if(requestString.equals("IMG")){
+//					long fileSize = Long.parseLong(dis.readLine());
+//					numberOfPicture++;
+//					if(numberOfPicture > 9){
+//						numberOfPicture = 1;
+//					}
+//					File file = new File(path+getNamePicture());
+//					System.out.println("************"+path+getNamePicture());
+//					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
+//					copy(dis, outFile, fileSize);
+//					outFile.close();
+//					System.out.println("-> Picture saved at " + path+namePicture);
+//					cm.analysePicture(path+namePicture);
+//					outToClient.writeBytes("done\r\n");
+//					System.out.println("Picture saved");
+//				}
+//			}
+//		}
+//		catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		catch(Exception e){
+//			e.printStackTrace();
+//		}
+//	}
 	
 	private void copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buf = new byte[8192];

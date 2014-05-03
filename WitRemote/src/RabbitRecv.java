@@ -1,13 +1,11 @@
 import gui.KirovAirship;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
-
-import javax.imageio.ImageIO;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -93,24 +91,21 @@ public class RabbitRecv implements Runnable{
 				} else if(topic.equals(enemy +".info.position")){
 					String[] words = message.split("[ ]+");
 					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
-				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){
-					numberOfPicture++;
-					if(numberOfPicture > 9){
-						numberOfPicture = 1;
-					}
-					namePicture = "recv" + numberOfPicture + ".jpg";
-					File file = new File(path+namePicture);
-					
-					//Foto-boodschap aankrijgen
-					delivery = consumer.nextDelivery();
-					byte[] imageBytes = delivery.getBody();
-					
-//					long size = Long.parseLong(message);
+//				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){
+//					numberOfPicture++;
+//					if(numberOfPicture > 9){
+//						numberOfPicture = 1;
+//					}
+//					namePicture = "recv" + numberOfPicture + ".jpg";
+//					File file = new File(path+namePicture);
+//					
+//					byte[] data = delivery.getBody();
+//					
 //					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
 //					BufferedOutputStream bout = new BufferedOutputStream(outFile);
 //					long done = 0;
-//					System.out.println(size +"");
-					
+////					System.out.println(size +"");
+//					
 //					String test = new String(data, "UTF-8");
 //					while(! test.equals("end")){
 //						bout.write(data);
@@ -121,13 +116,8 @@ public class RabbitRecv implements Runnable{
 //					}
 //					outFile.close();
 					
-					InputStream in = new ByteArrayInputStream(imageBytes);
-					BufferedImage bufferedImage = ImageIO.read(in);
-					ImageIO.write(bufferedImage, "jpg", file);
-					in.close();
-					
-					System.out.println("[.] New picture downloaded: " + path+namePicture);
-					cm.analysePicture(path+namePicture);
+//					System.out.println("[.] New picture downloaded: " + path+namePicture);
+//					cm.analysePicture(path+namePicture);
 				}
 				if(topics.contains(topic) && !topic.equals("wit.private.recvPicture"))
 					System.out.println("[.] " + topic + ": " + message);

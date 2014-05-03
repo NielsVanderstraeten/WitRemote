@@ -19,6 +19,7 @@ import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
 import commands.SetPosition;
+import commands.TakePicture;
 import commands.Terminate;
 
 
@@ -67,6 +68,8 @@ public class ControlManager implements Runnable{
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
 			channel2.connect();
+			
+			
 		}
 		catch (Exception e){ 
 			System.out.println("Fout bij SSH connectie met Pi");
@@ -89,7 +92,11 @@ public class ControlManager implements Runnable{
 	private int analysedQRPictures;
 	private final static int QR_PICTURES_TO_ANALYSE = 20;
 	
+	private String IPadressPi = "";
+	
+	
 	public ControlManager(String IPadressPi){
+		this.IPadressPi = IPadressPi;
 		setUpFirstConnection(IPadressPi);
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
@@ -144,6 +151,7 @@ public class ControlManager implements Runnable{
 	
 	private Thread analyserThread = null;
 	private Thread qrThread = null;
+	private Thread photoClient = null;
 	
 	public synchronized void run(){
 		
@@ -180,9 +188,12 @@ public class ControlManager implements Runnable{
 			
 			gui.updateGui();
 			
-			if(System.currentTimeMillis() - lastCheck > 3000){
+			if(System.currentTimeMillis() - lastCheck > 3000 && (photoClient == null || ! photoClient.isAlive())){
 				lastCheck = System.currentTimeMillis();
-				client.sendMessage("true", "wit.private.sendPicture");
+//				client.sendMessage("true", "wit.private.sendPicture");
+				//TODO: via rabbitmq vervangen door listener:
+				photoClient = new Thread(new Client(IPadressPi, 6066, this));
+				photoClient.start();
 				
 //				boolean stillEmpty = false;
 //				if (queue.isEmpty())
