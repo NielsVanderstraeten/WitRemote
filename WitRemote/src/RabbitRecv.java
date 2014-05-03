@@ -1,10 +1,13 @@
 import gui.KirovAirship;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -82,7 +85,7 @@ public class RabbitRecv implements Runnable{
 				topic = delivery.getEnvelope().getRoutingKey();
 				
 				if(topic.equals("wit.info.height") && !simulator)
-					gui.updateZeppHeightMM((int) Double.parseDouble(message));
+					gui.updateZeppHeightMM((int) (Double.parseDouble(message)*10));
 				else if(topic.equals("wit.private.terminate")){
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))
@@ -95,19 +98,34 @@ public class RabbitRecv implements Runnable{
 					if(numberOfPicture > 9){
 						numberOfPicture = 1;
 					}
-					long size = Long.parseLong(message);
 					namePicture = "recv" + numberOfPicture + ".jpg";
 					File file = new File(path+namePicture);
-					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
-					long done = 0;
-					System.out.println(size +"");
-					while(done < size){
-						delivery = consumer.nextDelivery();
-						byte[] data = delivery.getBody();
-						outFile.write(data);
-						done = done + data.length;
-					}
-					outFile.close();
+					
+					//Foto-boodschap aankrijgen
+					delivery = consumer.nextDelivery();
+					byte[] imageBytes = delivery.getBody();
+					
+//					long size = Long.parseLong(message);
+//					OutputStream outFile = new FileOutputStream(file, false); //Schrijft nu over eventueel bestaand bestand
+//					BufferedOutputStream bout = new BufferedOutputStream(outFile);
+//					long done = 0;
+//					System.out.println(size +"");
+					
+//					String test = new String(data, "UTF-8");
+//					while(! test.equals("end")){
+//						bout.write(data);
+//						done = done + data.length;
+//						delivery = consumer.nextDelivery();
+//						data = delivery.getBody();
+//						test = new String(data, "UTF-8");
+//					}
+//					outFile.close();
+					
+					InputStream in = new ByteArrayInputStream(imageBytes);
+					BufferedImage bufferedImage = ImageIO.read(in);
+					ImageIO.write(bufferedImage, "jpg", file);
+					in.close();
+					
 					System.out.println("[.] New picture downloaded: " + path+namePicture);
 					cm.analysePicture(path+namePicture);
 				}

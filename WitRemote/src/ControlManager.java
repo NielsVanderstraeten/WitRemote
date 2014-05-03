@@ -19,6 +19,7 @@ import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
 import commands.SetPosition;
+import commands.Terminate;
 
 
 public class ControlManager implements Runnable{
@@ -136,6 +137,7 @@ public class ControlManager implements Runnable{
 	}
 	
 	private boolean terminate = false;
+	
 	public void terminate(){
 		terminate = true;
 	}
@@ -166,6 +168,10 @@ public class ControlManager implements Runnable{
 					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastFigures());
 				}
+				else if (c instanceof Terminate) {
+					client.executeCommand(c);
+					terminate();
+				}
 				else{
 					client.executeCommand(c);
 				}
@@ -174,7 +180,7 @@ public class ControlManager implements Runnable{
 			
 			gui.updateGui();
 			
-			if(System.currentTimeMillis() - lastCheck > 2000){
+			if(System.currentTimeMillis() - lastCheck > 3000){
 				lastCheck = System.currentTimeMillis();
 				client.sendMessage("true", "wit.private.sendPicture");
 				
