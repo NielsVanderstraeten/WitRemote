@@ -88,7 +88,7 @@ public class RabbitRecv implements Runnable{
 					System.out.println(message);
 					if(message.equalsIgnoreCase("true"))
 						terminated = true;
-				} else if(topic.equals(enemy +".info.position")){
+				} else if(topic.equals(enemy +".info.location")){
 					String[] words = message.split("[ ]+");
 					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
 //				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){

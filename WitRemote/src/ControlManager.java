@@ -177,6 +177,7 @@ public class ControlManager {
 				Command c = queue.poll();		
 				if(c instanceof SetPosition){
 					rabbitClient.executeCommand(c);
+					rabbitClient.sendMessage((((SetPosition) c).getRotation()) +"", "wit.private.rotation");
 					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastFigures());
 //				} else if (c instanceof SetGoalHeight) {
