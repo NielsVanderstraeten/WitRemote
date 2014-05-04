@@ -9,12 +9,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import Rooster.Grid;
-
 import commands.Command;
 
 public class Simulator implements Runnable{
@@ -40,7 +40,6 @@ public class Simulator implements Runnable{
 		grid = new Grid("test");
 		createGUI();
 		setUpConnection();
-		goals.addLast(new GoalHeight(100));
 		ownX = gui.getOwnX();
 		ownY = gui.getOwnY();
 	}
@@ -76,7 +75,7 @@ public class Simulator implements Runnable{
 		setNextGoal();
 		while(true){
 			try {
-				Thread.sleep(250); 
+				Thread.sleep(500); 
 			} catch(Exception e){
 				System.err.println("Da werkt ni..... stoeme thread sleep");
 			}
@@ -122,8 +121,8 @@ public class Simulator implements Runnable{
 	private double speedX, speedY;
 	private static double accelX = 0.00002; //  mm*(ms)^-2
 	private static double accelY = 0.00002; //  mm*(ms)^-2
-	private static double maxSpeedX = 0.02; // mm/ms
-	private static double maxSpeedY = 0.02; // mm/ms
+	private static double maxSpeedX = 0.04; // mm/ms
+	private static double maxSpeedY = 0.04; // mm/ms
 	
 	private void calcNextPosition(long time){
 		double diffX = goalX - ownX;
@@ -286,15 +285,18 @@ public class Simulator implements Runnable{
 			gui.setTargetHeight(((GoalHeight) nextGoal).getTargetHeight());
 		else if(nextGoal instanceof GoalPosition)
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
-		else if(nextGoal == null && lastTablet != -1){
-			try{
-				URL url = new URL("http://" + qrservername + ":" + qrportnumber + "wit" + lastTablet + ".png");
-				BufferedImage image = ImageIO.read(url);
-				ImageIO.write(image,"png",new File(qrsimpath));
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-		} else if(nextGoal != null)
+		//TODO Tablets...
+//		else if(nextGoal == null && lastTablet != -1){
+//			try{
+//				URL url = new URL("http://" + qrservername + ":" + qrportnumber + "wit" + lastTablet + ".png");
+//				BufferedImage image = ImageIO.read(url);
+//				ImageIO.write(image,"png",new File(qrsimpath));
+//				new QRcode(goals, grid, qrsimpath);
+//			} catch(Exception e) {
+//				e.printStackTrace();
+//			}
+//		} 
+		else if(nextGoal != null)
 			System.err.println("Error bij addnextgoal");
 	}
 	

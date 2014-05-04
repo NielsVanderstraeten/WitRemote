@@ -1,6 +1,7 @@
 package gui;
 
 import goals.Goal;
+import goals.GoalHeight;
 import goals.GoalPosition;
 
 import java.util.LinkedList;
@@ -11,8 +12,6 @@ import Rooster.Vector;
 import commands.CancelCurrentGoal;
 import commands.Command;
 import commands.GetHeight;
-import commands.SetGoalHeight;
-import commands.SetGoalPosition;
 import commands.SetPosition;
 import commands.Terminate;
 
@@ -118,7 +117,7 @@ public class TextParser {
 			if(x < 0 || y < 0)
 				return "Please enter positive amounts.";
 			else{
-				queue.add(new SetGoalPosition(x, y));
+				goals.add(new GoalPosition(x, y));
 				return "Adding a new goal position to: x= " + x + "mm, y= " +y + "mm.";
 			}
 		}
@@ -138,7 +137,7 @@ public class TextParser {
 			if(height < 0)
 				return "Please enter a positive amount.";
 			else{
-				queue.add(new SetGoalHeight(height));
+				goals.add(new GoalHeight(height));
 				return "Adding a new goal height: height = "+ height + "mm.";
 			}
 		}
