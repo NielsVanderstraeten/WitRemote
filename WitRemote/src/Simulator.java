@@ -57,7 +57,7 @@ public class Simulator implements Runnable{
 	}
 	
 	private void setUpConnection(){
-		client = new RabbitClient(host, exchangeName);
+		client = new RabbitClient(host, exchangeName, "appelblauwzeegroen");
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui, true);
 		Thread recv = new Thread(rabbitRecv);
 		recv.start();
@@ -184,7 +184,7 @@ public class Simulator implements Runnable{
 				rotation += Math.PI;
 			
 			gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
-			client.sendMessage(ownX + " " + ownY, "wit.info.location");
+			client.sendMessage(ownX + " " + ownY, "appelblauwzeegroen.info.location");
 		}
 	}
 	
@@ -227,7 +227,7 @@ public class Simulator implements Runnable{
 		if(heightSpeed != 0){
 			height = height + heightSpeed*time;
 			gui.updateZeppHeightMM((int) (height));
-			client.sendMessage((int) height + "", "wit.info.height");
+			client.sendMessage((int) height + "", "appelblauwzeegroen.info.height");
 		}
 	}
 	

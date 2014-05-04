@@ -15,12 +15,20 @@ public class RabbitClient implements Runnable{
 	private Channel channel;
 	private int port;
 	private String server;
+	private String zeppName;
 //	private String namePicture = "recv";
 //	private int numberOfPicture = 0;
 	
 	public RabbitClient(String host, String exchangeName){
 		setUpConnection(host, exchangeName);
 		this.exchangeName = exchangeName;
+		zeppName = "wit";
+	}
+	
+	public RabbitClient(String host, String exchangeName, String zeppName){
+		setUpConnection(host, exchangeName);
+		this.exchangeName = exchangeName;
+		this.zeppName = zeppName;
 	}
 	
 	public int getPort(){
@@ -74,13 +82,13 @@ public class RabbitClient implements Runnable{
 //		try{
 		
 			String str = command.getPiCommand();
-			String topic = "wit." + command.getTopic();
+			String topic = zeppName + "." + command.getTopic();
 			sendMessage(str, topic);
 			
 			//FIRSTWORLDANARCHISTS
 			if(command instanceof SetPosition){
 				double rot = ((SetPosition) command).getRotation();
-				topic = "wit.private.rotation";
+				topic = zeppName + "."  + "private.rotation";
 				sendMessage(rot + "", topic);
 			}
 //			if(str.equals("takepicture")){
