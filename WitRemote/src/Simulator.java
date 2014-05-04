@@ -184,7 +184,7 @@ public class Simulator implements Runnable{
 				rotation += Math.PI;
 			
 			gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
-			client.sendMessage(ownX + " " + ownY, "wit.info.position");
+			client.sendMessage(ownX + " " + ownY, "wit.info.location");
 		}
 	}
 	
