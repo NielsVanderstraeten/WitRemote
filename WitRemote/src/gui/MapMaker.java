@@ -79,7 +79,7 @@ public class MapMaker extends JPanel {
 		Graphics2D g2 = (Graphics2D)g;
 		Image resizedImg = tabletPhoto.getScaledInstance(100, 100, Image.SCALE_DEFAULT);
 		for(Vector pos: tablets){
-			g2.drawImage(resizedImg, (int) pos.getX(), (int) pos.getY(), (int) (30*tabletScale), (int) (30*tabletScale), null);
+			g2.drawImage(resizedImg, (int) (pos.getX() - 15*tabletScale), (int) (pos.getY()- 15*tabletScale), (int) (30*tabletScale), (int) (30*tabletScale), null);
 		}
 		
 		for(PaintComp toPaint: toPaintAreas){
