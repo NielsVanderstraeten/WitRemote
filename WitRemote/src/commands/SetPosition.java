@@ -6,7 +6,7 @@ public class SetPosition extends Command{
 	private double rotation;
 	
 	public SetPosition(int x, int y, double rotation){
-		super(x + "," + y, "Reporting position to the zeppelin. Poisition is: x=" + x + "mm, y=" + y + "mm. Rotation is: " + rotation, "info.location");
+		super(x + " " + y, "Reporting position to the zeppelin. Poisition is: x=" + x + "mm, y=" + y + "mm. Rotation is: " + rotation, "info.location");
 		this.x = x;
 		this.y = y;
 		this.rotation = rotation;

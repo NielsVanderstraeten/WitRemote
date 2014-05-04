@@ -6,7 +6,7 @@ public class SetDimensions extends Command {
 	private int height, width;
 	
 	public SetDimensions(int width, int height){
-		super("dimension " + width + " " + height, "Setting up the dimension of the grid. Width: "+ width + "mm, height: " + height + "mm.", "info.dimensions");
+		super(width + " " + height, "Setting up the dimension of the grid. Width: "+ width + "mm, height: " + height + "mm.", "info.dimensions");
 		this.width = width;
 		this.height = height;
 	}
