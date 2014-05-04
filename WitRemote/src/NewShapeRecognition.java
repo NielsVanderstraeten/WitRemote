@@ -72,6 +72,8 @@ import commands.SetPosition;
  */
 
 public class NewShapeRecognition implements Runnable {
+	
+	private final boolean debug = false;
 
 	/**
 	 * Lijst met alle vormen. 
@@ -119,7 +121,7 @@ public class NewShapeRecognition implements Runnable {
 
 	private KirovAirship gui;
 	private Grid grid;
-	private LinkedList<Command> queue;
+	private List<Command> queue;
 
 	private CvScalar minWhite = cvScalar(170, 170, 170, 0);
 	private CvScalar maxWhite = cvScalar(255, 255, 255, 0);	 
@@ -127,34 +129,36 @@ public class NewShapeRecognition implements Runnable {
 	private CvScalar maxHSV = cvScalar(255, 255, 255, 0);
 	private CvScalar colorScalar;
 
-	public static void main(String args[]){
+	//	public static void main(String args[]){
+	//
+	//		Grid grid = new Grid("");
+	//		NewShapeRecognition shapeRecog = new NewShapeRecognition(
+	//				"C:/Users/Jeroen/Desktop/Pics/A11.jpg", null, grid, null);
+	//		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
+	//		Thread t = new Thread(shapeRecog);
+	//		t.start();
+	//	}	
 
-		Grid grid = new Grid("");
-		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-				"C:/Users/Jeroen/Desktop/Pics/A11.jpg", null, grid, null);
-		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
-		Thread t = new Thread(shapeRecog);
-		t.start();
-	}	
-
-	public NewShapeRecognition(String path, KirovAirship gui, Grid grid, LinkedList<Command> queue){
-		this.gui = gui;
-		this.grid = grid;
-		this.queue = queue;
+	public NewShapeRecognition(String path, ControlManager cm){
+		this.gui = cm.getGUI();
+		this.grid = cm.getGrid();
+		this.queue = cm.getQueue();
 
 		originalImagePath = path;
 	}
+	
+	private long start = System.currentTimeMillis();
 
 	public synchronized void run(){
-		Long start = System.currentTimeMillis();
+		start = System.currentTimeMillis();
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
 		emptyAllParameters();
 
 		createImagesAndFindContours();
-		System.out.println("    Time1: " + (System.currentTimeMillis() - start));
+//		System.out.println("   Time1: " + (System.currentTimeMillis() - start));
 		gui.updatePhoto();
-		
+
 
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
 		System.out.println("Number of shapes found: " + shapes.size());
@@ -167,14 +171,21 @@ public class NewShapeRecognition implements Runnable {
 
 		Vector position = grid.getPositionNew(shapeList);
 		double rotation = grid.getRotationNew(shapeList);
-		System.out.println("    Position: " + position.getX() + ", " + position.getY());
-		System.out.println("    Rotation: " + rotation);
+		if (debug) {
+			System.out.println("    Position: " + position.getX() + ", " + position.getY());
+			System.out.println("    Rotation: " + rotation);
+		}
 		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 			gui.updateRecognisedShapes(shapeList);
 			gui.updateOwnPosition((int) position.getX(), (int) position.getY(), rotation);
 		}
-		System.out.println("    Time2: " + (System.currentTimeMillis() - start));
+		
+		//TODO: kijken of dit memoryleak oplost
+		for (MatOfPoint c : contours) {
+			c.release();
+		}
+		
 	}
 
 	private void createImagesAndFindContours() {
@@ -199,7 +210,7 @@ public class NewShapeRecognition implements Runnable {
 		imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
 		//	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 		cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
-//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
+		//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
 
 		// HSV => DONKEREKLEUREN
 		imgThresholdHSVDarkColors = IplImage.create(cvGetSize(imgOrg), 8, 1);
@@ -207,27 +218,30 @@ public class NewShapeRecognition implements Runnable {
 		cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
 		//	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 		//	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
-//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
+		//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 
 		imgThresholdBlack = IplImage.create(cvGetSize(imgOrg), 8, 1);
 		CvScalar minBlack = cvScalar(0, 0, 0, 0); 
 		CvScalar maxBlack = cvScalar(90, 50, 90, 0);
 		cvInRangeS(imgSmooth, minBlack, maxBlack, imgThresholdBlack);
-//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
+		
+		//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
 
-//		System.out.println("###############");
-//		// findContoursAndHull(imgSmooth, imgThresholdBlack);
-//		System.out.println("###############");
+		//		System.out.println("###############");
+		//		// findContoursAndHull(imgSmooth, imgThresholdBlack);
+		//		System.out.println("###############");
 		findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
+		System.out.println("   Cont1: " + (System.currentTimeMillis() - start));
 		findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
-//		System.out.println("Average area = " + averageArea/(stars+hearts+rectangles+circles));
-//		double median;
-//		if (medianArea.size()%2 != 0)
-//			median = medianArea.get(medianArea.size()/2);
-//		else
-//			median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
-//		System.out.println("Median area = " + median);
-//		cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
+		System.out.println("   Cont2: " + (System.currentTimeMillis() - start));
+		//		System.out.println("Average area = " + averageArea/(stars+hearts+rectangles+circles));
+		//		double median;
+		//		if (medianArea.size()%2 != 0)
+		//			median = medianArea.get(medianArea.size()/2);
+		//		else
+		//			median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
+		//		System.out.println("Median area = " + median);
+		//		cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
 		cvSaveImage("src/images/analyse.jpg", imgSmooth);
 
 		imgThresholdBlack.release();
@@ -244,18 +258,24 @@ public class NewShapeRecognition implements Runnable {
 
 	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
 		CvMemStorage memory = CvMemStorage.create();
+		System.out.println("     Memory: " + (System.currentTimeMillis() - start));
 		CvSeq contour = CvSeq.create(0, Loader.sizeof(CvSeq.class), 
 				Loader.sizeof(CvPoint.class), memory);
+		System.out.println("     Contour: " + (System.currentTimeMillis() - start));
 		cvFindContours(imgThreshold, memory, contour, Loader.sizeof(CvContour.class), CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 		
+		System.out.println("     Contours: " + (System.currentTimeMillis() - start));
+
 		//Median area berekenen
 
-		CvMemStorage storage = CvMemStorage.create();    
+		CvMemStorage storage = CvMemStorage.create(); 
+		System.out.println("     Storage: " + (System.currentTimeMillis() - start));
 		while (contour != null && !contour.isNull()) {
 			if (contour.elem_size() > 0) {
 
 				cvApproxPoly(contour, Loader.sizeof(CvContour.class),
 						storage, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
+				System.out.println("     Approxpoly: " + (System.currentTimeMillis() - start));
 				int centerX = 0;
 				int centerY = 0;        
 				CvMoments moments = new CvMoments();
@@ -265,6 +285,8 @@ public class NewShapeRecognition implements Runnable {
 				double momY01 = cvGetSpatialMoment(moments, 0, 1);
 				centerX = (int) (momX10 / area);
 				centerY = (int) (momY01 / area);
+				
+				System.out.println("     Moments: " + (System.currentTimeMillis() - start));
 				if(area > 500 && area < 5000){
 					ArrayList<CvPoint2D32f> punten = new ArrayList<CvPoint2D32f>();
 					boolean onEdge = false;
@@ -294,6 +316,8 @@ public class NewShapeRecognition implements Runnable {
 						double areaHull = cvGetCentralMoment(moments, 0, 0);
 
 						Vector vectorCenter = new Vector(centerX, centerY);
+						
+						System.out.println("     Center: " + (System.currentTimeMillis() - start));
 
 						ArrayList<Double> list = new ArrayList<Double>();
 						for(int i = 0; i < contour.total(); i++){
@@ -305,11 +329,13 @@ public class NewShapeRecognition implements Runnable {
 						double radius = list.get(list.size()-1);
 						double areaCircle = Math.PI*radius*radius;
 						String imageTxt = "";
-						System.out.println("    AreaHull/area == " + areaHull/area);
-						System.out.println("    AreaCircle/area == " + areaCircle/area);
-						
+						if (debug) {
+							System.out.println("    AreaHull/area == " + areaHull/area);
+							System.out.println("    AreaCircle/area == " + areaCircle/area);
+						}
+
 						boolean isUnidentified = false;
-						
+
 						//(vb omhullende klopt, maar circle-verhouding is absurd)
 						if(areaHull/area > 1.9){
 							//System.out.println("Unidentified AREAHULL/AREA == " + areaHull/area);
@@ -326,7 +352,7 @@ public class NewShapeRecognition implements Runnable {
 							averageArea+= area;
 							medianArea.add(area);
 						}
-//						else if(areaCircle/area > 1.6  && areaCircle/area < 3){
+						//						else if(areaCircle/area > 1.6  && areaCircle/area < 3){
 						else if(((areaCircle/area > 1.64) 
 								|| (areaHull/area < 1.038 && areaCircle/area > 1.4))
 								&& (areaCircle/area < 3)){
@@ -338,7 +364,7 @@ public class NewShapeRecognition implements Runnable {
 							averageArea+= area;
 							medianArea.add(area);
 						}
-//						else if(areaCircle/area > 1.3  && areaCircle/area < 3){
+						//						else if(areaCircle/area > 1.3  && areaCircle/area < 3){
 						else if(areaHull/area > 1.038  && areaCircle/area < 3){
 							//System.out.println("Heart AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Heart AreaHull/area == " + areaHull/area);
@@ -361,6 +387,8 @@ public class NewShapeRecognition implements Runnable {
 							imageTxt = "U";
 							isUnidentified = true;
 						}
+						
+						System.out.println("     Identify: " + (System.currentTimeMillis() - start));
 
 						colorScalar = cvGet2D(imgOrg, centerY, centerX);   
 						Color figureColor = findColor((int)colorScalar .val(2), (int)colorScalar .val(1), (int)colorScalar .val(0));           
@@ -370,7 +398,7 @@ public class NewShapeRecognition implements Runnable {
 						foundColorCodesRGB.add("RGB: [" + colorScalar.val(2) + ", " + colorScalar.val(1) + ", "+ colorScalar.val(0) + "]");
 
 						centers.add(new Vector(centerX, centerY));
-						
+
 						if (! isUnidentified) {
 							//draw points
 							for(int i = 0; i < contour.total(); i++){
@@ -379,7 +407,7 @@ public class NewShapeRecognition implements Runnable {
 							}
 							//draw text
 							cvPutText(imgOrg, imageTxt, cvPoint((int)centerX, (int)centerY), 
-								cvFont(2, 3), CvScalar.BLACK);
+									cvFont(2, 3), CvScalar.BLACK);
 						}
 
 						String printString = "";
@@ -387,15 +415,20 @@ public class NewShapeRecognition implements Runnable {
 						printString += " --- CENTER:("+centerX+", " + centerY+")";
 						printString += " --- AREA = " + area; 
 						printString += " --- " + foundColorCodesRGB.get(foundColorCodesRGB.size()-1);
-						System.out.println(printString);
+						if (debug)
+							System.out.println(printString);
 						//System.out.println("AREAHULL = " + areaHull + " --- AreaHull/Area = " + areaHull/area);
 						//System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 					}
 				}
 			}
 			contour = contour.h_next();
+			System.out.println("     Nextcont: " + (System.currentTimeMillis() - start));
 		}
 		memory.release();
+		System.out.println("     Mrelease: " + (System.currentTimeMillis() - start));
+		storage.release();
+		System.out.println("     Srelease: " + (System.currentTimeMillis() - start));
 	}
 
 	private String colorToString(Color figureColor) {

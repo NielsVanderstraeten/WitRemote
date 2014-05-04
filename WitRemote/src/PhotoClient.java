@@ -1,25 +1,20 @@
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.ConnectException;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-
-import commands.Command;
 
 
 public class PhotoClient implements Runnable {
 	private String serverName, path;
 	private String namePicture = "recv";
 	private static int numberOfPicture = 0;
-	private int port, bufferSize;
+	private int port;
 	private ControlManager cm;
+	
+	long start = System.currentTimeMillis();
 
 	public PhotoClient(String serverName, int port, ControlManager cm){
 		this.serverName = serverName;
@@ -45,6 +40,7 @@ public class PhotoClient implements Runnable {
 	
 	public synchronized void run(){
 		try {
+			start = System.currentTimeMillis();
 			Socket client = new Socket(getServerName(), getPort());			
 			InputStream inFromServer = client.getInputStream();
 
@@ -56,14 +52,18 @@ public class PhotoClient implements Runnable {
 
 			File file = new File(path + namePicture + numberOfPicture + ".jpg");
 			OutputStream outFile = new FileOutputStream(file, false);
+			
 			copy(inFromServer, outFile);
 			outFile.close();
 			inFromServer.close();
 			System.out.println("-> Picture saved at " + path + namePicture + numberOfPicture + ".jpg");
+			
+			
 			cm.analysePicture(path + namePicture + numberOfPicture + ".jpg");
 
 
 			client.close();
+			System.out.println("-> Time photo: " + (System.currentTimeMillis() - start));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -127,21 +127,30 @@ public class PhotoClient implements Runnable {
 	private void copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buf = new byte[8192];
 		int len = 0;
-		while ((len = in.read(buf)) != -1) {
-			out.write(buf, 0, len);
+		boolean firstRead = true; //TODO: voor debug
+//		while ((len = in.read(buf)) != -1) {
+		
+		int b;
+		while ((b = in.read()) != -1) {
+			if (firstRead) {
+//				System.out.println("--> First read: " + (System.currentTimeMillis() - start));
+				firstRead = false;
+			}
+//			out.write(buf, 0, len);
+			out.write(b);
 		}
 	}
 	
-	private void copy(InputStream in, OutputStream out, long contentLength) throws IOException {
-		byte[] buf = new byte[bufferSize];
-		int n = 0;
-		while( contentLength > 0 ){
-			n = in.read(buf, 0, (int)Math.min(buf.length, contentLength));
-			if( n == -1 ){
-				break;
-			}
-			out.write(buf,0,n);
-			contentLength -= n;
-		}
-	}
+//	private void copy(InputStream in, OutputStream out, long contentLength) throws IOException {
+//		byte[] buf = new byte[bufferSize];
+//		int n = 0;
+//		while( contentLength > 0 ){
+//			n = in.read(buf, 0, (int)Math.min(buf.length, contentLength));
+//			if( n == -1 ){
+//				break;
+//			}
+//			out.write(buf,0,n);
+//			contentLength -= n;
+//		}
+//	}
 }

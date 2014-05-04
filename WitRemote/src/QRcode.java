@@ -65,7 +65,9 @@ public class QRcode implements Runnable {
 	}
 
 	
-	public synchronized void run(){		
+	public synchronized void run(){	
+		long start = System.currentTimeMillis();
+		
 		//READ QR CODE
 		String text = "";
 		
@@ -97,6 +99,7 @@ public class QRcode implements Runnable {
 		
 		cm.getGUI().printToConsole(command);
 		cm.getGUI().updatePhoto(imagePath);
+		System.out.println("-> Time QR: " + (System.currentTimeMillis() - start));
 	}
 	
 	

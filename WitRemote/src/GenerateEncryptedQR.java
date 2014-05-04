@@ -18,7 +18,7 @@ public class GenerateEncryptedQR {
 	public void run() {
 		try {
 			ByteArrayOutputStream byteout = QRCode.from(text).to(ImageType.JPG).withSize(500, 500).stream();
-			FileOutputStream fileout = new FileOutputStream(new File("src/gui/resources/testQRcode.jpg"));
+			FileOutputStream fileout = new FileOutputStream(new File("src/gui/resources/testQRcodetablet.jpg"));
 			fileout.write(byteout.toByteArray());
 			fileout.close();
 		} catch (IOException e) {

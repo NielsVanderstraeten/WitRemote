@@ -14,43 +14,39 @@ import Rooster.Grid;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
-
+import commands.CancelCurrentGoal;
 import commands.Command;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
 import commands.SetPosition;
-import commands.TakePicture;
 import commands.Terminate;
 
 
-public class ControlManager implements Runnable{
+public class ControlManager {
 
 	private final static int columnReal = 12;
 	private final static int rowReal = 14;
 	private final static int REAL_WIDTH = 400*columnReal;
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
 
-	private int tabletNumber = 1; //-1 indien zeppelin moet landen
+	private int tabletNumber = -1; //-1 betekent geen nieuwe tablet als doel
 
 	public static void main(String[] args){
-		Simulator simulator;
+		//		Simulator simulator;
 		ControlManager cm ;
-		Thread t = null;
 		if(args.length == 0 || args[0].equals("-lazymode")){
 			cm = new ControlManager();
-			t = new Thread(cm);
 		}
-		else if(args[0].equals("-simulate")){
-			simulator = new Simulator("localhost");
-			t = new Thread(simulator);
-		}
+		//		else if(args[0].equals("-simulate")){
+		//			simulator = new Simulator("localhost");
+		//			t = new Thread(simulator);
+		//		}
 		else {
 			cm = new ControlManager(args[0]);
-			t = new Thread(cm);
 		}
 		//		else 
 		//			throw new IllegalArgumentException("Cannot start main method in Control Manager");
-		t.start();
+		cm.run();
 	}
 
 	public void setUpFirstConnection(String IPadressPi){
@@ -64,7 +60,7 @@ public class ControlManager implements Runnable{
 			session.connect(30000000);
 
 			ChannelExec channel2= (ChannelExec) session.openChannel("exec");			
-			channel2.setCommand("cd ZeppelinPi/WitPi/WitPi/src; sudo java -classpath pi4j-0.0.5/lib/pi4j-core.jar:rabbitmq-client.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
+			channel2.setCommand("cd ZeppelinPi/WitPi2/WitPi/WitPi/src; sudo java -classpath pi4j-0.0.5/lib/pi4j-core.jar:rabbitmq-client.jar:. pi/Pi 6066 " + REAL_WIDTH + " " + REAL_HEIGHT);
 			channel2.setInputStream(null);
 			channel2.setErrStream(System.err);
 			channel2.connect();
@@ -73,13 +69,14 @@ public class ControlManager implements Runnable{
 		}
 		catch (Exception e){ 
 			System.out.println("Fout bij SSH connectie met Pi");
+			System.out.println(" -> Waarschijnlijk is de Pi uitgevallen");
 			e.printStackTrace();
 		}		
 	}
 
 	private KirovAirship gui;
 	//	private Client photoClient;
-	private RabbitClient client;
+	private RabbitClient rabbitClient;
 	private RabbitRecv rabbitRecv;
 	private LinkedList<Command> queue;
 	private long lastCheck;
@@ -90,12 +87,13 @@ public class ControlManager implements Runnable{
 	private Grid grid;
 	private boolean findQRcode = false;
 	private int analysedQRPictures;
-	private final static int QR_PICTURES_TO_ANALYSE = 20;
+	private final static int QR_PICTURES_TO_ANALYSE = 5;
 
 	private String IPadressPi = "";
 
 
 	public ControlManager(String IPadressPi){
+		long start = System.currentTimeMillis();
 		this.IPadressPi = IPadressPi;
 		setUpFirstConnection(IPadressPi);
 		queue = new LinkedList<Command>();
@@ -112,12 +110,13 @@ public class ControlManager implements Runnable{
 		}
 
 		//Client voor dingen door te sturen.
-		client = new RabbitClient(host, exchangeName);
+		rabbitClient = new RabbitClient(host, exchangeName);
 		//rabbitRecv om de hoogte die de Pi doorstuurt, te ontvangen.
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui, this);
 		(new Thread(rabbitRecv)).start();
 		//	queue.add(new SetDimensions(REAL_WIDTH,REAL_HEIGHT));
 		grid = new Grid("plaats van CSV-bestand");
+		System.out.println("CM started in: " + (System.currentTimeMillis() - start));
 	}
 
 	public ControlManager(){
@@ -136,14 +135,16 @@ public class ControlManager implements Runnable{
 	public void setUpGoals(){
 		//Standaard hoogte van 1m invoeren als targethoogte.
 		//nextGoal = new GoalHeight(800);
-		goals.add(new GoalFindQRCode()); //TODO: wegdoen?
+//		goals.add(new GoalFindQRCode()); //TODO: wegdoen
 		gui.setTargetHeight(800);
-
-		//TODO: commando om QR te lezen op bepaald moment & oude goal negeert
 	}
 
 	public KirovAirship getGUI() {
 		return gui;
+	}
+	
+	public List<Goal> getGoals() {
+		return goals;
 	}
 
 	private boolean terminate = false;
@@ -175,27 +176,28 @@ public class ControlManager implements Runnable{
 			while(!queue.isEmpty()){
 				Command c = queue.poll();		
 				if(c instanceof SetPosition){
-					client.executeCommand(c);
+					rabbitClient.executeCommand(c);
 					gui.updateOwnPosition(((SetPosition) c).getX(), ((SetPosition) c).getY(), ((SetPosition) c).getRotation());
 					gui.setFoundFigures(grid.getLastFigures());
-				} else if (c instanceof SetGoalHeight) {
-					client.executeCommand(c);
-					int height = ((SetGoalHeight)c).getHeight();
-					goals.add(new GoalHeight(height));
-					gui.setTargetHeight(height);
-				} else if (c instanceof SetGoalPosition) {
-					client.executeCommand(c);
-					int x = ((SetGoalPosition)c).getX();
-					int y = ((SetGoalPosition)c).getY();
-					goals.add(new GoalPosition(x, y));
-					gui.setGoalPosition(x, y);
-				}
-				else if (c instanceof Terminate) {
-					client.executeCommand(c);
+//				} else if (c instanceof SetGoalHeight) {
+//					rabbitClient.executeCommand(c);
+//					int height = ((SetGoalHeight)c).getHeight();
+//					goals.add(new GoalHeight(height));
+//					gui.setTargetHeight(height);
+//				} else if (c instanceof SetGoalPosition) {
+//					rabbitClient.executeCommand(c);
+//					int x = ((SetGoalPosition)c).getX();
+//					int y = ((SetGoalPosition)c).getY();
+//					goals.add(new GoalPosition(x, y));
+//					gui.setGoalPosition(x, y);
+				} else if(c instanceof CancelCurrentGoal) {
+					nextGoal = null;
+				} else if (c instanceof Terminate) {
+					rabbitClient.executeCommand(c);
 					terminate();
 				}
 				else{
-					client.executeCommand(c);
+					rabbitClient.executeCommand(c);
 				}
 				gui.updateLastCommand(c.getConsole());
 			}
@@ -213,7 +215,7 @@ public class ControlManager implements Runnable{
 			}
 		}
 	}
-	
+
 	//TODO: analysing pictures gaat nog traag?
 
 	//RabbitRecv moet dit oproepen wanneer een foto ontvangen wordt
@@ -223,7 +225,7 @@ public class ControlManager implements Runnable{
 
 		boolean analyseNextPictureForQR = false;
 		boolean analyseNextPictureForShapes = false;
-		NewShapeRecognition recog = new NewShapeRecognition(realPath, gui, grid, queue);
+		NewShapeRecognition recog = new NewShapeRecognition(realPath, this);
 
 		System.out.println("Analysing picture...");
 		if (findQRcode) {
@@ -260,7 +262,7 @@ public class ControlManager implements Runnable{
 	private void startFindingQRCode() {
 		findQRcode = true;
 		analysedQRPictures = 0;
-		client.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
+		rabbitClient.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
 	}
 
 	public void setTabletNumber(int number) {
@@ -268,6 +270,7 @@ public class ControlManager implements Runnable{
 	}
 
 	private boolean isThreadStillAlive(Thread t) {
+		//		System.gc(); //TODO: aanzetten?
 		return (t != null && t.isAlive());
 	}	
 
@@ -275,65 +278,58 @@ public class ControlManager implements Runnable{
 	private Goal nextGoal;
 	private boolean checkGoalReached(){
 		if(nextGoal instanceof GoalHeight){
-			double height = gui.getZeppHeight();
-			double target = ((GoalHeight) nextGoal).getTargetHeight();
-			return closeEnough(height, target);
+//			double height = gui.getZeppHeight();
+//			double target = ((GoalHeight) nextGoal).getTargetHeight();
+//			return closeEnough(height, target);
+			return true;
 		}
 		else if(nextGoal instanceof GoalPosition){
 			int ownX = gui.getOwnX(); int ownY = gui.getOwnY();
 			int targetX = ((GoalPosition) nextGoal).getX(); int targetY = ((GoalPosition) nextGoal).getY();
 			boolean result = closeEnough(ownX, targetX) && closeEnough(ownY, targetY);
-			if (tabletNumber == -1 && result) { //Landen als doel bereikt is en er geen volgende tablet meer is
-				//TODO: niet terminaten, maar blijven vliegen over positie
+//			if (tabletNumber == -1 && result) {		
+			if (result) {
 				gui.printToConsole("TARGET POSITION REACHED!");
-//				client.sendMessage("true", "wit.private.terminate");
-//				System.exit(0);
+				
+				//Wanneer doel bereikt is, nieuwe QRcode zoeken.
+
+				goals.add(new GoalFindQRCode());
 			}
+
 			return result;
 		} else if (nextGoal instanceof GoalFindQRCode) {
 			return findQRcode == false;
-		}
+		} else if (nextGoal == null)
+			return true;
+
 		return false;
 	}
-
-
 
 	private void addNextGoal(){
-		if(!goals.isEmpty()){
-			nextGoal = goals.poll();
-			//TODO: GoalHeight verwijderen (anton weet hoe)
-			//TODO: cancelnextgoal bij commands toevoegen.
-			if(nextGoal instanceof GoalHeight){
-				int targetheight = ((GoalHeight) nextGoal).getTargetHeight();
-				gui.setTargetHeight(targetheight);
-				queue.offerFirst(new SetGoalHeight(targetheight));
-			}
-			else if(nextGoal instanceof GoalPosition){
-				int goalX = ((GoalPosition) nextGoal).getX();
-				int goalY = ((GoalPosition) nextGoal).getY();
-				gui.setGoalPosition(goalX, goalY);
-				queue.offerFirst(new SetGoalPosition(goalX, goalY));
-			} else if (nextGoal instanceof GoalFindQRCode) {
-				startFindingQRCode();
-			}
-			else
-				throw new IllegalStateException("Niet bestaande goal @ addNextGoal @ ControlManager");
-		} else {
-			//TODO: wegdoen? indien nu geen nieuwe doellocatie gegeven staat, gaat hij zoeken achter QRcodes?
-			//Maar die zijn er niet. Dus: beter QRcodes aanzetten met commando?
-			nextGoal = new GoalFindQRCode();
+		if(goals.isEmpty())
+			nextGoal = null;
+
+		nextGoal = goals.poll();
+		
+		if(nextGoal instanceof GoalHeight){
+			int targetheight = ((GoalHeight) nextGoal).getTargetHeight();
+			gui.setTargetHeight(targetheight);
+			queue.offerFirst(new SetGoalHeight(targetheight));
+		}
+		else if(nextGoal instanceof GoalPosition){
+			int goalX = ((GoalPosition) nextGoal).getX();
+			int goalY = ((GoalPosition) nextGoal).getY();
+			gui.setGoalPosition(goalX, goalY);			
+			queue.offerFirst(new SetGoalPosition(goalX, goalY));
+		} else if (nextGoal instanceof GoalFindQRCode) {
 			startFindingQRCode();
 		}
+		else if (nextGoal != null)
+			throw new IllegalStateException("Niet bestaande goal @ addNextGoal @ ControlManager");
 	}
-	
-	//TODO anton: richting +45 graden?
 
 	private boolean closeEnough(double current, double target){
-		//We werken in mm ok? - NEIN
-		double absoluteMarge = 100;
-		if(Math.abs(current - target) < absoluteMarge)
-			return true;
-		return false;
+		return (Math.abs(current - target) < 500);
 	}
 
 	public List<Command> getQueue() {

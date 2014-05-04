@@ -21,7 +21,6 @@ import commands.SetGoalPosition;
 
 public class CommandDecoder {
 
-	private List<Command> queue;
 	private List<Goal> goals;
 	private ControlManager cm;
 	private Grid grid;
@@ -37,8 +36,8 @@ public class CommandDecoder {
 	 */
 	public CommandDecoder(ControlManager cm, String command) {
 		this.cm = cm;
-		this.queue = cm.getQueue();
 		this.grid = cm.getGrid();
+		this.goals = cm.getGoals();
 		this.command = command;
 	}
 	
@@ -62,10 +61,12 @@ public class CommandDecoder {
 			//geval position
 			m = Pattern.compile("position:(\\d+),(\\d+)").matcher(command);
 			if (m.find()) {
+				System.out.println("---> Decoded QRcode: position:"+Integer.parseInt(m.group(1))+","+Integer.parseInt(m.group(2)));
 				if (cm != null) {
-					queue.add(new SetGoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+					//queue.add(new SetGoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
 					cm.setTabletNumber(-1); //-1 betekent landen
 					cm.foundQRCode();
+					System.out.println("Found correct QR code!"); //TODO debug
 				}
 				if (goals != null) {
 					goals.add(new GoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
@@ -75,20 +76,19 @@ public class CommandDecoder {
 			//geval tablet
 			m = Pattern.compile("tablet:(\\d+)").matcher(command);
 			if (!foundCorrectQRCode && m.find()) {
+				System.out.println("---> Decoded QRcode: tablet:" + Integer.parseInt(m.group(1)));	
 				Vector targetPosition = grid.getTabletPosition(Integer.parseInt(m.group(1)));
+				
+				goals.add(new GoalPosition((int) targetPosition.getX(), (int) targetPosition.getY()));
+				
 				if (cm != null) {
-					queue.add(new SetGoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
 					cm.setTabletNumber(Integer.parseInt(m.group(1)));
 					cm.foundQRCode();
-				}
-				if (goals != null) {
-					goals.add(new GoalPosition((int) targetPosition.getX(), (int) targetPosition.getX()));
+					System.out.println("Found correct QR code!"); //TODO debug
 				}
 				foundCorrectQRCode = true;				
 			}
 		
-		}
-		
-		System.out.println("---> Decoded QRcode: " + command);		
+		}	
 	}
 }

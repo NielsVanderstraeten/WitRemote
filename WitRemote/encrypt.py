@@ -3,7 +3,7 @@ import base64
 
 key= open("public","r").read()
 pub_key = RSA.importKey(key)
-cmd_enc = pub_key.encrypt("position:15,60",0)[0]
+cmd_enc = pub_key.encrypt("tablet:2",0)[0]
 
 with open("encrypted", "w") as file:
 	file.write(cmd_enc.encode("base64"))

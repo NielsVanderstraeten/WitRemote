@@ -125,7 +125,7 @@ public class Grid {
 				double gridAngle = myCalculator.getVector(compare.getGridPosition()).getAngle(triCenter);
 				Vector picCenter = myCalculator.calculateTriple(rightFigures.get(0).getPosition(), rightFigures.get(1).getPosition(), rightFigures.get(2).getPosition());
 				double pictureAngle = compare.getPosition().getAngle(picCenter);
-				lastRotation = ((gridAngle - pictureAngle + 270 - 45)%360)/180*Math.PI;
+				lastRotation = ((gridAngle - pictureAngle + 270)%360)/180*Math.PI;
 			}			
 		}
 	return lastRotation;

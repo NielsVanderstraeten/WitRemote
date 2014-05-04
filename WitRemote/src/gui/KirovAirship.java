@@ -595,7 +595,8 @@ public class KirovAirship extends JFrame {
 		return targetheight;
 	}
 	
-	int goalX, goalY;
+	private int goalX = REAL_WIDTH/2;
+	private int goalY = REAL_HEIGHT/2;
 	/**
 	 * Zet een nieuwe doelhoogte. In mm
 	 * @param x
