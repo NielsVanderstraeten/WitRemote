@@ -267,27 +267,32 @@ public class NewShapeRecognition implements Runnable {
 		System.out.println("     Contours: " + (System.currentTimeMillis() - start));
 
 		//Median area berekenen
-
-		CvMemStorage storage = CvMemStorage.create(); 
+ 
 		System.out.println("     Storage: " + (System.currentTimeMillis() - start));
 		while (contour != null && !contour.isNull()) {
 			if (contour.elem_size() > 0) {
-
-				cvApproxPoly(contour, Loader.sizeof(CvContour.class),
-						storage, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
-				System.out.println("     Approxpoly: " + (System.currentTimeMillis() - start));
-				int centerX = 0;
-				int centerY = 0;        
+				
 				CvMoments moments = new CvMoments();
 				cvMoments(contour, moments, 1);
 				double area = cvGetCentralMoment(moments, 0, 0);
-				double momX10 = cvGetSpatialMoment(moments, 1, 0);
-				double momY01 = cvGetSpatialMoment(moments, 0, 1);
-				centerX = (int) (momX10 / area);
-				centerY = (int) (momY01 / area);
 				
-				System.out.println("     Moments: " + (System.currentTimeMillis() - start));
 				if(area > 500 && area < 5000){
+					//TODO: storage in if gezet
+					CvMemStorage storage = CvMemStorage.create();
+
+					cvApproxPoly(contour, Loader.sizeof(CvContour.class),
+							storage, CV_POLY_APPROX_DP, cvContourPerimeter(contour)*0.02, 1);
+					System.out.println("     Approxpoly: " + (System.currentTimeMillis() - start));
+					
+					//Middelpunt
+					int centerX = 0;
+					int centerY = 0; 
+					double momX10 = cvGetSpatialMoment(moments, 1, 0);
+					double momY01 = cvGetSpatialMoment(moments, 0, 1);
+					centerX = (int) (momX10 / area);
+					centerY = (int) (momY01 / area);
+					System.out.println("     Moments: " + (System.currentTimeMillis() - start));
+					
 					ArrayList<CvPoint2D32f> punten = new ArrayList<CvPoint2D32f>();
 					boolean onEdge = false;
 
@@ -420,6 +425,8 @@ public class NewShapeRecognition implements Runnable {
 						//System.out.println("AREAHULL = " + areaHull + " --- AreaHull/Area = " + areaHull/area);
 						//System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 					}
+					storage.release(); //TODO: hier gereleaset
+					System.out.println("     Srelease: " + (System.currentTimeMillis() - start));
 				}
 			}
 			contour = contour.h_next();
@@ -427,8 +434,8 @@ public class NewShapeRecognition implements Runnable {
 		}
 		memory.release();
 		System.out.println("     Mrelease: " + (System.currentTimeMillis() - start));
-		storage.release();
-		System.out.println("     Srelease: " + (System.currentTimeMillis() - start));
+//		storage.release();
+//		System.out.println("     Srelease: " + (System.currentTimeMillis() - start));
 	}
 
 	private String colorToString(Color figureColor) {
