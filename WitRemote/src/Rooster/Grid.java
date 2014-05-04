@@ -125,7 +125,7 @@ public class Grid {
 				double gridAngle = myCalculator.getVector(compare.getGridPosition()).getAngle(triCenter);
 				Vector picCenter = myCalculator.calculateTriple(rightFigures.get(0).getPosition(), rightFigures.get(1).getPosition(), rightFigures.get(2).getPosition());
 				double pictureAngle = compare.getPosition().getAngle(picCenter);
-				lastRotation = ((gridAngle - pictureAngle + 270 - 45)%360)/180*Math.PI; //TODO 90 naar 45 veranderd
+				lastRotation = ((gridAngle - pictureAngle + 270 - 45)%360)/180*Math.PI;
 			}			
 		}
 	return lastRotation;
@@ -309,7 +309,9 @@ public class Grid {
 	public Vector getPositionNew(ArrayList<Shape> figures) {
 		ArrayList<ArrayList<Shape>> triangles = getAllTriangles(figures);
 		
-		ArrayList<Integer> rightpoints = new ArrayList<Integer>();
+		lastFoundFigures = new ArrayList<Integer>(); //TODO AANGEPAST DOOR ANTON. KAN FOUT ZIJN!
+		
+		ArrayList<Integer> rightpoints = new ArrayList<Integer>();		
 		int lastTriangle = 0;
 		for (int k = 0; k<triangles.size(); k++) {
 			if (getPointsNew(triangles.get(k)).size() == 3) {
