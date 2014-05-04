@@ -1,7 +1,6 @@
 package gui;
 
 import goals.Goal;
-import goals.GoalHeight;
 import goals.GoalPosition;
 
 import java.util.LinkedList;
@@ -9,8 +8,11 @@ import java.util.LinkedList;
 import Rooster.Grid;
 import Rooster.Vector;
 
+import commands.CancelCurrentGoal;
 import commands.Command;
 import commands.GetHeight;
+import commands.SetGoalHeight;
+import commands.SetGoalPosition;
 import commands.SetPosition;
 import commands.Terminate;
 
@@ -62,10 +64,12 @@ public class TextParser {
 			returnString = help(commandWords);
 		else if(commandWords[0].equalsIgnoreCase(commands.get(6)))
 			returnString = text(commandWords);
-		else if(commandWords[0].equalsIgnoreCase("terminate"))
+		else if(commandWords[0].equalsIgnoreCase("terminate") || commandWords[0].equalsIgnoreCase("t"))
 			returnString = terminate();
 		else if(commandWords[0].equalsIgnoreCase("gototablet"))
 			returnString = gotoTablet(commandWords);
+		else if(commandWords[0].equalsIgnoreCase("cancel"))
+			returnString = cancel(commandWords);
 		else
 			returnString = "Command not found. Please try again.\nYou entered: " + command;
 
@@ -114,7 +118,7 @@ public class TextParser {
 			if(x < 0 || y < 0)
 				return "Please enter positive amounts.";
 			else{
-				goals.add(new GoalPosition(x, y));
+				queue.add(new SetGoalPosition(x, y));
 				return "Adding a new goal position to: x= " + x + "mm, y= " +y + "mm.";
 			}
 		}
@@ -134,12 +138,13 @@ public class TextParser {
 			if(height < 0)
 				return "Please enter a positive amount.";
 			else{
-				goals.add(new GoalHeight(height));
+				queue.add(new SetGoalHeight(height));
 				return "Adding a new goal height: height = "+ height + "mm.";
 			}
 		}
 	}
 	
+	@Deprecated
 	private String getHeight(String[] command){
 		if(command.length != 1)
 			return "Please do not enter anything after the getheight command.";
@@ -199,6 +204,15 @@ public class TextParser {
 	private String terminate(){
 		queue.add(new Terminate());
 		return "Terminating program. Bye bye";
+	}
+	
+	private String cancel(String[] command){
+		if(command.length != 1)
+			return "Please do not enter anything after the cancel command.";
+		else{
+			queue.addFirst(new CancelCurrentGoal());
+			return "Cancelling current goal.";
+		}
 	}
 	
 }

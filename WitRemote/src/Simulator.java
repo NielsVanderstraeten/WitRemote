@@ -36,6 +36,7 @@ public class Simulator implements Runnable{
 	public Simulator(String host){
 		queue = new LinkedList<Command>();
 		goals = new LinkedList<Goal>();
+		goals.add(new GoalHeight(800));
 		grid = new Grid("test");
 		createGUI();
 		setUpConnection();
@@ -109,7 +110,7 @@ public class Simulator implements Runnable{
 	private boolean fuzzyEquals(double first, double second){
 		if(Math.abs(first - second) < 50)
 			return true;
-		return false;
+		return false;	
 	}
 	
 	private boolean fuzzyEqualsParam(double first, double second, double range){
@@ -291,8 +292,7 @@ public class Simulator implements Runnable{
 				BufferedImage image = ImageIO.read(url);
 				ImageIO.write(image,"png",new File(qrsimpath));
 			} catch(Exception e) {
-				//System.out.println("dit is voor morgen");
-				//e.printStackTrace();
+				e.printStackTrace();
 			}
 		} else if(nextGoal != null)
 			System.err.println("Error bij addnextgoal");
