@@ -152,8 +152,7 @@ public class NewShapeRecognition implements Runnable {
 		emptyAllParameters();
 
 		createImagesAndFindContours();
-		System.out.println();
-		System.out.println("Time: " + (System.currentTimeMillis() - start));
+		System.out.println("    Time1: " + (System.currentTimeMillis() - start));
 		gui.updatePhoto();
 		
 
@@ -168,13 +167,14 @@ public class NewShapeRecognition implements Runnable {
 
 		Vector position = grid.getPositionNew(shapeList);
 		double rotation = grid.getRotationNew(shapeList);
-		System.out.println("Position: " + position.getX() + ", " + position.getY());
-		System.out.println("Rotation: " + rotation);
+		System.out.println("    Position: " + position.getX() + ", " + position.getY());
+		System.out.println("    Rotation: " + rotation);
 		if (position.getX() != -1 && position.getY() != -1) {
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 			gui.updateRecognisedShapes(shapeList);
 			gui.updateOwnPosition((int) position.getX(), (int) position.getY(), rotation);
 		}
+		System.out.println("    Time2: " + (System.currentTimeMillis() - start));
 	}
 
 	private void createImagesAndFindContours() {
@@ -305,8 +305,8 @@ public class NewShapeRecognition implements Runnable {
 						double radius = list.get(list.size()-1);
 						double areaCircle = Math.PI*radius*radius;
 						String imageTxt = "";
-						System.out.println("AreaHull/area == " + areaHull/area);
-						System.out.println("AreaCircle/area == " + areaCircle/area);
+						System.out.println("    AreaHull/area == " + areaHull/area);
+						System.out.println("    AreaCircle/area == " + areaCircle/area);
 						
 						boolean isUnidentified = false;
 						
@@ -383,12 +383,11 @@ public class NewShapeRecognition implements Runnable {
 						}
 
 						String printString = "";
-						printString += "FOUND COLOR & SHAPE: " + colors.get(colors.size()-1) + " " + shapes.get(shapes.size()-1);
+						printString += "    FOUND COLOR & SHAPE: " + colors.get(colors.size()-1) + " " + shapes.get(shapes.size()-1);
 						printString += " --- CENTER:("+centerX+", " + centerY+")";
 						printString += " --- AREA = " + area; 
 						printString += " --- " + foundColorCodesRGB.get(foundColorCodesRGB.size()-1);
 						System.out.println(printString);
-						System.out.println();
 						//System.out.println("AREAHULL = " + areaHull + " --- AreaHull/Area = " + areaHull/area);
 						//System.out.println("AREACIRCLE = "+ areaCircle + " (r= " + radius + ") --- AreaCircle/Area = " + areaCircle/area);
 					}

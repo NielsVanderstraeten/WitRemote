@@ -136,7 +136,7 @@ public class ControlManager implements Runnable{
 	public void setUpGoals(){
 		//Standaard hoogte van 1m invoeren als targethoogte.
 		//nextGoal = new GoalHeight(800);
-		goals.add(new GoalFindQRCode());
+		goals.add(new GoalFindQRCode()); //TODO: wegdoen?
 		gui.setTargetHeight(800);
 
 		//TODO: commando om QR te lezen op bepaald moment & oude goal negeert
@@ -319,6 +319,8 @@ public class ControlManager implements Runnable{
 			else
 				throw new IllegalStateException("Niet bestaande goal @ addNextGoal @ ControlManager");
 		} else {
+			//TODO: wegdoen? indien nu geen nieuwe doellocatie gegeven staat, gaat hij zoeken achter QRcodes?
+			//Maar die zijn er niet. Dus: beter QRcodes aanzetten met commando?
 			nextGoal = new GoalFindQRCode();
 			startFindingQRCode();
 		}
