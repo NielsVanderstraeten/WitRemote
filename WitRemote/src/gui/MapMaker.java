@@ -104,7 +104,6 @@ public class MapMaker extends JPanel {
 			
 		}
 		
-		
 		if(displayTarget){
 			g2.setColor(Color.RED);
 			g2.draw(target);

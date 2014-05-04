@@ -30,7 +30,7 @@ public class Simulator implements Runnable{
 	private final static int qrportnumber = 5000;
 	private final static String qrsimpath = "src/images/qrimsulator.jpg";
 	
-	private int lastTablet;
+	private int lastTablet = -1;
 	private Grid grid;
 	
 	public Simulator(String host){
@@ -287,12 +287,12 @@ public class Simulator implements Runnable{
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
 		else if(nextGoal == null && lastTablet != -1){
 			try{
-				URL url = new URL(qrservername + ":" + qrportnumber + "wit" + lastTablet + "png");
+				URL url = new URL("http://" + qrservername + ":" + qrportnumber + "wit" + lastTablet + ".png");
 				BufferedImage image = ImageIO.read(url);
 				ImageIO.write(image,"png",new File(qrsimpath));
 			} catch(Exception e) {
-				System.out.println("dit is voor morgen");
-				e.printStackTrace();
+				//System.out.println("dit is voor morgen");
+				//e.printStackTrace();
 			}
 		} else if(nextGoal != null)
 			System.err.println("Error bij addnextgoal");
