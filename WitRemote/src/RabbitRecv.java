@@ -20,12 +20,10 @@ public class RabbitRecv implements Runnable{
 	private Channel channel;
 	private String queueName, exchangeName;
 	private KirovAirship gui;
-	private final String enemy = "zwart";
+	//TODO naar echte vrijand aanpassen
+	private String enemy = "wit";
 	private boolean simulator;
-	private int numberOfPicture = 0;
 	private ControlManager cm;
-	private String path = "src/images/";
-	private String namePicture;
 	
 	public RabbitRecv(String host, String exchangeName, KirovAirship gui, ControlManager cm) {
 		setUpTopics();
@@ -137,12 +135,17 @@ public class RabbitRecv implements Runnable{
 		System.out.println("terminate");
 		System.exit(0);
 	}
+	
+	public void setEnemy(String enemy){
+		this.enemy = enemy;
+	}
+	
 	private ArrayList<String> topics;
 	private void setUpTopics(){
 		topics = new ArrayList<String>();
 		topics.add("wit.info.height");
 		topics.add("wit.private.#");
-		topics.add(enemy + ".info.position");
+		topics.add(enemy + ".info.location");
 		topics.add("wit.private.recvPicture");
 	}
 	

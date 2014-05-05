@@ -25,7 +25,7 @@ public class Simulator implements Runnable{
 	private RabbitClient client;
 	private RabbitRecv rabbitRecv;
 	private final String host = "localhost";
-	private final String exchangeName = "tabor";
+	private final String exchangeName = "server";
 	private final static String qrservername = "192.168.2.115";
 	private final static int qrportnumber = 5000;
 	private final static String qrsimpath = "src/images/qrimsulator.jpg";
