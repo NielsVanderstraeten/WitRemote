@@ -23,7 +23,7 @@ public class Grid {
 	
 	//toegelaten afwijking in percenten bij afstandsverglijking
 	private final double approx = 20;
-	
+	private boolean debug = false;
 	
 	/*
 	 * DIT IS DE GOEDE CONSTRUCTOR!!!
@@ -31,6 +31,9 @@ public class Grid {
 	public Grid(String plaatsVanCSV) {
 		tablets = new ArrayList<Vector>();
 		parseCSV(plaatsVanCSV);
+		if (debug) {
+			System.out.println("height: " + height + ", " + "width: " + width);
+		}
 		myCalculator = new PositionCalculator(width, height, startLeft, pictureSize);
 		lastFoundZepPosition = new Vector(-1,-1);
 		lastRotation = -1;
@@ -178,6 +181,9 @@ public class Grid {
 	
 	//return the two last points when 2 NEIGHBOUR points are given.
 	private ArrayList<Integer> getTriangle(int point1, int point2) {
+		if (debug) {
+			System.out.println("in getTriangle");
+		}
 		int firstpoint;
 		int secondpoint;
 		if (point1<point2) {
@@ -300,6 +306,16 @@ public class Grid {
 				}
 			}
 		}
+		if (debug) {
+			System.out.println("aantal figuren in alltriangles:" + returnMap.size());
+			System.out.println("OK!");
+//			for (ArrayList<Shape> triangle: returnMap) {
+//				System.out.println("Triangle: ");
+//				for (Shape shape: triangle) {
+//					System.out.println(shape.getCode());
+//				}
+//			}
+		}
 		return returnMap;
 	}
 	
@@ -313,10 +329,26 @@ public class Grid {
 		
 		ArrayList<Integer> rightpoints = new ArrayList<Integer>();		
 		int lastTriangle = 0;
+		//TODO juiste optie kiezen
+		//DIT IS DE OUDE WERKENDE CODE
+//		for (int k = 0; k<triangles.size(); k++) {
+//			if (getPointsNew(triangles.get(k)).size() == 3) {
+//				lastTriangle = k;
+//				rightpoints = getPointsNew(triangles.get(k));
+//				for (Integer j: rightpoints) {
+//					if (!(lastFoundFigures.contains(j))) {
+//						lastFoundFigures.add(j);
+//					}					
+//				}
+//			}
+//		}
+		
+		//DIT IS DE NIEUWE WERKENDE? CODE //TODO terug oud???		
 		for (int k = 0; k<triangles.size(); k++) {
-			if (getPointsNew(triangles.get(k)).size() == 3) {
+			ArrayList<Integer> points = getPointsNew(triangles.get(k));
+			if (points.size() == 3) {
 				lastTriangle = k;
-				rightpoints = getPointsNew(triangles.get(k));
+				rightpoints = points;
 				for (Integer j: rightpoints) {
 					if (!(lastFoundFigures.contains(j))) {
 						lastFoundFigures.add(j);
@@ -368,6 +400,9 @@ public class Grid {
 	 * 
 	 */
 	public ArrayList<Integer> getPointsNew(ArrayList<Shape> figures) {
+		if (debug) {
+			System.out.println("in getpoints");
+		}
 		if (figures.size() == 3) {
 			ArrayList<Shape> rightFigures = figures;
 			ArrayList<Integer> points0 = new ArrayList<Integer>();
@@ -378,39 +413,96 @@ public class Grid {
 				if (rightFigures.get(0).getCode().equals(myMap.get(i))) {
 					points0.add(i);
 //					System.out.println("added to points0: " + i);
+//					System.out.println("points0 = " + myMap.get(i));
 				}
 				if (rightFigures.get(1).getCode().equals(myMap.get(i))) {
 					points1.add(i);
 //					System.out.println("added to points1: " + i);
+//					System.out.println("points1 = " + myMap.get(i));
 				}
 				if (rightFigures.get(2).getCode().equals(myMap.get(i))) {
 					points2.add(i);
 //					System.out.println("added to points2: " + i);
+//					System.out.println("points2 = " + myMap.get(i));
 				}
 			}
+			if (debug) {
+				System.out.println("points0 = " + myMap.get(points0.get(0)));
+				System.out.println("points1 = " + myMap.get(points1.get(0)));
+				System.out.println("points2 = " + myMap.get(points2.get(0)));
+			}
 			for (int i = 0; i < points0.size(); i++) {
+				if (debug) {
+					
+				}
 				for (int j = 0; j < points1.size(); j++) {
+					if (debug) {
+						if (points0.get(i) == 144) {
+							System.out.println("heeft voor J: " + points1.get(j));
+						}
+					}
 					ArrayList<Integer> compareList = getHexagon(points0.get(i));
+					if (debug) {
+						if (points0.get(i) == 144) {
+							System.out.println("juiste wit hart in lijst");
+							System.out.println("zeshoek hier rond:");
+							for (int test: compareList) {
+								System.out.println(test);
+							}
+						}
+					}
 					boolean found = false;
 					int j2 = 0;
 					while (j2 < compareList.size() && !found) {
-						if (compareList.get(j2) == points1.get(j)) {
+						if (debug) {
+							System.out.println("--------");
+							System.out.println(compareList.get(j2));
+							System.out.println(points1.get(j));
+						}
+						
+						if (compareList.get(j2).equals(points1.get(j))) {
 							found = true;
+//							System.out.println("found = true");
 						}
 						j2++;
 					}
 					if (found) {
+//						System.out.println("in if found");
 						for (int k = 0; k < points2.size(); k++) {
+							if (debug) {
+//								if (points0.get(i) == 144) {
+									System.out.println("heeft voor K: " + points2.get(k));
+									System.out.println("heeft voor J: " + points1.get(j));
+									System.out.println("heeft voor i: " + points0.get(i));
+//								}
+							}
 							ArrayList<Integer> compareList2 = getTriangle(points0.get(i), points1.get(j));
+							if (debug) {
+//								if (points0.get(i) == 145) {
+									System.out.println("juiste gele circle in lijst");
+									System.out.println("driehoek hier rond:");
+									for (int test2: compareList2) {
+										System.out.println(test2);
+									}
+//								}
+							}
 							boolean found2 = false;
 							int k2 = 0;
 							while (k2 < compareList2.size() && !found2) {
-								if (compareList2.get(k2) == points2.get(k)) {
+								if (debug) {
+									System.out.println("--------");
+									System.out.println(compareList2.get(k2));
+									System.out.println(points2.get(k));
+								}								
+								if (compareList2.get(k2).equals(points2.get(k))) {
 									found2 = true;
+//									System.out.println("HEEFT ALLES GEVONDEN");
+//									System.out.println("--------------------");
 								}
 								k2++;
 							}
 							if (found2) {
+//								System.out.println("in found2 => OK!");
 								ArrayList<Integer> returnList = new ArrayList<Integer>();
 								returnList.add(points0.get(i));
 								rightFigures.get(0).setGridPosition(points0.get(i));
