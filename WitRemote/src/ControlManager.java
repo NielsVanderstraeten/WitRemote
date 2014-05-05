@@ -31,7 +31,7 @@ public class ControlManager {
 	private final static int REAL_WIDTH = 400*columnReal;
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
 	
-	private static String IPaddressPI = "192.168.2.137";
+	private static String IPaddressPI = "192.168.43.180";
 
 	private int tabletNumber = -1; //-1 betekent geen nieuwe tablet als doel
 	
@@ -81,6 +81,7 @@ public class ControlManager {
 			System.out.println("Fout bij SSH connectie met Pi");
 			System.out.println(" -> Waarschijnlijk is de Pi uitgevallen");
 			System.out.println(" -> Of Putty / SSH op pi staat nog niet op");
+			System.out.println(" -> Of IP vd pi is fout");
 			e.printStackTrace();
 		}		
 	}
