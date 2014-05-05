@@ -24,6 +24,8 @@ public class Simulator implements Runnable{
 	private Goal nextGoal = null;
 	private RabbitClient client;
 	private RabbitRecv rabbitRecv;
+	//TODO
+	//private final String host = "192.168.2.134";
 	private final String host = "localhost";
 	private final String exchangeName = "server";
 	private final static String qrservername = "192.168.2.115";
