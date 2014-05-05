@@ -141,9 +141,9 @@ public class RabbitRecv implements Runnable{
 	
 	public void setEnemy(String enemy){
 		try{
-			channel.queueUnbind(queueName, exchangeName, enemy + ".info.location");
+			channel.queueUnbind(queueName, exchangeName, this.enemy + ".info.location");
 			this.enemy = enemy;
-			channel.queueBind(queueName, exchangeName, enemy + ".info.location");
+			channel.queueBind(queueName, exchangeName, this.enemy + ".info.location");
 		} catch (IOException ioe){
 			System.out.println("I declare bullshit");
 			ioe.printStackTrace();
