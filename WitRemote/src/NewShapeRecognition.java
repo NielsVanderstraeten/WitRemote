@@ -138,8 +138,11 @@ public class NewShapeRecognition implements Runnable {
 	//		Thread t = new Thread(shapeRecog);
 	//		t.start();
 	//	}	
+	
+	private ControlManager cm;
 
 	public NewShapeRecognition(String path, ControlManager cm){
+		this.cm = cm;
 		this.gui = cm.getGUI();
 		this.grid = cm.getGrid();
 		this.queue = cm.getQueue();
@@ -176,12 +179,13 @@ public class NewShapeRecognition implements Runnable {
 			System.out.println("    Rotation: " + rotation);
 		}
 		if (position.getX() != -1 && position.getY() != -1) {
+			cm.setFoundPosition();
 			queue.add(new SetPosition((int) position.getX(), (int) position.getY(), rotation));
 			gui.updateRecognisedShapes(shapeList);
 			gui.updateOwnPosition((int) position.getX(), (int) position.getY(), rotation);
 		}
 		
-		//TODO: kijken of dit memoryleak oplost
+
 		for (MatOfPoint c : contours) {
 			c.release();
 		}

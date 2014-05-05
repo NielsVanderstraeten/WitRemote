@@ -688,10 +688,10 @@ public class KirovAirship extends JFrame {
 				//setGoalPosition(mouseX,mouseY);
 			}
 			else if(SwingUtilities.isRightMouseButton(e) ){
-				updateOwnPosition(mouseX, mouseY, ownRotation);
+				//updateOwnPosition(mouseX, mouseY, ownRotation);
 			}
 			else if(SwingUtilities.isMiddleMouseButton(e) ){
-				updateOpponentPosition(mouseX, mouseY);
+				//updateOpponentPosition(mouseX, mouseY);
 			}
 			updateGui();
 		}
