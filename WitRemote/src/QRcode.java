@@ -96,10 +96,11 @@ public class QRcode implements Runnable {
 			CommandDecoder decoder = new CommandDecoder(goals, grid, command);
 			decoder.decodeCommand();
 		}
-		
-		cm.getGUI().printToConsole(command);
-		cm.getGUI().updatePhoto(imagePath);
-		System.out.println("-> Time QR: " + (System.currentTimeMillis() - start));
+		if(cm!= null){
+			cm.getGUI().printToConsole(command);
+			cm.getGUI().updatePhoto(imagePath);
+		}
+			System.out.println("-> Time QR: " + (System.currentTimeMillis() - start));
 	}
 	
 	

@@ -28,7 +28,7 @@ public class Simulator implements Runnable{
 	//private final String host = "192.168.2.134";
 	private final String host = "localhost";
 	private final String exchangeName = "server";
-	private final static String qrservername = "192.168.2.115";
+	private final static String qrservername = "192.168.2.134";
 	private final static int qrportnumber = 5000;
 	private final static String qrsimpath = "src/images/qrimsulator.jpg";
 	
@@ -186,7 +186,7 @@ public class Simulator implements Runnable{
 				rotation += Math.PI;
 			
 			gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
-			client.sendMessage(ownX + " " + ownY, "appelblauwzeegroen.info.location");
+			client.sendMessage(ownX + "," + ownY, "appelblauwzeegroen.info.location");
 		}
 	}
 	
@@ -288,16 +288,18 @@ public class Simulator implements Runnable{
 		else if(nextGoal instanceof GoalPosition)
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
 		//TODO Tablets...
-//		else if(nextGoal == null && lastTablet != -1){
-//			try{
-//				URL url = new URL("http://" + qrservername + ":" + qrportnumber + "wit" + lastTablet + ".png");
-//				BufferedImage image = ImageIO.read(url);
-//				ImageIO.write(image,"png",new File(qrsimpath));
-//				new QRcode(goals, grid, qrsimpath);
-//			} catch(Exception e) {
-//				e.printStackTrace();
-//			}
-//		} 
+		else if(nextGoal == null && lastTablet != -1){
+			try{
+				URL url = new URL("http://" + qrservername + ":" + qrportnumber + "/static/wit" + lastTablet + ".png");
+				BufferedImage image = ImageIO.read(url);
+				ImageIO.write(image,"png",new File(qrsimpath));
+				System.out.println("Hij raakt hier");
+				(new QRcode(goals, grid, qrsimpath)).run();
+				System.out.println("normaal klaar");
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		} 
 		else if(nextGoal != null)
 			System.err.println("Error bij addnextgoal");
 	}
