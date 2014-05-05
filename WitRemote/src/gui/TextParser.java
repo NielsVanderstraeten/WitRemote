@@ -12,6 +12,7 @@ import Rooster.Vector;
 import commands.CancelCurrentGoal;
 import commands.Command;
 import commands.GetHeight;
+import commands.SetEnemy;
 import commands.SetPosition;
 import commands.Terminate;
 
@@ -69,6 +70,8 @@ public class TextParser {
 			returnString = gotoTablet(commandWords);
 		else if(commandWords[0].equalsIgnoreCase("cancel"))
 			returnString = cancel(commandWords);
+		else if(commandWords[0].equalsIgnoreCase("setenemy"))
+			returnString = setEnemy(commandWords);
 		else
 			returnString = "Command not found. Please try again.\nYou entered: " + command;
 
@@ -211,6 +214,15 @@ public class TextParser {
 		else{
 			queue.addFirst(new CancelCurrentGoal());
 			return "Cancelling current goal.";
+		}
+	}
+	
+	private String setEnemy(String[] command){
+		if(command.length != 2)
+			return "Please do not enter anything after the setenemy command.";
+		else{
+			queue.addFirst(new SetEnemy(command[1]));
+			return "Set enemy as:" + command[1];
 		}
 	}
 	
