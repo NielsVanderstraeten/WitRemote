@@ -144,22 +144,106 @@ public class TestGrid {
 	
 	@Test
 	public void completeGrid() {
-		System.out.println("in comleteGrid()");
+//		System.out.println("in comleteGrid()");
 		Grid grid = new Grid("blablabla");
+//		ArrayList<Shape> myList = new ArrayList<Shape>();
+//		
+		
+		System.out.println("Test1: ");
+		System.out.println("-----------------");
+		System.out.println("");
 		ArrayList<Shape> myList = new ArrayList<Shape>();
-//		myList.add(new Shape(377,381,"GH"));
-//		myList.add(new Shape(435,381,"YR"));
-//		myList.add(new Shape(495,381,"RR"));
-//		myList.add(new Shape(405,330,"YS"));
-//		myList.add(new Shape(465,330,"WR"));
+		myList.add(new Shape(369,241,"WH"));
+		myList.add(new Shape(461,506,"YC"));
+		myList.add(new Shape(183,454,"BR"));
+		myList.add(new Shape( 65,418,"RU"));
+		myList.add(new Shape(641,288,"RR"));
+		myList.add(new Shape(213, 62,"RU"));
 		
-		myList.add(new Shape(331,236,"RH"));
-		myList.add(new Shape(393,236,"BR"));
-		myList.add(new Shape(363,183,"GR"));
-		myList.add(new Shape(456,236,"BC"));
-		myList.add(new Shape(425,183,"BH"));
-		myList.add(new Shape(394,129,"YS"));
+//		
 		
+//		System.out.println("-------------------------------");
+		long start = System.currentTimeMillis();
+		Vector uitkomst = grid.getPositionNew(myList);
+		System.out.println("Running time: " +  (System.currentTimeMillis() - start) + "ms");
+		System.out.println(uitkomst.toString());
+		System.out.println("rotation:");
+		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
+		System.out.println("foundFigures:");
+		ArrayList<Integer> figures = grid.getLastFigures();
+		for (Integer i: figures) {
+			System.out.println(i);
+			System.out.println(grid.getPositionCalculator().getVector(i).toString());
+		}
+		
+		
+		System.out.println("Test2: ");
+		System.out.println("-----------------");
+		System.out.println("");
+		myList = new ArrayList<Shape>();
+		myList.add(new Shape(348,241,"WR"));
+		myList.add(new Shape(418,477,"RC"));
+		myList.add(new Shape(177,420,"BH"));
+//		myList.add(new Shape( 65,418,"RU"));
+		myList.add(new Shape(586,293,"RR"));
+//		myList.add(new Shape(213, 62,"RU"));
+		
+		uitkomst = grid.getPositionNew(myList);
+		System.out.println(uitkomst.toString());
+		System.out.println("rotation:");
+		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
+		System.out.println("foundFigures:");
+		figures = grid.getLastFigures();
+		for (Integer i: figures) {
+			System.out.println(i);
+			System.out.println(grid.getPositionCalculator().getVector(i).toString());
+		}
+		
+		System.out.println("Test3: ");
+		System.out.println("-----------------");
+		System.out.println("");
+		myList = new ArrayList<Shape>();
+		myList.add(new Shape(661,301,"WR"));
+		myList.add(new Shape(268,289,"WH"));
+		myList.add(new Shape(349,477,"RC"));
+		myList.add(new Shape(666,304,"WS"));
+		myList.add(new Shape(476,300,"RH"));
+		myList.add(new Shape(574,135,"BC"));
+//		myList.add(new Shape(213, 62,"RU"));
+		
+		uitkomst = grid.getPositionNew(myList);
+		System.out.println(uitkomst.toString());
+		System.out.println("rotation:");
+		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
+		System.out.println("foundFigures:");
+		figures = grid.getLastFigures();
+		for (Integer i: figures) {
+			System.out.println(i);
+			System.out.println(grid.getPositionCalculator().getVector(i).toString());
+		}
+		
+		System.out.println("Test4: ");
+		System.out.println("-----------------");
+		System.out.println("");
+		myList = new ArrayList<Shape>();
+		myList.add(new Shape(602, 334,"WS"));
+		myList.add(new Shape(135, 492,"BC"));
+		myList.add(new Shape(326, 278,"YC"));
+		myList.add(new Shape(49, 202,"BR"));
+		myList.add(new Shape(539, 67,"RR"));
+//		myList.add(new Shape(574,135,"BC"));
+//		myList.add(new Shape(213, 62,"RU"));
+		
+		uitkomst = grid.getPositionNew(myList);
+		System.out.println(uitkomst.toString());
+		System.out.println("rotation:");
+		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
+		System.out.println("foundFigures:");
+		figures = grid.getLastFigures();
+		for (Integer i: figures) {
+			System.out.println(i);
+			System.out.println(grid.getPositionCalculator().getVector(i).toString());
+		}
 //		ArrayList<Integer> result = grid.getPoints(myList);
 //		System.out.println("de gevonden punten op het rooster zijn:");
 //		System.out.println("de size = " + result.size());
@@ -176,25 +260,27 @@ public class TestGrid {
 //		for (int i: points) {
 //			System.out.println(i);
 //		}
-		
-		System.out.println("-------------------------------");
-		long start = System.currentTimeMillis();
-		Vector uitkomst = grid.getPositionNew(myList);
-		System.out.println("Running time: " +  (System.currentTimeMillis() - start) + "ms");
-		System.out.println(uitkomst.toString());
-		System.out.println("rotation:");
-		System.out.println(grid.getRotationNew(myList)*180/Math.PI);
-		System.out.println("foundFigures:");
-		ArrayList<Integer> figures = grid.getLastFigures();
-		for (Integer i: figures) {
-			System.out.println(i);
-			System.out.println(grid.getPositionCalculator().getVector(i).toString());
-		}
 //		System.out.println(grid.getPositionCalculator().getVector(11).toString());
 //		System.out.println(grid.getPositionCalculator().getVector(12).toString());
 //		System.out.println(grid.getPositionCalculator().getVector(18).toString());
 //		System.out.println(grid.getPositionCalculator().getVector(19).toString());
 //		System.out.println(grid.getPositionCalculator().getVector(20).toString());
+//		myList.add(new Shape(377,381,"GH"));
+//		myList.add(new Shape(435,381,"YR"));
+//		myList.add(new Shape(495,381,"RR"));
+//		myList.add(new Shape(405,330,"YS"));
+//		myList.add(new Shape(465,330,"WR"));
+		
+//		myList.add(new Shape(331,236,"RH"));
+//		myList.add(new Shape(393,236,"BR"));
+//		myList.add(new Shape(363,183,"GR"));
+//		myList.add(new Shape(456,236,"BC"));
+//		myList.add(new Shape(425,183,"BH"));
+//		myList.add(new Shape(394,129,"YS"));
+		
+//		myList.add(new Shape(446,505,"YC"));
+//		myList.add(new Shape(101,424,"BR"));
+//		myList.add(new Shape(683,243,"RR"));
 	}
 	
 //	@Test
