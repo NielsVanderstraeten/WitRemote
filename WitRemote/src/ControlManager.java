@@ -209,8 +209,10 @@ public class ControlManager {
 					terminate();
 				} else if (c instanceof SetEnemy){
 					rabbitRecv.setEnemy(((SetEnemy) c).getEnemy());
-				}
-				else{
+				} else if (c instanceof SetGoalHeight) {
+					gui.setTargetHeight(((SetGoalHeight)c).getHeight());
+					rabbitClient.executeCommand(c);
+				} else{
 					rabbitClient.executeCommand(c);
 				}
 				gui.updateLastCommand(c.getConsole());

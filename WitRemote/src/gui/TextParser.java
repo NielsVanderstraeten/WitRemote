@@ -1,7 +1,6 @@
 package gui;
 
 import goals.Goal;
-import goals.GoalHeight;
 import goals.GoalPosition;
 
 import java.util.LinkedList;
@@ -13,6 +12,7 @@ import commands.CancelCurrentGoal;
 import commands.Command;
 import commands.GetHeight;
 import commands.SetEnemy;
+import commands.SetGoalHeight;
 import commands.SetPosition;
 import commands.Terminate;
 
@@ -140,7 +140,7 @@ public class TextParser {
 			if(height < 0)
 				return "Please enter a positive amount.";
 			else{
-				goals.add(new GoalHeight(height));
+				queue.add(new SetGoalHeight(height));
 				return "Adding a new goal height: height = "+ height + "mm.";
 			}
 		}
