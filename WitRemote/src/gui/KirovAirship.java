@@ -723,8 +723,7 @@ public class KirovAirship extends JFrame {
 		public void keyPressed(KeyEvent arg0) {
 			if(arg0.getKeyCode() == KeyEvent.VK_ENTER){
 				textEntered(inputConsole.getText());
-			} else if(arg0.getKeyCode() == KeyEvent.VK_Y)
-				updatePhoto();
+			}
 		}
 
 		@Override

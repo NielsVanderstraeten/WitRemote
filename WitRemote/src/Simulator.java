@@ -295,6 +295,7 @@ public class Simulator implements Runnable{
 				ImageIO.write(image,"png",new File(qrsimpath));
 				System.out.println("Hij raakt hier");
 				(new QRcode(goals, grid, qrsimpath)).run();
+				gui.updatePhoto(qrsimpath);
 				System.out.println("normaal klaar");
 			} catch(Exception e) {
 				e.printStackTrace();
