@@ -6,19 +6,19 @@ public class TestQRCode {
 	public static void main(String[] args) throws IOException {
 		QRcode.initialiseKeys();
 
-		try {
-			Process tr = Runtime.getRuntime().exec("cmd /c C:/Python27/python.exe encrypt.py");
-			tr.waitFor();
-		} catch (IOException | InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			Process tr = Runtime.getRuntime().exec("cmd /c C:/Python27/python.exe encrypt.py");
+//			tr.waitFor();
+//		} catch (IOException | InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//
+//		String text = QRcode.read("encrypted");
+//
+//		GenerateEncryptedQR generator = new GenerateEncryptedQR(text);
+//		generator.run();
 
-		String text = QRcode.read("encrypted");
-
-		GenerateEncryptedQR generator = new GenerateEncryptedQR(text);
-		generator.run();
-
-		QRcode qrcoder = new QRcode(null, "src/gui/resources/testQRcode.jpg");
+		QRcode qrcoder = new QRcode(null, "C:/qrcode.jpg");
 
 		try {
 			qrcoder.run();
