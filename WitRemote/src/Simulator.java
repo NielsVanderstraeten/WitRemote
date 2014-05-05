@@ -179,7 +179,7 @@ public class Simulator implements Runnable{
 		if(speedX != 0 || speedY != 0){
 			ownX = ownX + speedX * time;
 			ownY = ownY + speedY * time;
-			rotation = Math.atan((goalY - ownY)/(goalX - ownX)) + Math.PI/2;
+			rotation = Math.atan((goalY - ownY)/(goalX - ownX));
 			if(goalX < ownX)
 				rotation += Math.PI;
 			

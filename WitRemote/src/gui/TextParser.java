@@ -50,7 +50,7 @@ public class TextParser {
 		
 		if(commandWords.length == 0)
 			returnString = "Please enter something else than just space.";
-		else if(commandWords[0].equalsIgnoreCase(commands.get(0)))
+		else if(commandWords[0].equalsIgnoreCase(commands.get(0)) || commandWords[0].equalsIgnoreCase("sp"))
 			returnString = setPosition(commandWords);
 		else if(commandWords[0].equalsIgnoreCase(commands.get(1)))
 			returnString = addGoal(commandWords);

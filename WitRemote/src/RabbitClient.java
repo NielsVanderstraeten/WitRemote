@@ -90,6 +90,7 @@ public class RabbitClient implements Runnable{
 				double rot = ((SetPosition) command).getRotation();
 				topic = zeppName + "."  + "private.rotation";
 				sendMessage(rot + "", topic);
+				
 			}
 //			if(str.equals("takepicture")){
 //				sendMessage(str, false);
@@ -129,10 +130,9 @@ public class RabbitClient implements Runnable{
 	public static void main(String[] argvs) throws InterruptedException{
 		RabbitClient client = new RabbitClient("localhost", "server");
 		//client.sendMessage("1000", "white.info.height");
-		client.sendMessage("2000 2000", "wit.hcommand.move");
-		client.sendMessage("5000", "wit.hcommand.elevate");
-		client.sendMessage("1000 1000", "wit.info.location");
-		client.sendMessage("true", "wit.private.terminate");
+		client.sendMessage("2000,2000", "wit.info.location");
+		client.sendMessage("2000,2000", "wit.hcommand.move");
+		client.sendMessage("3.14", "wit.private.rotation");
 		client.closeChannel();
 	}
 	
