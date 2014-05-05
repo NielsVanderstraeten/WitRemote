@@ -30,6 +30,8 @@ public class ControlManager {
 	private final static int rowReal = 14;
 	private final static int REAL_WIDTH = 400*columnReal;
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
+	
+	private static String IPaddressPI = "192.168.2.137";
 
 	private int tabletNumber = -1; //-1 betekent geen nieuwe tablet als doel
 	
@@ -129,7 +131,7 @@ public class ControlManager {
 	}
 
 	public ControlManager(){
-		this("192.168.43.180");
+		this(IPaddressPI);
 	}
 
 	public void setUpGui(){
