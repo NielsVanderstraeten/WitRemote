@@ -160,11 +160,10 @@ public class NewShapeRecognition implements Runnable {
 	private ControlManager cm;
 
 	public NewShapeRecognition(String path, ControlManager cm){
-		//TODO UNCOMMENTEN
-		//this.cm = cm;
-		//this.gui = cm.getGUI();
-		//this.grid = cm.getGrid();
-		//this.queue = cm.getQueue();
+		this.cm = cm;
+		this.gui = cm.getGUI();
+		this.grid = cm.getGrid();
+		this.queue = cm.getQueue();
 
 		originalImagePath = path;
 	}
@@ -179,7 +178,7 @@ public class NewShapeRecognition implements Runnable {
 
 		createImagesAndFindContours();
 //		System.out.println("   Time1: " + (System.currentTimeMillis() - start));
-		//gui.updatePhoto(); //TODO UNCOMMENTEN
+		gui.updatePhoto();
 
 
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
