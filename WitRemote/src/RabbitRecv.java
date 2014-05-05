@@ -90,7 +90,7 @@ public class RabbitRecv implements Runnable{
 						cm.terminate();
 					}
 				} else if(topic.equals(enemy +".info.location")){
-					String[] words = message.split("[ ]+");
+					String[] words = message.split(",");
 					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
 //				} else if(topic.equalsIgnoreCase("wit.private.recvPicture")){
 //					numberOfPicture++;
