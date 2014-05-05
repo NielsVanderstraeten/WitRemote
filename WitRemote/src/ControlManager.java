@@ -32,6 +32,12 @@ public class ControlManager {
 	private final static int REAL_HEIGHT = (int) (400*Math.sqrt(3)/2)*rowReal;
 
 	private int tabletNumber = -1; //-1 betekent geen nieuwe tablet als doel
+	
+	private boolean foundPosition = true;
+	
+	public void setFoundPosition() {
+		foundPosition = true;
+	}
 
 	public static void main(String[] args){
 		//		Simulator simulator;
@@ -72,6 +78,7 @@ public class ControlManager {
 		catch (Exception e){ 
 			System.out.println("Fout bij SSH connectie met Pi");
 			System.out.println(" -> Waarschijnlijk is de Pi uitgevallen");
+			System.out.println(" -> Of Putty / SSH op pi staat nog niet op");
 			e.printStackTrace();
 		}		
 	}
@@ -232,7 +239,7 @@ public class ControlManager {
 		NewShapeRecognition recog = new NewShapeRecognition(realPath, this);
 
 		System.out.println("Analysing picture...");
-		if (findQRcode) {
+		if (findQRcode && foundPosition) {
 			analyseNextPictureForQR = true;
 			analysedQRPictures++;
 			gui.updateLastCommand("Analysing picture for QR Code");
@@ -244,6 +251,7 @@ public class ControlManager {
 		if (analyseNextPictureForQR) {
 			if (analysedQRPictures > QR_PICTURES_TO_ANALYSE) {
 				findQRcode = false;
+				foundPosition = false;
 				goals.add(new GoalPosition(gui.getGoalX(), gui.getGoalY()));
 			} else {
 				qrThread = new Thread(new QRcode(this, realPath));
