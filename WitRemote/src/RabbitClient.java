@@ -131,7 +131,7 @@ public class RabbitClient implements Runnable{
 		//client.sendMessage("1000", "white.info.height");
 		client.sendMessage("2000 2000", "wit.hcommand.move");
 		client.sendMessage("5000", "wit.hcommand.elevate");
-		client.sendMessage("1000 1000", "wit.info.position");
+		client.sendMessage("1000 1000", "wit.info.location");
 		client.sendMessage("true", "wit.private.terminate");
 		client.closeChannel();
 	}

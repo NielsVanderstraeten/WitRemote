@@ -30,7 +30,7 @@ public class QRcode implements Runnable {
 	private Grid grid;
 	private List<Goal> goals;
 	private String imagePath;
-	private static boolean initialisedKeys = false;
+	private static boolean initialisedKeys = true;
 	
 	public QRcode(ControlManager cm, String imagePath) {
 		this.cm = cm;

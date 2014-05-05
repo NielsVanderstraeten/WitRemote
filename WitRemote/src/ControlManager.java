@@ -266,7 +266,7 @@ public class ControlManager {
 	private void startFindingQRCode() {
 		findQRcode = true;
 		analysedQRPictures = 0;
-		rabbitClient.sendMessage(QRcode.getPublicKey(), "wit.tablet.tablet" + tabletNumber);
+		rabbitClient.sendMessage(QRcode.getPublicKey(), "wit.tablets.tablet" + tabletNumber);
 	}
 
 	public void setTabletNumber(int number) {
