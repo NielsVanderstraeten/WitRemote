@@ -14,8 +14,10 @@ import Rooster.Grid;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+
 import commands.CancelCurrentGoal;
 import commands.Command;
+import commands.SetEnemy;
 import commands.SetGoalHeight;
 import commands.SetGoalPosition;
 import commands.SetPosition;
@@ -120,7 +122,7 @@ public class ControlManager {
 	}
 
 	public ControlManager(){
-		this("192.168.2.100");
+		this("192.168.43.180");
 	}
 
 	public void setUpGui(){
@@ -195,6 +197,8 @@ public class ControlManager {
 				} else if (c instanceof Terminate) {
 					rabbitClient.executeCommand(c);
 					terminate();
+				} else if (c instanceof SetEnemy){
+					rabbitRecv.setEnemy(((SetEnemy) c).getEnemy());
 				}
 				else{
 					rabbitClient.executeCommand(c);
