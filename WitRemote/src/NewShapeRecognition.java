@@ -10,9 +10,20 @@ import static com.googlecode.javacv.cpp.opencv_core.cvPoint;
 import static com.googlecode.javacv.cpp.opencv_core.cvPoint2D32f;
 import static com.googlecode.javacv.cpp.opencv_core.cvPutText;
 import static com.googlecode.javacv.cpp.opencv_core.cvScalar;
+import static com.googlecode.javacv.cpp.opencv_core.cvSplit;
+import static com.googlecode.javacv.cpp.opencv_core.cvMerge;
+import static com.googlecode.javacv.cpp.opencv_core.cvGetMat;
+import static com.googlecode.javacv.cpp.opencv_core.cvInvert;
+import static com.googlecode.javacv.cpp.opencv_core.cvInv;
+import static com.googlecode.javacv.cpp.opencv_core.cvNot;
+
 import static com.googlecode.javacv.cpp.opencv_highgui.CV_LOAD_IMAGE_UNCHANGED;
 import static com.googlecode.javacv.cpp.opencv_highgui.cvLoadImage;
 import static com.googlecode.javacv.cpp.opencv_highgui.cvSaveImage;
+
+import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2Lab;
+import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2YCrCb;
+
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_BGR2HSV;
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_CHAIN_APPROX_SIMPLE;
 import static com.googlecode.javacv.cpp.opencv_imgproc.CV_CLOCKWISE;
@@ -30,6 +41,7 @@ import static com.googlecode.javacv.cpp.opencv_imgproc.cvGetSpatialMoment;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvMoments;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvPointPolygonTest;
 import static com.googlecode.javacv.cpp.opencv_imgproc.cvSmooth;
+import static com.googlecode.javacv.cpp.opencv_imgproc.cvEqualizeHist;
 
 
 
@@ -62,6 +74,7 @@ import com.googlecode.javacv.cpp.opencv_core.CvSeq;
 import com.googlecode.javacv.cpp.opencv_core.IplImage;
 import com.googlecode.javacv.cpp.opencv_core.IplImageArray;
 import com.googlecode.javacv.cpp.opencv_imgproc.CvMoments;
+import com.googlecode.javacv.cpp.opencv_ml.CvVectors;
 
 import commands.Command;
 import commands.SetPosition;
@@ -73,7 +86,7 @@ import commands.SetPosition;
 
 public class NewShapeRecognition implements Runnable {
 	
-	private final boolean debug = false;
+	private final boolean debug = true;
 
 	/**
 	 * Lijst met alle vormen. 
@@ -109,7 +122,7 @@ public class NewShapeRecognition implements Runnable {
 	 * iplimages
 	 */
 	private IplImage imgOrg, imgHSV, imgSmooth, imgThresholdWhite, 
-	imgThresholdWhiteCanny, imgThresholdHSVDarkColors, imgThresholdBlack;
+	imgThresholdWhiteCanny, imgThresholdHSVDarkColors, imgThresholdHSVDarkColorsLowLight;
 
 	@SuppressWarnings("unused")
 	private int stars,rectangles,hearts,circles,unidentifiedShapes,unidentifiedColors;
@@ -125,27 +138,33 @@ public class NewShapeRecognition implements Runnable {
 
 	private CvScalar minWhite = cvScalar(170, 170, 170, 0);
 	private CvScalar maxWhite = cvScalar(255, 255, 255, 0);	 
+//	private CvScalar minAll = cvScalar(0, 0, 0, 0);
+//	private CvScalar maxAll = cvScalar(200, 200, 200, 0);
 	private CvScalar minHSV = cvScalar(0, 50, 50, 0);
 	private CvScalar maxHSV = cvScalar(255, 255, 255, 0);
+	private CvScalar minHSVLowLight = cvScalar(0, 30, 50, 0);
+	private CvScalar maxHSVLowLight = cvScalar(30, 200, 150, 0);
 	private CvScalar colorScalar;
 
-	//	public static void main(String args[]){
-	//
-	//		Grid grid = new Grid("");
-	//		NewShapeRecognition shapeRecog = new NewShapeRecognition(
-	//				"C:/Users/Jeroen/Desktop/Pics/A11.jpg", null, grid, null);
-	//		//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
-	//		Thread t = new Thread(shapeRecog);
-	//		t.start();
-	//	}	
+		public static void main(String args[]){
+	
+			Grid grid = new Grid("");
+			NewShapeRecognition shapeRecog = new NewShapeRecognition(
+					//"C:/Users/Jeroen/Desktop/Pics/A25.jpg", null);
+					"E:/Recv1.jpg", null);
+			//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
+			Thread t = new Thread(shapeRecog);
+			t.start();
+		}	
 	
 	private ControlManager cm;
 
 	public NewShapeRecognition(String path, ControlManager cm){
-		this.cm = cm;
-		this.gui = cm.getGUI();
-		this.grid = cm.getGrid();
-		this.queue = cm.getQueue();
+		//TODO UNCOMMENTEN
+		//this.cm = cm;
+		//this.gui = cm.getGUI();
+		//this.grid = cm.getGrid();
+		//this.queue = cm.getQueue();
 
 		originalImagePath = path;
 	}
@@ -160,7 +179,7 @@ public class NewShapeRecognition implements Runnable {
 
 		createImagesAndFindContours();
 //		System.out.println("   Time1: " + (System.currentTimeMillis() - start));
-		gui.updatePhoto();
+		//gui.updatePhoto(); //TODO UNCOMMENTEN
 
 
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
@@ -199,14 +218,16 @@ public class NewShapeRecognition implements Runnable {
 		//	    imgHSV = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 		//		imgHSV = null;
 		cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
-		//cvSaveImage("C:/Users/Jeroen/Desktop/Original.jpg", imgOrg);
-		//cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
+		//cvSaveImage("C:/Users/Jeroen/Desktop/Original.jpg", imgfOrg);
+		cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
 
 		imgSmooth = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 		//	    imgSmooth = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 		cvSmooth(imgOrg, imgSmooth, CV_GAUSSIAN, 5);
 		//cvSaveImage("C:/Users/Jeroen/Desktop/WhiteGaussian.jpg", imgSmooth);
-
+		
+		
+		
 		// WIT   
 		imgThresholdWhite = IplImage.create(cvGetSize(imgOrg), 8, 1);
 		//	    imgThresholdWhite = cvCreateImage(cvGetSize(imgOrg), 8, 1);
@@ -214,44 +235,34 @@ public class NewShapeRecognition implements Runnable {
 		imgThresholdWhiteCanny = IplImage.create(cvGetSize(imgOrg), 8, 1);
 		//	    imgThresholdWhiteCanny = cvCreateImage(cvGetSize(imgOrg), 8, 1);
 		cvCanny(imgThresholdWhite, imgThresholdWhiteCanny, 0, 255, 3);
-		//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
+				cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdWhite.jpg", imgThresholdWhite);
 
 		// HSV => DONKEREKLEUREN
 		imgThresholdHSVDarkColors = IplImage.create(cvGetSize(imgOrg), 8, 1);
+		imgThresholdHSVDarkColorsLowLight = IplImage.create(cvGetSize(imgOrg), 8, 1);
 		//	    imgThresholdHSVDarkColors = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 		cvInRangeS(imgHSV, minHSV, maxHSV, imgThresholdHSVDarkColors);
+		cvInRangeS(imgHSV, minHSVLowLight, maxHSVLowLight, imgThresholdHSVDarkColorsLowLight);
 		//	    IplImage cannyEdge2 = cvCreateImage(cvGetSize(imgHSV), 8, 1);
 		//	    cvCanny(imgThresholdHSVDarkColors, imgThresholdHSVDarkColors, 0, 255, 3);
-		//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
+		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 
-		imgThresholdBlack = IplImage.create(cvGetSize(imgOrg), 8, 1);
-		CvScalar minBlack = cvScalar(0, 0, 0, 0); 
-		CvScalar maxBlack = cvScalar(90, 50, 90, 0);
-		cvInRangeS(imgSmooth, minBlack, maxBlack, imgThresholdBlack);
-		
-		//		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdBlack.jpg", imgThresholdBlack);
+		cvNot(imgThresholdHSVDarkColorsLowLight, imgThresholdHSVDarkColorsLowLight);
+		cvSaveImage("C:/Users/Jeroen/Desktop/temp.jpg", imgThresholdHSVDarkColorsLowLight);
 
-		//		System.out.println("###############");
-		//		// findContoursAndHull(imgSmooth, imgThresholdBlack);
-		//		System.out.println("###############");
-		findContoursAndHull(imgSmooth, imgThresholdWhiteCanny);
-//		System.out.println("   Cont1: " + (System.currentTimeMillis() - start));
-		findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors);
-//		System.out.println("   Cont2: " + (System.currentTimeMillis() - start));
-		//		System.out.println("Average area = " + averageArea/(stars+hearts+rectangles+circles));
-		//		double median;
-		//		if (medianArea.size()%2 != 0)
-		//			median = medianArea.get(medianArea.size()/2);
-		//		else
-		//			median = (medianArea.get(medianArea.size()/2) + medianArea.get(medianArea.size()/2 + 1))/2;
-		//		System.out.println("Median area = " + median);
-		//		cvSaveImage("C:/Users/Jeroen/Desktop/Analysed.jpg", imgSmooth);
+
+		findContoursAndHull(imgSmooth, imgThresholdWhiteCanny, false);
+		findContoursAndHull(imgSmooth, imgThresholdHSVDarkColors, false);
+		findContoursAndHull(imgSmooth, imgThresholdHSVDarkColorsLowLight, true);
+
 		cvSaveImage("src/images/analyse.jpg", imgSmooth);
 
-		imgThresholdBlack.release();
+//		imgThresholdBlack.release();
 		imgHSV.release();
 		imgThresholdHSVDarkColors.release();
+		imgThresholdHSVDarkColorsLowLight.release();
 		imgThresholdWhite.release();
+//		imgThresholdAll.release();
 		imgOrg.release();
 		imgSmooth.release();
 		imgThresholdWhiteCanny.release();
@@ -260,7 +271,7 @@ public class NewShapeRecognition implements Runnable {
 	private int averageArea = 0;
 	private List<Double> medianArea = new ArrayList<Double>();
 
-	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold) {
+	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold, boolean lowLight) {
 		CvMemStorage memory = CvMemStorage.create();
 //		System.out.println("     Memory: " + (System.currentTimeMillis() - start));
 		CvSeq contour = CvSeq.create(0, Loader.sizeof(CvSeq.class), 
@@ -280,7 +291,7 @@ public class NewShapeRecognition implements Runnable {
 				cvMoments(contour, moments, 1);
 				double area = cvGetCentralMoment(moments, 0, 0);
 				
-				if(area > 500 && area < 5000){
+				if(area > 300 && area < 5000){
 					CvMemStorage storage = CvMemStorage.create();
 //					System.out.println("     Storage: " + (System.currentTimeMillis() - start));
 
@@ -344,9 +355,15 @@ public class NewShapeRecognition implements Runnable {
 						}
 
 						boolean isUnidentified = false;
+						
+						double hullEdge;
+						if (lowLight) 
+							hullEdge = 1.04;
+						else
+							hullEdge = 1.038;
 
 						//(vb omhullende klopt, maar circle-verhouding is absurd)
-						if(areaHull/area > 1.9){
+						if(areaHull/area > 1.975){
 							//System.out.println("Unidentified AREAHULL/AREA == " + areaHull/area);
 							shapes.add("Unidentified");
 							unidentifiedShapes++;
@@ -363,7 +380,7 @@ public class NewShapeRecognition implements Runnable {
 						}
 						//						else if(areaCircle/area > 1.6  && areaCircle/area < 3){
 						else if(((areaCircle/area > 1.64) 
-								|| (areaHull/area < 1.038 && areaCircle/area > 1.4))
+								|| (areaHull/area < hullEdge && areaCircle/area > 1.4))
 								&& (areaCircle/area < 3)){
 							//System.out.println("Rectangle AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Rectangle AreaHull/area == " + areaHull/area);
@@ -374,7 +391,7 @@ public class NewShapeRecognition implements Runnable {
 							medianArea.add(area);
 						}
 						//						else if(areaCircle/area > 1.3  && areaCircle/area < 3){
-						else if(areaHull/area > 1.038  && areaCircle/area < 3){
+						else if(areaHull/area > hullEdge  && areaCircle/area < 3){
 							//System.out.println("Heart AreaCircle/area == " + areaCircle/area);
 							//System.out.println("Heart AreaHull/area == " + areaHull/area);
 							shapes.add("Heart");
@@ -400,7 +417,7 @@ public class NewShapeRecognition implements Runnable {
 //						System.out.println("     Identify: " + (System.currentTimeMillis() - start));
 
 						colorScalar = cvGet2D(imgOrg, centerY, centerX);   
-						Color figureColor = findColor((int)colorScalar .val(2), (int)colorScalar .val(1), (int)colorScalar .val(0));           
+						Color figureColor = findColor((int)colorScalar .val(2), (int)colorScalar .val(1), (int)colorScalar .val(0), lowLight);           
 						String figureColorString = colorToString(figureColor);
 						colors.add(figureColorString);
 						imageTxt = figureColorString.substring(0,1) + imageTxt;
@@ -481,7 +498,14 @@ public class NewShapeRecognition implements Runnable {
 	 * Groen: Scalar(0,255,0)
 	 * Zwart: Scalar(0,0,0)
 	 */
-	private Color findColor(int averageRed, int averageGreen, int averageBlue) {
+	private Color findColor(int averageRed, int averageGreen, int averageBlue, boolean lowLight) {
+		if (lowLight)
+			return findColorLowLight(averageRed, averageGreen, averageBlue);
+		else
+			return findColorGoodLight(averageRed, averageGreen, averageBlue);
+	}
+	
+	private Color findColorGoodLight(int averageRed, int averageGreen, int averageBlue) {
 		int min = 150;
 		int zwartGrijs = 50;
 		if(averageRed >= min && averageGreen >= min && averageBlue >= min){
@@ -491,6 +515,33 @@ public class NewShapeRecognition implements Runnable {
 			return Color.black;
 		}
 		else if(averageRed >= min && averageGreen >= min){
+			return Color.yellow;
+		}
+		else if(averageBlue >= averageRed && averageBlue >= averageGreen + 10){
+			return Color.blue;
+		}
+		else if(averageRed >= averageGreen && averageRed >= averageBlue){
+			return Color.red;
+		}
+		else if(averageGreen >= averageRed && averageGreen >= averageBlue - 10){
+			return Color.green;
+		}
+		else{
+			return Color.cyan;
+		}
+	}
+	
+	//TODO testen
+	private Color findColorLowLight(int averageRed, int averageGreen, int averageBlue) {
+		int min = 100;
+		int zwartGrijs = 50;
+		if(averageRed >= min && averageGreen >= min && averageBlue >= min){
+			return Color.white;
+		}
+		else if(averageRed <= zwartGrijs && averageGreen <= zwartGrijs && averageBlue <= zwartGrijs){
+			return Color.black;
+		}
+		else if(averageRed >= 100 && averageGreen >= 90){
 			return Color.yellow;
 		}
 		else if(averageBlue >= averageRed && averageBlue >= averageGreen + 10){
