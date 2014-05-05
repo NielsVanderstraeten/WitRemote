@@ -83,9 +83,11 @@ public class RabbitRecv implements Runnable{
 				if(topic.equals("wit.info.height") && !simulator)
 					gui.updateZeppHeightMM((int) (Double.parseDouble(message)*10));
 				else if(topic.equals("wit.private.terminate")){
-					System.out.println(message);
-					if(message.equalsIgnoreCase("true"))
+					System.out.println("Pi told us to terminate.");
+					if(message.equalsIgnoreCase("true")) {
 						terminated = true;
+						cm.terminate();
+					}
 				} else if(topic.equals(enemy +".info.location")){
 					String[] words = message.split("[ ]+");
 					gui.updateOpponentPosition(Integer.parseInt(words[0]), Integer.parseInt(words[1]));
