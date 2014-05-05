@@ -381,7 +381,7 @@ public class MapMaker extends JPanel {
 		RoundRectangle2D line = new RoundRectangle2D.Double(1*targetScale, 19*targetScale, 12*targetScale, 2*targetScale, 1*targetScale, 1*targetScale);
 		Area generalLine = new Area(line);
 		AffineTransform targetAT = new AffineTransform();
-		//targetAT.rotate(Math.PI/2, 20*targetScale, 20*targetScale);
+		targetAT.rotate(Math.PI/2, 20*targetScale, 20*targetScale);
 		
 		target = new Area(outerCircle);
 		target.subtract(new Area(innerCircle));
