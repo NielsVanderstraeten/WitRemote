@@ -10,6 +10,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -61,6 +62,7 @@ public class Simulator implements Runnable{
 	private void setUpConnection(){
 		client = new RabbitClient(host, exchangeName, "appelblauwzeegroen");
 		rabbitRecv = new RabbitRecv(host, exchangeName, gui, true);
+		rabbitRecv.setEnemy("wit");
 		Thread recv = new Thread(rabbitRecv);
 		recv.start();
 	}
@@ -77,7 +79,8 @@ public class Simulator implements Runnable{
 		setNextGoal();
 		while(true){
 			try {
-				Thread.sleep(500); 
+				double random = Math.random() * 200 + 400;
+				Thread.sleep((int) random); 
 			} catch(Exception e){
 				System.err.println("Da werkt ni..... stoeme thread sleep");
 			}
@@ -186,7 +189,7 @@ public class Simulator implements Runnable{
 				rotation += Math.PI;
 			
 			gui.updateOwnPosition((int) ownX, (int) ownY, rotation);
-			client.sendMessage(ownX + "," + ownY, "appelblauwzeegroen.info.location");
+			client.sendMessage(((int) ownX) + "," + (int) ownY, "appelblauwzeegroen.info.location");
 		}
 	}
 	
@@ -288,7 +291,7 @@ public class Simulator implements Runnable{
 		else if(nextGoal instanceof GoalPosition)
 			gui.setGoalPosition(((GoalPosition) nextGoal).getX(), ((GoalPosition) nextGoal).getY());
 		//TODO Tablets...
-		else if(nextGoal == null && lastTablet != -1){
+		else if(nextGoal == null && lastTablet != -1 && lastTablet < 4){
 			try{
 				URL url = new URL("http://" + qrservername + ":" + qrportnumber + "/static/wit" + lastTablet + ".png");
 				BufferedImage image = ImageIO.read(url);

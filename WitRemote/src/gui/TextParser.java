@@ -8,13 +8,7 @@ import java.util.LinkedList;
 import Rooster.Grid;
 import Rooster.Vector;
 
-import commands.CancelCurrentGoal;
-import commands.Command;
-import commands.GetHeight;
-import commands.SetEnemy;
-import commands.SetGoalHeight;
-import commands.SetPosition;
-import commands.Terminate;
+import commands.*;
 
 public class TextParser {
 
@@ -40,6 +34,7 @@ public class TextParser {
 		commands.add("help");
 		commands.add("text");
 		commands.add("gototablet");
+		commands.add("sptablet");
 	}
 	
 	public String parse(String command){
@@ -72,6 +67,8 @@ public class TextParser {
 			returnString = cancel(commandWords);
 		else if(commandWords[0].equalsIgnoreCase("setenemy"))
 			returnString = setEnemy(commandWords);
+		else if(commandWords[0].equalsIgnoreCase("sptablet"))
+			returnString = setPositionAtTablet(commandWords);
 		else
 			returnString = "Command not found. Please try again.\nYou entered: " + command;
 
@@ -201,6 +198,31 @@ public class TextParser {
 		} else
 			return "Please enter exactly 2 words. First the command then the number of the tablet.\n"
 					+ "For example: gototablet 3";	
+	}
+	
+	private String setPositionAtTablet(String[] command){
+		if(command.length == 2){
+			int number;
+			try{
+				number = Integer.parseInt(command[1]); }
+			catch(NumberFormatException ne){
+				return "Please enter a valid number as tabletnumber. Only positive integers are allowed.";
+			}
+			if(number < 0)
+				return "Please enter a strictly positive number.";
+			else{
+				Vector position = grid.getTabletPosition(number);
+				int x = (int) position.getX();
+				int y = (int) position.getY();
+				if(x == -1 || y == -1)
+					return "This tablet is not available. Please enter a tablet number that exists.";
+				queue.add(new SetPosition(x, y, 0));
+				return "Setting position at tablet " + number + ".\n"
+						+ "This is located at: x=" + x + ", y=" + y + ".";
+			}
+		} else
+			return "Please enter exactly 2 words. First the command then the number of the tablet.\n"
+					+ "For example: sptablet 3";	
 	}
 	
 	private String terminate(){

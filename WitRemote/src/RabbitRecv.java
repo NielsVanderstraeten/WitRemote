@@ -21,7 +21,7 @@ public class RabbitRecv implements Runnable{
 	private String queueName, exchangeName;
 	private KirovAirship gui;
 	//TODO naar echte vrijand aanpassen
-	private String enemy = "blauw";
+	private String enemy = "wit";
 	private boolean simulator;
 	private ControlManager cm;
 	
