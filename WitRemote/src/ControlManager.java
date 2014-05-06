@@ -145,10 +145,7 @@ public class ControlManager {
 	}
 
 	public void setUpGoals(){
-		//Standaard hoogte van 1m invoeren als targethoogte.
-		//nextGoal = new GoalHeight(800);
-//		goals.add(new GoalFindQRCode()); //TODO: wegdoen
-		gui.setTargetHeight(800);
+		gui.setTargetHeight(1000);
 	}
 
 	public KirovAirship getGUI() {
@@ -334,6 +331,7 @@ public class ControlManager {
 			queue.offerFirst(new SetGoalHeight(targetheight));
 		}
 		else if(nextGoal instanceof GoalPosition){
+//			findQRcode = false; //TODO
 			int goalX = ((GoalPosition) nextGoal).getX();
 			int goalY = ((GoalPosition) nextGoal).getY();
 			gui.setGoalPosition(goalX, goalY);			

@@ -18,7 +18,7 @@ public class TestQRCode {
 //		GenerateEncryptedQR generator = new GenerateEncryptedQR(text);
 //		generator.run();
 
-		QRcode qrcoder = new QRcode(null, "C:/qrcode.jpg");
+		QRcode qrcoder = new QRcode(null, "C:/Users/Niels Vanderstraeten/Dropbox/P&O WIT/VormHerkenning/A29.jpg");
 
 		try {
 			qrcoder.run();
