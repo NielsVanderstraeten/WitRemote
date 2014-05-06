@@ -370,6 +370,11 @@ public class MapMaker extends JPanel {
 		one.addPoint((int) (27*zeppScale), (int) (8*zeppScale)); one.addPoint((int) (27*zeppScale), (int) (53*zeppScale));
 		one.addPoint((int) (16*zeppScale), (int) (53*zeppScale)); one.addPoint((int) (16*zeppScale), (int) (21*zeppScale));
 		firstZepp = new Area(one);
+		AffineTransform atFirst = new AffineTransform();
+		atFirst.rotate(1.57, ownZeppX, ownZeppY);
+		//Hij moet naar rechts kijken
+		firstZepp.transform(atFirst);
+		ownZepp.transform(atFirst);
 		
 		Ellipse2D outerCircle = new Ellipse2D.Double(5*targetScale,5*targetScale,30*targetScale,30*targetScale);
 		Ellipse2D innerCircle = new Ellipse2D.Double(7.5*targetScale, 7.5*targetScale, 25*targetScale, 25*targetScale);

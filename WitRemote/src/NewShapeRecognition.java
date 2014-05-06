@@ -151,7 +151,7 @@ public class NewShapeRecognition implements Runnable {
 			Grid grid = new Grid("");
 			NewShapeRecognition shapeRecog = new NewShapeRecognition(
 					//"C:/Users/Jeroen/Desktop/Pics/A25.jpg", null);
-					"E:/Recv1.jpg", null);
+					"E:/Recv9.jpg", null);
 			//NewShapeRecognition shapeRecog = new NewShapeRecognition("pic1.jpg");
 			Thread t = new Thread(shapeRecog);
 			t.start();
@@ -160,11 +160,10 @@ public class NewShapeRecognition implements Runnable {
 	private ControlManager cm;
 
 	public NewShapeRecognition(String path, ControlManager cm){
-		//TODO UNCOMMENTEN
-		//this.cm = cm;
-		//this.gui = cm.getGUI();
-		//this.grid = cm.getGrid();
-		//this.queue = cm.getQueue();
+		this.cm = cm;
+		this.gui = cm.getGUI();
+		this.grid = cm.getGrid();
+		this.queue = cm.getQueue();
 
 		originalImagePath = path;
 	}
@@ -179,7 +178,7 @@ public class NewShapeRecognition implements Runnable {
 
 		createImagesAndFindContours();
 //		System.out.println("   Time1: " + (System.currentTimeMillis() - start));
-		//gui.updatePhoto(); //TODO UNCOMMENTEN
+		gui.updatePhoto(); //TODO
 
 
 		/*System.out.println("Unidentified shapes: " + " " + unidentifiedShapes + " --- Unidentified colors: " + unidentifiedColors);
@@ -219,7 +218,7 @@ public class NewShapeRecognition implements Runnable {
 		//		imgHSV = null;
 		cvCvtColor(imgOrg, imgHSV, CV_BGR2HSV);
 		//cvSaveImage("C:/Users/Jeroen/Desktop/Original.jpg", imgfOrg);
-		cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
+		//cvSaveImage("C:/Users/Jeroen/Desktop/HSV.jpg", imgHSV);
 
 		imgSmooth = IplImage.create(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
 		//	    imgSmooth = cvCreateImage(cvGetSize(imgOrg), imgOrg.depth(), imgOrg.nChannels());
@@ -248,7 +247,7 @@ public class NewShapeRecognition implements Runnable {
 		cvSaveImage("C:/Users/Jeroen/Desktop/ThresholdHSVDarkColors.jpg", imgThresholdHSVDarkColors);
 
 		cvNot(imgThresholdHSVDarkColorsLowLight, imgThresholdHSVDarkColorsLowLight);
-		cvSaveImage("C:/Users/Jeroen/Desktop/temp.jpg", imgThresholdHSVDarkColorsLowLight);
+		//cvSaveImage("C:/Users/Jeroen/Desktop/temp.jpg", imgThresholdHSVDarkColorsLowLight);
 
 
 		findContoursAndHull(imgSmooth, imgThresholdWhiteCanny, false);
@@ -268,8 +267,6 @@ public class NewShapeRecognition implements Runnable {
 		imgThresholdWhiteCanny.release();
 
 	}
-	private int averageArea = 0;
-	private List<Double> medianArea = new ArrayList<Double>();
 
 	private void findContoursAndHull(IplImage imgOrg, IplImage imgThreshold, boolean lowLight) {
 		CvMemStorage memory = CvMemStorage.create();
@@ -375,8 +372,6 @@ public class NewShapeRecognition implements Runnable {
 							shapes.add("Star");
 							stars++;;
 							imageTxt = "S";
-							averageArea+= area;
-							medianArea.add(area);
 						}
 						//						else if(areaCircle/area > 1.6  && areaCircle/area < 3){
 						else if(((areaCircle/area > 1.64) 
@@ -387,8 +382,6 @@ public class NewShapeRecognition implements Runnable {
 							shapes.add("Rectangle");
 							rectangles++;
 							imageTxt = "R";
-							averageArea+= area;
-							medianArea.add(area);
 						}
 						//						else if(areaCircle/area > 1.3  && areaCircle/area < 3){
 						else if(areaHull/area > hullEdge  && areaCircle/area < 3){
@@ -397,15 +390,11 @@ public class NewShapeRecognition implements Runnable {
 							shapes.add("Heart");
 							hearts++;
 							imageTxt = "H";
-							averageArea+= area;
-							medianArea.add(area);
 						}
 						else if(areaCircle/area >= 1  && areaCircle/area < 3){
 							shapes.add("Circle");
 							circles++;
 							imageTxt = "C";
-							averageArea+= area;
-							medianArea.add(area);
 						}
 						else {
 							shapes.add("Unidentified");
@@ -534,7 +523,7 @@ public class NewShapeRecognition implements Runnable {
 	//TODO testen
 	private Color findColorLowLight(int averageRed, int averageGreen, int averageBlue) {
 		int min = 100;
-		int zwartGrijs = 50;
+		int zwartGrijs = 30;
 		if(averageRed >= min && averageGreen >= min && averageBlue >= min){
 			return Color.white;
 		}
@@ -544,7 +533,7 @@ public class NewShapeRecognition implements Runnable {
 		else if(averageRed >= 100 && averageGreen >= 90){
 			return Color.yellow;
 		}
-		else if(averageBlue >= averageRed && averageBlue >= averageGreen + 10){
+		else if(averageBlue >= averageRed && averageBlue >= averageGreen){
 			return Color.blue;
 		}
 		else if(averageRed >= averageGreen && averageRed >= averageBlue){

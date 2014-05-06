@@ -68,9 +68,9 @@ public class CommandDecoder {
 					cm.foundQRCode();
 					System.out.println("Found correct QR code!"); //TODO debug
 				}
-				if (goals != null) {
-					goals.add(new GoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
-				}
+				
+				goals.add(new GoalPosition(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2))));
+				
 				foundCorrectQRCode = true;
 			}
 			//geval tablet

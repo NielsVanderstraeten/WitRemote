@@ -21,7 +21,7 @@ public class RabbitRecv implements Runnable{
 	private String queueName, exchangeName;
 	private KirovAirship gui;
 	//TODO naar echte vrijand aanpassen
-	private String enemy = "wit";
+	private String enemy = "blauw";
 	private boolean simulator;
 	private ControlManager cm;
 	
@@ -140,7 +140,14 @@ public class RabbitRecv implements Runnable{
 	}
 	
 	public void setEnemy(String enemy){
-		this.enemy = enemy;
+		try{
+			channel.queueUnbind(queueName, exchangeName, this.enemy + ".info.location");
+			this.enemy = enemy;
+			channel.queueBind(queueName, exchangeName, this.enemy + ".info.location");
+		} catch (IOException ioe){
+			System.out.println("I declare bullshit");
+			ioe.printStackTrace();
+		}
 	}
 	
 	private ArrayList<String> topics;
