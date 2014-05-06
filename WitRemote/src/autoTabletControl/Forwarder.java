@@ -20,15 +20,17 @@ public class Forwarder implements Runnable{
 	private String color;
 	private boolean colorIsEnemy;
 	private ForwardClient myClient;
+	private int port;
 
-	public Forwarder(String forwardFrom, String forwardTo, String exchangeName, String color, boolean isOwnColor) throws SecurityException, IOException {
+	public Forwarder(String forwardFrom,int fromPort, String forwardTo,int toPort, String exchangeName, String color, boolean isOwnColor) throws SecurityException, IOException {
 		this.forwardFrom = forwardFrom;
 		this.forwardTo = forwardTo;
 		this.color = color;
 		this.exchangeName = exchangeName;
 		this.colorIsEnemy = !isOwnColor;
+		this.port = fromPort;
 		System.out.println("color = " + color + " and enemy = " + colorIsEnemy);
-		myClient = new ForwardClient(forwardTo,exchangeName,color);
+		myClient = new ForwardClient(forwardTo,exchangeName,color,toPort);
 	}
 
 	private void setUpConnection(){
@@ -39,7 +41,7 @@ public class Forwarder implements Runnable{
 			factory.setUsername("wit");
 			factory.setPassword("wit");
 			factory.setHost(forwardFrom);
-			factory.setPort(5672);			
+			factory.setPort(port);			
 			connection = factory.newConnection();			
 			channel = connection.createChannel();
 			channel.exchangeDeclare(exchangeName, "topic");			
@@ -123,10 +125,5 @@ public class Forwarder implements Runnable{
 	private void declareTopicBinds() throws IOException{
 		for(String topic: topics)
 			channel.queueBind(queueName, exchangeName, topic);
-	}
-	
-	public static void main(String[] args) throws SecurityException, IOException{
-		TabletControlListener listener = new TabletControlListener("localhost", "server");
-		listener.run();
 	}
 }

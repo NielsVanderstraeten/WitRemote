@@ -14,12 +14,15 @@ public class Regulator implements Runnable {
 	
 	//// NIEUWE RUN METHODE ////
 	//----------------------////
-	
+	private String laptop = "192.168.2.100";
+	private String local = "localhost";
 	private String exchangeName = "server";
 	// EERSTE FORWARDER
 	//Declare the two hosts to forward from and to:
-	private String forwardFrom1 = "localhost";
-	private String forwardTo1 = "localhost";
+	private String forwardFrom1 = local;
+	int fromport1 = 5672;
+	private String forwardTo1 = local;
+	int toport1 = 5680;
 	
 	//Declare the color to forward from
 	private String color1 = "wit";
@@ -28,8 +31,10 @@ public class Regulator implements Runnable {
 	// TWEEDE FORWARDER
 	boolean playToEnemy = true;
 	//Declare the two hosts to forward from and to
-	private String forwardFrom2 = "localhost";
-	private String forwardTo2 = "localhost";
+	private String forwardFrom2 = local;
+	int fromport2 = 5680;
+	private String forwardTo2 = local;
+	int toport2 = 5672;
 	
 	//Declare the color to forward from
 	private String color2 = "appelblauwzeegroen";
@@ -49,12 +54,12 @@ public class Regulator implements Runnable {
 	@Override
 	public synchronized void run() {
 		try {
-			Forwarder forwarder1 = new Forwarder(forwardFrom1,forwardTo1,exchangeName,color1,isOwnColor1);
+			Forwarder forwarder1 = new Forwarder(forwardFrom1,fromport1, forwardTo1,toport1,exchangeName,color1,isOwnColor1);
 			Thread forw1 = new Thread(forwarder1);
 			forw1.start();
 			if (playToEnemy) {
 				System.out.println("made forwarder 2");
-				Forwarder forwarder2 = new Forwarder(forwardFrom2,forwardTo2,exchangeName,color2,isOwnColor2);
+				Forwarder forwarder2 = new Forwarder(forwardFrom2,fromport2,forwardTo2,toport2,exchangeName,color2,isOwnColor2);
 				Thread forw2 = new Thread(forwarder2);
 				forw2.start();
 			}

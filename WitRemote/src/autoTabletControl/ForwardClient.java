@@ -16,10 +16,11 @@ public class ForwardClient implements Runnable{
 	private String server;
 	private String colorToForward;
 	
-	public ForwardClient(String host, String exchangeName, String colorToForward){
-		setUpConnection(host, exchangeName);
+	public ForwardClient(String host, String exchangeName, String colorToForward,int toPort){
+		this.port = toPort;
 		this.exchangeName = exchangeName;
 		this.colorToForward = colorToForward;
+		setUpConnection(host, exchangeName);		
 	}
 	
 	public int getPort(){
